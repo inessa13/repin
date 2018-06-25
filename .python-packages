@@ -1,0 +1,2143 @@
+2:
+  created_at: '2015-03-19T14:47:19.580Z'
+  last_activity_at: '2015-05-13T10:35:41.131Z'
+  name: django-cms-exness-edition
+  package_data:
+    author: Patrick Lauber
+    author_email: digi@treepy.com
+    classifiers: ['Development Status :: 5 - Production/Stable', 'Environment :: Web
+        Environment', 'Framework :: Django', 'Intended Audience :: Developers', 'License
+        :: OSI Approved :: BSD License', 'Operating System :: OS Independent', 'Programming
+        Language :: Python', 'Topic :: Internet :: WWW/HTTP :: Dynamic Content', 'Topic
+        :: Software Development', 'Topic :: Software Development :: Libraries :: Application
+        Frameworks', 'Programming Language :: Python :: 2.6', 'Programming Language
+        :: Python :: 2.7', 'Programming Language :: Python :: 3.3', 'Programming Language
+        :: Python :: 3.4']
+    description: An Advanced Django CMS
+    include_package_data: true
+    install_requires: [Django>=1.4, django-classy-tags>=0.5, south>=0.7.2, html5lib,
+      'django-mptt==0.5.2,==0.6,==0.6.1', django-sekizai>=0.7, djangocms-admin-style]
+    license: BSD License
+    long_description: ''
+    name: django-cms
+    packages: null
+    platforms: [OS Independent]
+    test_suite: runtests.main
+    tests_require: [django-reversion==1.8.1, Pillow==2.5.0, Sphinx==1.2.2, Jinja2==2.7.3,
+      Pygments==1.6, dj-database-url==0.3.0, django-hvad, djangocms-text-ckeditor>=2.1.1,
+      djangocms-column, djangocms-style]
+    url: https://www.django-cms.org/
+    version: 3.0.5
+    zip_safe: false
+  path: site/django-cms-exness-edition
+  python_percent: 89.37
+  req_sources: [setup.py]
+  reqs: [setup.py]
+  web_url: https://git.exness.io/site/django-cms-exness-edition
+3:
+  created_at: '2015-03-22T18:10:36.506Z'
+  last_activity_at: '2015-06-19T09:27:13.830Z'
+  name: translate-exness-edition
+  package_data: n/a
+  path: site/translate-exness-edition
+  python_percent: 99.34
+  req_sources: [setup.py, requirements.txt]
+  reqs: [setup.py, requirements.txt]
+  web_url: https://git.exness.io/site/translate-exness-edition
+4:
+  created_at: '2015-03-22T18:12:28.231Z'
+  last_activity_at: '2018-06-25T15:29:07.797Z'
+  name: frontendsource
+  path: site/frontendsource
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/site/frontendsource
+7:
+  created_at: '2015-03-22T18:25:22.374Z'
+  last_activity_at: '2018-06-25T14:52:09.053Z'
+  name: pages
+  path: site/pages
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/site/pages
+8:
+  created_at: '2015-03-22T18:27:07.522Z'
+  group: site
+  last_activity_at: '2018-06-25T16:37:05.366Z'
+  name: py
+  package_data:
+    install_requires: [Cheetah==2.4.4, Django==1.6.10, Fabric==1.10.2, GitPython==1.0.1,
+      M2Crypto==0.22.3, Markdown==2.6.2, Pillow==2.9.0, PyYAML==3.11, South==1.0.2,
+      Unidecode==0.4.18, XlsxWriter==0.6.9, anyjson==0.3.3, argparse==1.2.1, beautifulsoup4==4.3.2,
+      celery==3.1.25, chardet==2.3.0, cmsplugin-filery==1.0.1, daily-rates==1.0.4,
+      diff-match-patch==20110725.1, django-admin-sortable2==0.5.1, django-bidi-utils==1.0,
+      django-cache-machine==0.8, django-celery==3.1.16, django-ckeditor-updated==4.2.8,
+      django-classy-tags==0.6.2, django-cms==3.0.15, django-debug-toolbar==1.2.1,
+      django-easy-select2==1.2.12, django-filer==0.9.9, django-filter==0.7, django-import-export==0.2.8,
+      django-ipgeobase, django-meta==0.3.1, django-meta-mixin==0.2.0, django-mptt==0.7.3,
+      django-parler==1.4, django-phonenumber-field==0.7.2, django-polymorphic==0.7.1,
+      django-redis==4.2.0, django-rosetta==0.7.4, django-sekizai==0.8.2, django-selectable==0.9.0,
+      django-simple-captcha==0.4.3, django-simple-history==1.6.3, django-statsd-mozilla==0.3.15,
+      django-treeadmin==0.4.1, django-widget-tweaks==1.3, djangocms-admin-style==0.2.2,
+      djangocms-file==0.0.1, djangocms-link==1.3.5, djangocms-page-meta==0.5.7, djangocms-picture==0.0.2,
+      djangocms-text-ckeditor==2.1.6, djangorestframework==3.2.0, djangorestframework-csv==1.3.3,
+      easy-thumbnails==2.2, ecdsa==0.13, exness-generic, exness-sf-api~=0.9, exness-mt==1.5.0,
+      exness-mt-api==0.4.9, facebook-sdk==2.0.0, flup==1.0.2, gitdb==0.6.4, google-api-python-client==1.4.1,
+      gunicorn==19.3.0, html5lib==0.999, httplib2==0.9.1, locale-transport==1.0.3,
+      lxml==3.4.4, medusa==0.5.4, meld3==1.0.0, msgpack-python==0.4.6, netifaces==0.10.4,
+      oauth2client==1.4.12, pandas==0.21.1, paramiko==1.16.0, pexpect==3.3, 'phonenumbers>=8.9.1,<9.0.0',
+      polib==1.0.4, psycopg2==2.4.5, pyasn1==0.1.8, pyasn1-modules==0.0.7, pycountry==1.10,
+      pycurl==7.43.0, python-dateutil==2.4.2, python-docx==0.5.3, python-magic==0.4.3,
+      python-memcached==1.48, raven, recaptcha-client==1.0.6, redis==2.10.3, repoze.lru==0.6,
+      requests==2.2.1, rest-pandas==0.5.0, rpdb==0.1.4, rsa, simplejson, six, smmap==0.9.0,
+      sqlparse==0.1.16, statsd==2.1.2, tablib==0.10.0, thrift==0.10.0, translate-toolkit==2.2.3,
+      unicodecsv==0.9.4, uritemplate==0.6, w3c-validator==0.2.1, web.py==0.34, wsgiref==0.1.2,
+      xlrd==0.9.3, xlwt==0.7.5, django-timezone-field==1.2, django-rest-swagger==0.3.5,
+      django-ddos-protection==0.0.11, decorator==4.0.9, thrift-client==0.2.12, thrift-server==0.1.10,
+      exness_stubs==1.12.0, django-uuidfield==0.5.0, pycrypto==2.6.1, pyminizip==0.2.1,
+      restful-simple-captcha==0.0.6, exness-django-commons==1.3.4, ipython==5.3.0,
+      persistent-cache-control==0.0.10, django-auth-ldap==1.2.8, kyc-document-files>=0.2.2,
+      newrelic, python-stdnum==1.6, exness-constants-storage==0.0.7, django-webpack-loader,
+      yawd-elfinder==0.91.00-exness-edition, graypy, flower, pycoin, qrcode==5.3,
+      exness-bitcoin==0.4.0, exness-payment~=1.0, geoip2~=2.8, glom==18.1.1]
+  path: site/py
+  python_percent: 95.0
+  req_sources: [reqs.txt]
+  reqs: [reqs.txt]
+  web_url: https://git.exness.io/site/py
+9:
+  created_at: '2015-03-22T18:28:47.926Z'
+  last_activity_at: '2018-06-25T15:31:22.072Z'
+  name: templates
+  path: public-site/templates
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/public-site/templates
+10:
+  created_at: '2015-03-22T18:30:40.007Z'
+  last_activity_at: '2018-06-25T15:33:40.745Z'
+  name: static
+  path: public-site/static
+  python_percent: n/a
+  reqs: []
+  skip: true
+  web_url: https://git.exness.io/public-site/static
+12:
+  created_at: '2015-03-23T09:14:53.649Z'
+  last_activity_at: '2015-03-23T09:14:53.649Z'
+  name: additional-service-admin
+  path: intranet/additional-service-admin
+  python_percent: 100.0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/intranet/additional-service-admin
+14:
+  created_at: '2015-03-23T09:38:47.705Z'
+  last_activity_at: '2015-06-19T10:11:48.864Z'
+  name: multiaccounting-client
+  package_data: n/a
+  path: intranet/multiaccounting-client
+  python_percent: 100.0
+  req_sources: [setup.py]
+  reqs: [setup.py]
+  web_url: https://git.exness.io/intranet/multiaccounting-client
+15:
+  created_at: '2015-03-23T09:41:41.876Z'
+  last_activity_at: '2015-03-23T09:41:41.876Z'
+  name: multiaccounting-server
+  package_data:
+    install_requires: [Django==1.7.1, PIL==1.1.7, argparse==1.2.1, distribute==0.7.3,
+      django-redis-cache==0.13.0, djangorestframework==3.0.2, psycopg2==2.5.4, python-memcached==1.53,
+      redis==2.10.3, wsgiref==0.1.2]
+  path: intranet/multiaccounting-server
+  python_percent: 100.0
+  req_sources: [requirements.txt]
+  reqs: [requirements.txt]
+  web_url: https://git.exness.io/intranet/multiaccounting-server
+26:
+  created_at: '2015-04-24T11:43:57.767Z'
+  last_activity_at: '2015-09-25T11:11:26.201Z'
+  name: notification-server
+  path: intranet/notification-server
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/intranet/notification-server
+27:
+  created_at: '2015-04-30T07:18:36.454Z'
+  last_activity_at: '2015-04-30T07:20:12.198Z'
+  name: smon-ios
+  path: mobile/smon-ios
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/mobile/smon-ios
+28:
+  created_at: '2015-05-13T09:23:06.774Z'
+  last_activity_at: '2018-05-30T09:31:23.572Z'
+  name: reconciliation-system
+  package_data: n/a
+  path: payments/reconciliation-system
+  python_percent: 98.52
+  req_sources: [setup.py]
+  reqs: [setup.py]
+  web_url: https://git.exness.io/payments/reconciliation-system
+30:
+  created_at: '2015-05-13T12:53:57.799Z'
+  last_activity_at: '2015-06-10T07:08:25.175Z'
+  name: economic-calendar-parser
+  path: intranet/economic-calendar-parser
+  python_percent: 100.0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/intranet/economic-calendar-parser
+31:
+  created_at: '2015-05-19T10:52:34.911Z'
+  last_activity_at: '2015-11-26T08:13:07.906Z'
+  name: two-factor-auth
+  package_data:
+    install_requires: [Django==1.8.2, Pillow==2.8.1, argparse==1.2.1, django-simple-captcha==0.4.5,
+      six==1.9.0, wsgiref==0.1.2, python-ldap==2.4.19, django-redis==4.0.0, python-memcached==1.54,
+      psycopg2, gunicorn==19.3.0]
+  path: intranet/two-factor-auth
+  python_percent: 97.18
+  req_sources: [requirements.txt]
+  reqs: [requirements.txt]
+  web_url: https://git.exness.io/intranet/two-factor-auth
+32:
+  created_at: '2015-05-20T06:53:57.146Z'
+  last_activity_at: '2018-05-14T23:51:58.746Z'
+  name: exness-mt
+  package_data:
+    author: exness
+    author_email: sergey.tsaplin@exness.com
+    classifiers: ['Development Status :: 5 - Production/Stable', 'Environment :: Web
+        Environment', 'Framework :: Django', 'Intended Audience :: Developers', 'License
+        :: OSI Approved :: BSD License', 'Operating System :: OS Independent', 'Programming
+        Language :: Python', 'Topic :: Internet :: WWW/HTTP :: Dynamic Content', 'Topic
+        :: Software Development', 'Topic :: Software Development :: Libraries', 'Programming
+        Language :: Python :: 2.7']
+    description: Exness MT-Models and utils
+    include_package_data: true
+    license: BSD License
+    long_description: ''
+    name: exness-mt
+    packages: null
+    platforms: [OS Independent]
+    test_suite: ''
+    tests_require: []
+    url: https://exness.com/
+    version: 1.6.0
+    zip_safe: false
+  path: web-core/exness-mt
+  python_percent: 100.0
+  req_sources: [setup.py]
+  reqs: [setup.py]
+  web_url: https://git.exness.io/web-core/exness-mt
+34:
+  created_at: '2015-05-21T14:44:53.881Z'
+  last_activity_at: '2017-10-13T13:26:07.312Z'
+  name: drivers
+  path: payments/drivers
+  python_percent: 100.0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/payments/drivers
+37:
+  created_at: '2015-06-08T10:44:30.676Z'
+  last_activity_at: '2015-12-04T08:43:22.318Z'
+  name: django-rest-pandas
+  package_data: n/a
+  path: site/django-rest-pandas
+  python_percent: 100.0
+  req_sources: [setup.py]
+  reqs: [setup.py]
+  web_url: https://git.exness.io/site/django-rest-pandas
+42:
+  created_at: '2015-06-22T06:21:59.421Z'
+  last_activity_at: '2015-06-23T08:19:12.276Z'
+  name: fa
+  package_data:
+    install_requires: [Django==1.6.11, South==1.0.2, django-smart-selects==1.1.1,
+      pytz==2015.4, wsgiref==0.1.2]
+  path: mikhail.oskin/fa
+  python_percent: 98.92
+  req_sources: [requirements.txt]
+  reqs: [requirements.txt]
+  web_url: https://git.exness.io/mikhail.oskin/fa
+45:
+  created_at: '2015-06-22T15:37:19.345Z'
+  last_activity_at: '2018-04-13T08:41:01.826Z'
+  name: deployment
+  path: site/deployment
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/site/deployment
+46:
+  created_at: '2015-06-22T15:37:47.514Z'
+  last_activity_at: '2015-06-22T15:55:42.736Z'
+  name: configs
+  path: site/configs
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/site/configs
+47:
+  created_at: '2015-06-22T16:33:03.844Z'
+  last_activity_at: '2017-12-11T15:52:40.728Z'
+  name: smon
+  package_data:
+    install_requires: [Django==1.10.6, django-auth-ldap==1.2.6, django-classy-tags==0.5.1,
+      django-sekizai==0.9.0, flup==1.0.2, grab==0.4.13, '#ipython==2.3.1', lxml==3.4.1,
+      pycurl==7.19.5.1, simplejson==3.6.5, xlwt==0.7.5, python-memcached==1.54, python-ldap==2.4.19,
+      django-auth-ldap==1.2.6, MySQL-python==1.2.5, paramiko==1.15.2, djangorestframework==3.6.3,
+      boto3==1.4.4, gunicorn==19.7.1, raven==6.1.0, Twisted]
+  path: intranet/smon
+  python_percent: 63.85
+  req_sources: [requirements.txt]
+  reqs: [requirements.txt]
+  web_url: https://git.exness.io/intranet/smon
+51:
+  created_at: '2015-07-01T13:57:27.778Z'
+  last_activity_at: '2017-07-07T04:46:09.636Z'
+  name: daily-rates
+  package_data:
+    author: exness
+    author_email: sergey.tsaplin@exness.com
+    classifiers: ['Development Status :: 5 - Production/Stable', 'Environment :: Web
+        Environment', 'Framework :: Django', 'Intended Audience :: Developers', 'License
+        :: OSI Approved :: BSD License', 'Operating System :: OS Independent', 'Programming
+        Language :: Python', 'Topic :: Internet :: WWW/HTTP :: Dynamic Content', 'Topic
+        :: Software Development', 'Topic :: Software Development :: Libraries', 'Programming
+        Language :: Python :: 2.7']
+    description: Grabing dayly rates
+    include_package_data: true
+    install_requires: [Django>=1.6]
+    license: BSD License
+    long_description: Grabing dayly rates
+    name: daily-rates
+    packages: null
+    platforms: [OS Independent]
+    test_suite: ''
+    tests_require: []
+    url: https://exness.com/
+    version: 1.0.4
+    zip_safe: false
+  path: site-utils/daily-rates
+  python_percent: 100.0
+  req_sources: [setup.py]
+  reqs: [setup.py]
+  web_url: https://git.exness.io/site-utils/daily-rates
+52:
+  created_at: '2015-07-03T07:22:17.339Z'
+  last_activity_at: '2015-11-05T09:03:18.610Z'
+  name: erlang-news-proxy
+  path: intranet/erlang-news-proxy
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/intranet/erlang-news-proxy
+61:
+  created_at: '2015-07-20T17:25:52.592Z'
+  last_activity_at: '2017-01-25T13:41:31.190Z'
+  name: xmerge
+  package_data:
+    entry_points:
+      console_scripts: ['xmerge = xmerge:main_func']
+    include_package_data: true
+    install_requires: [PyYAML==3.11]
+    license: Creative Commons Attribution-Noncommercial-Share Alike license
+    long_description: ''
+    name: xmerge
+    package_dir: {? '' : src}
+    packages: null
+    version: 0.2.6
+  path: site/xmerge
+  python_percent: 100.0
+  req_sources: [setup.py]
+  reqs: [setup.py]
+  web_url: https://git.exness.io/site/xmerge
+66:
+  created_at: '2015-08-06T09:31:12.270Z'
+  last_activity_at: '2015-08-07T08:14:56.334Z'
+  name: redis-py-cluster
+  package_data: n/a
+  path: site/redis-py-cluster
+  python_percent: 97.01
+  req_sources: [setup.py, requirements.txt]
+  reqs: [setup.py, requirements.txt]
+  web_url: https://git.exness.io/site/redis-py-cluster
+68:
+  created_at: '2015-08-14T12:18:21.084Z'
+  last_activity_at: '2015-08-14T12:20:36.672Z'
+  name: staticfiles
+  path: site/staticfiles
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/site/staticfiles
+69:
+  created_at: '2015-08-17T07:24:09.058Z'
+  last_activity_at: '2018-05-14T09:53:41.657Z'
+  name: partnership-links
+  package_data:
+    author: exness
+    author_email: evgeny.zuev@exness.com
+    description: Put short decription here
+    entry_points: {}
+    extras_require:
+      dev: [ipython]
+      tests: [pytest, pytest-cov, pytest-django, pytest-cov, mock, flake8]
+    include_package_data: true
+    install_requires: [Django==1.11.12, raven, gunicorn, six, kafka-python, avro-python3;python_version>"3",
+      avro;python_version<"3"]
+    long_description: ''
+    name: partnership-links
+    packages: null
+    platforms: [OS Independent]
+    test_suite: ''
+    url: https://git.exness.io/site/partnership-links
+    version: 1.0.0
+    zip_safe: false
+  path: site/partnership-links
+  python_percent: 95.37
+  req_sources: [setup.py]
+  reqs: [setup.py]
+  web_url: https://git.exness.io/site/partnership-links
+70:
+  created_at: '2015-08-19T06:53:04.914Z'
+  last_activity_at: '2018-06-12T14:36:26.924Z'
+  name: gateway_stats
+  path: intranet/gateway_stats
+  python_percent: n/a
+  reqs: [requirements.txt]
+  skip: true
+  web_url: https://git.exness.io/intranet/gateway_stats
+75:
+  created_at: '2015-09-02T08:25:14.539Z'
+  last_activity_at: '2017-04-14T12:22:17.742Z'
+  name: release_config
+  path: site/release_config
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/site/release_config
+78:
+  created_at: '2015-09-09T16:02:31.344Z'
+  last_activity_at: '2015-11-06T12:54:12.165Z'
+  name: exmon_records
+  path: exmon/exmon_records
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/exmon_records
+79:
+  created_at: '2015-09-10T07:16:59.802Z'
+  last_activity_at: '2015-09-10T12:19:30.645Z'
+  name: syslogd-client
+  path: golibs/syslogd-client
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/golibs/syslogd-client
+81:
+  created_at: '2015-09-10T15:00:42.735Z'
+  last_activity_at: '2015-10-16T07:12:35.801Z'
+  name: log_reader
+  path: exmon/log_reader
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/log_reader
+82:
+  created_at: '2015-09-10T16:12:02.500Z'
+  last_activity_at: '2015-11-06T13:00:46.840Z'
+  name: exmon_reader
+  path: exmon/exmon_reader
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/exmon_reader
+83:
+  created_at: '2015-09-11T16:20:34.726Z'
+  last_activity_at: '2016-05-05T13:23:25.278Z'
+  name: hft_plugin_node
+  path: exmon/hft_plugin_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/hft_plugin_node
+84:
+  created_at: '2015-09-16T10:33:40.961Z'
+  last_activity_at: '2016-05-05T13:11:04.653Z'
+  name: end_user_node
+  path: exmon/end_user_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/end_user_node
+85:
+  created_at: '2015-09-17T14:03:20.476Z'
+  last_activity_at: '2015-11-10T14:49:50.786Z'
+  name: nginx_logs_node
+  path: exmon/nginx_logs_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/nginx_logs_node
+86:
+  created_at: '2015-09-17T18:58:39.165Z'
+  last_activity_at: '2015-11-10T13:35:07.414Z'
+  name: ddos_logs_node
+  path: exmon/ddos_logs_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/ddos_logs_node
+87:
+  created_at: '2015-09-18T11:28:05.799Z'
+  last_activity_at: '2016-05-05T13:43:44.394Z'
+  name: quotes_socket_node
+  path: exmon/quotes_socket_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/quotes_socket_node
+88:
+  created_at: '2015-09-18T13:53:50.512Z'
+  last_activity_at: '2016-05-05T13:40:46.485Z'
+  name: mt_backup_logs_node
+  path: exmon/mt_backup_logs_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/mt_backup_logs_node
+89:
+  created_at: '2015-09-20T15:43:15.383Z'
+  last_activity_at: '2015-11-10T13:57:43.730Z'
+  name: federated_link_logs_node
+  path: exmon/federated_link_logs_node
+  python_percent: n/a
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/federated_link_logs_node
+90:
+  created_at: '2015-09-20T21:09:21.563Z'
+  last_activity_at: '2015-11-10T14:33:27.481Z'
+  name: mt_data_feeder_logs_node
+  path: exmon/mt_data_feeder_logs_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/mt_data_feeder_logs_node
+91:
+  created_at: '2015-09-21T10:06:47.895Z'
+  last_activity_at: '2016-05-05T13:41:27.865Z'
+  name: mt_data_feeder_status_node
+  path: exmon/mt_data_feeder_status_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/mt_data_feeder_status_node
+93:
+  created_at: '2015-09-21T12:41:27.489Z'
+  last_activity_at: '2015-11-10T14:21:41.529Z'
+  name: ipay_options_logs_node
+  path: exmon/ipay_options_logs_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/ipay_options_logs_node
+94:
+  created_at: '2015-09-21T14:53:11.381Z'
+  last_activity_at: '2016-06-21T14:19:16.776Z'
+  name: leverage_refresh_logs_node
+  path: exmon/leverage_refresh_logs_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/leverage_refresh_logs_node
+95:
+  created_at: '2015-09-22T09:31:44.155Z'
+  last_activity_at: '2016-06-21T15:06:45.692Z'
+  name: sync_symbol_group_node
+  path: exmon/sync_symbol_group_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/sync_symbol_group_node
+96:
+  created_at: '2015-09-22T15:08:30.093Z'
+  last_activity_at: '2016-05-05T13:43:06.853Z'
+  name: news_proxy_node
+  path: exmon/news_proxy_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/news_proxy_node
+97:
+  created_at: '2015-09-23T11:46:29.679Z'
+  last_activity_at: '2016-02-01T14:58:33.207Z'
+  name: mt4rt
+  path: exmon/mt4rt
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/mt4rt
+98:
+  created_at: '2015-09-23T12:16:41.433Z'
+  last_activity_at: '2015-10-07T09:47:14.004Z'
+  name: mt4web
+  path: exmon/mt4web
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/mt4web
+99:
+  created_at: '2015-09-23T14:42:54.363Z'
+  last_activity_at: '2017-12-04T07:29:50.294Z'
+  name: check_mt_feeds_node
+  path: exmon/check_mt_feeds_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/check_mt_feeds_node
+100:
+  created_at: '2015-09-24T11:03:03.508Z'
+  last_activity_at: '2015-10-07T09:49:21.302Z'
+  name: mt4api
+  path: exmon/mt4api
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/mt4api
+101:
+  created_at: '2015-09-24T13:26:19.959Z'
+  last_activity_at: '2016-05-04T17:54:25.810Z'
+  name: check_mt_node
+  path: exmon/check_mt_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/check_mt_node
+102:
+  created_at: '2015-09-25T11:12:11.157Z'
+  last_activity_at: '2015-11-10T13:53:26.825Z'
+  name: exmon_logs_node
+  path: exmon/exmon_logs_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/exmon_logs_node
+103:
+  created_at: '2015-09-25T12:37:10.488Z'
+  last_activity_at: '2016-05-05T13:12:31.697Z'
+  name: exmon
+  path: exmon/exmon
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/exmon
+105:
+  created_at: '2015-09-29T08:36:19.475Z'
+  last_activity_at: '2018-01-12T15:43:51.984Z'
+  name: sync_mt_clients_node
+  path: exmon/sync_mt_clients_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/sync_mt_clients_node
+106:
+  created_at: '2015-09-29T17:13:44.848Z'
+  last_activity_at: '2015-11-23T09:30:11.435Z'
+  name: exmon_collector
+  path: exmon/exmon_collector
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/exmon_collector
+107:
+  created_at: '2015-09-30T14:36:34.798Z'
+  last_activity_at: '2018-05-25T07:51:21.132Z'
+  name: check_sync_node
+  path: exmon/check_sync_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/check_sync_node
+108:
+  created_at: '2015-10-02T13:05:36.619Z'
+  last_activity_at: '2016-05-04T17:52:23.107Z'
+  name: check_dcs_node
+  path: exmon/check_dcs_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/check_dcs_node
+109:
+  created_at: '2015-10-02T15:44:40.658Z'
+  last_activity_at: '2016-05-04T17:52:39.521Z'
+  name: check_id_node
+  path: exmon/check_id_node
+  python_percent: 0
+  req_sources: empty
+  reqs: []
+  web_url: https://git.exness.io/exmon/check_id_node
+111: {created_at: '2015-10-05T13:41:50.807Z', last_activity_at: '2018-01-12T15:19:15.430Z',
+  name: check_agent_node, path: exmon/check_agent_node, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/exmon/check_agent_node'}
+112: {created_at: '2015-10-06T11:54:42.526Z', last_activity_at: '2016-06-03T12:01:22.400Z',
+  name: check_ipwhitelist_node, path: exmon/check_ipwhitelist_node, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/exmon/check_ipwhitelist_node'}
+113: {created_at: '2015-10-06T14:40:28.955Z', last_activity_at: '2016-05-04T17:52:03.098Z',
+  name: check_backups_node, path: exmon/check_backups_node, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/exmon/check_backups_node'}
+114: {created_at: '2015-10-07T10:50:02.677Z', last_activity_at: '2016-05-04T17:50:28.301Z',
+  name: check_all_secure_logs_node, path: exmon/check_all_secure_logs_node, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/exmon/check_all_secure_logs_node'}
+117:
+  created_at: '2015-11-04T19:32:05.623Z'
+  last_activity_at: '2018-04-29T21:32:17.078Z'
+  name: thrift-server
+  package_data:
+    author: exness
+    author_email: sergey.tsaplin@exness.com
+    description: Exness thrift-server
+    entry_points:
+      console_scripts: []
+    extras_require:
+      dev: [ipython]
+      tests: ['mock>=1.3.0,<1.4.0', pytest, pytest-cov]
+    include_package_data: true
+    install_requires: [thrift>=0.9.3, 'PyYAML>=3.11,<4.0', 'pycrypto>=2.6.1,<2.7.0',
+      six]
+    name: thrift-server
+    packages: null
+    platforms: [OS Independent]
+    test_suite: ''
+    url: https://exness.com/
+    version: 1.0.0
+    zip_safe: false
+  path: intranet/thrift-server
+  python_percent: 100.0
+  req_sources: [setup.py, requirements.txt]
+  web_url: https://git.exness.io/intranet/thrift-server
+119: {created_at: '2015-11-12T11:12:06.796Z', last_activity_at: '2015-11-12T11:12:23.453Z',
+  name: twilio_alert_handler, path: exmon/twilio_alert_handler, python_percent: 100.0,
+  req_sources: empty, web_url: 'https://git.exness.io/exmon/twilio_alert_handler'}
+121:
+  created_at: '2015-11-12T11:32:08.244Z'
+  last_activity_at: '2018-03-16T10:10:14.722Z'
+  name: locale_transport
+  package_data:
+    entry_points: {}
+    include_package_data: true
+    install_requires: [paramiko==1.16.0, Fabric==1.10.2, polib==1.0.4]
+    license: Creative Commons Attribution-Noncommercial-Share Alike license
+    long_description: ''
+    name: locale_transport
+    package_dir: {? '' : src}
+    packages: null
+    version: 1.0.3
+  path: site/locale_transport
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/site/locale_transport
+122: {created_at: '2015-11-17T10:13:50.941Z', last_activity_at: '2018-06-25T09:01:01.829Z',
+  name: interfaces, path: thrift/interfaces, skip: true, web_url: 'https://git.exness.io/thrift/interfaces'}
+126: {created_at: '2015-11-19T09:02:20.744Z', last_activity_at: '2018-03-28T15:34:30.620Z',
+  name: exness-libraries, path: js-libraries/exness-libraries, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/js-libraries/exness-libraries'}
+128:
+  created_at: '2015-11-26T07:46:20.672Z'
+  last_activity_at: '2018-05-30T16:38:45.046Z'
+  name: appserverlib
+  package_data:
+    author: exness
+    author_email: sergey.tsaplin@exness.com
+    description: Exness application servers framework
+    entry_points:
+      console_scripts: ['manage = appserverlib.commands.manage:main']
+    extras_require:
+      dev: [ipython]
+      tests: [mock>=1.3.0, mockredispy==2.9.0]
+    include_package_data: true
+    install_requires: [exness-stubs, exness-rest-errors, 'PyYAML>=3.11,<4.0', SQLAlchemy>=1.0.9,
+      'six>=1.10.0,<1.11.0', 'decorator>=4.0.4,<4.1.0', 'alembic>=0.8.5,<0.9.0', pytest>=2.9.0,
+      pytest-cov>=2.2.1, Flask-RESTful>=0.3.6, Flask>=0.12.2, gunicorn>=19.7.1, pygelf==0.3.1,
+      'j2cli[yaml]==0.3.1-0', redis==2.10.5, pyjwt, cryptography, Jinja2]
+    name: exness-appserverlib
+    package_dir: {appserverlib: appserverlib}
+    packages: null
+    platforms: [OS Independent]
+    test_suite: ''
+    url: https://git.exness.io/intranet/appserverlib
+    version: 0.6.0
+    zip_safe: false
+  path: intranet/appserverlib
+  python_percent: 99.88
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/intranet/appserverlib
+135: {created_at: '2015-12-15T08:09:50.323Z', last_activity_at: '2015-12-15T08:43:06.897Z',
+  name: erl-stubs, path: exmon/erl-stubs, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/exmon/erl-stubs'}
+136: {created_at: '2015-12-16T07:51:04.260Z', last_activity_at: '2015-12-16T08:14:23.831Z',
+  name: erl-thrift, path: exmon/erl-thrift, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/exmon/erl-thrift'}
+138: {created_at: '2015-12-16T08:31:31.202Z', last_activity_at: '2016-02-17T18:34:42.726Z',
+  name: erl-thrift-server, path: exmon/erl-thrift-server, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/exmon/erl-thrift-server'}
+139:
+  created_at: '2015-12-16T15:33:16.632Z'
+  last_activity_at: '2016-04-28T15:01:26.216Z'
+  name: validationlib
+  package_data:
+    author: exness
+    author_email: sergey.tsaplin@exness.com
+    description: Exness validation library for thrift services
+    entry_points: {}
+    extras_require:
+      dev: [ipython]
+    include_package_data: true
+    install_requires: ['voluptuous>=0.8.7,<0.8.11', 'decorator>=4.0.6,<4.1.0', exness-stubs]
+    name: validationlib
+    package_dir: {validationlib: validationlib}
+    packages: null
+    platforms: [OS Independent]
+    test_suite: ''
+    url: https://git.exness.io/intranet/validationlib
+    version: 0.0.5
+    zip_safe: false
+  path: intranet/validationlib
+  python_percent: 100.0
+  req_sources: [setup.py, requirements.txt]
+  web_url: https://git.exness.io/intranet/validationlib
+140:
+  created_at: '2015-12-16T15:45:54.546Z'
+  last_activity_at: '2018-06-20T08:28:55.838Z'
+  name: authentication-service
+  package_data:
+    author: exness
+    author_email: sergey.tsaplin@exness.com
+    description: Authentication service
+    entry_points: {}
+    extras_require:
+      dev: [ipython==5.3.0]
+      tests: [mock>=1.3.0, pytest>=2.9.0, pytest-cov>=2.2.1, mockredispy==2.9.0]
+    include_package_data: true
+    install_requires: [SQLAlchemy==1.0.19, SQLAlchemy-Utils, exness-appserverlib==0.5.0,
+      exness-stubs==1.0.7, thrift-server==0.1.10, thrift-client==0.2.12, bcrypt==2.0.0,
+      passlib==1.6.5, redis==2.10.5, validationlib==0.0.5, psycopg2-binary, raven,
+      newrelic, pyjwt, cryptography, ply==3.10, PyYAML==3.12, pycrypto==2.6.1]
+    long_description: ''
+    name: authentication-service
+    packages: null
+    platforms: [OS Independent]
+    test_suite: ''
+    url: https://git.exness.io/py-services/authentication-service/
+    version: 2.3.0
+    zip_safe: false
+  path: py-services/authentication-service
+  python_percent: 98.85
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/py-services/authentication-service
+142: {created_at: '2015-12-17T12:30:02.803Z', last_activity_at: '2016-05-05T13:42:06.246Z',
+  name: mt_monitoring, path: exmon/mt_monitoring, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/exmon/mt_monitoring'}
+143:
+  created_at: '2015-12-17T14:35:41.179Z'
+  last_activity_at: '2018-04-25T09:21:55.752Z'
+  name: exness-stats
+  package_data:
+    author: exness
+    author_email: dev@exness.com
+    description: Clients balance and orders statistic
+    entry_points:
+      console_scripts: ['exness-stats = exness_stats.runner.main:main']
+    extras_require:
+      dev: [ipython]
+      tests: [mock==1.3.0, WebTest==2.0.18, django-webtest==1.7.8]
+    include_package_data: true
+    install_requires: ['Django>=1.8, <1.9', django-celery==3.2.1, django-redis==4.2.0,
+      redis==2.10.3, psycopg2==2.6, gunicorn==19.3.0, logan==0.7.2, six==1.10.0, PyCrypto==2.6.1,
+      exness-mt==1.5.0, exness_models, exness-mt-api==0.4.9, ipython==5, raven, pygelf,
+      dsnparse, flower==0.9.2]
+    long_description: ''
+    name: exness-stats
+    packages: null
+    platforms: [OS Independent]
+    test_suite: ''
+    url: https://exness.com/
+    version: 1.3.0
+    zip_safe: false
+  path: py-services/exness-stats
+  python_percent: 96.88
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/py-services/exness-stats
+144:
+  created_at: '2015-12-17T14:36:20.333Z'
+  last_activity_at: '2017-01-27T14:27:15.410Z'
+  name: pootle_fork
+  package_data: n/a
+  path: site/pootle_fork
+  python_percent: 64.27
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/site/pootle_fork
+149: {created_at: '2015-12-28T15:10:11.728Z', last_activity_at: '2016-06-03T13:31:43.146Z',
+  name: check_security_type, path: exmon/check_security_type, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/exmon/check_security_type'}
+152: {created_at: '2016-01-07T11:35:31.326Z', last_activity_at: '2016-01-21T10:49:29.949Z',
+  name: compensations, path: intranet/compensations, skip: true, web_url: 'https://git.exness.io/intranet/compensations'}
+153:
+  created_at: '2016-01-13T10:28:48.906Z'
+  last_activity_at: '2018-05-15T15:24:00.041Z'
+  name: exness-mt-api
+  package_data: n/a
+  path: web-core/exness-mt-api
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/web-core/exness-mt-api
+154:
+  created_at: '2016-01-13T16:02:57.720Z'
+  last_activity_at: '2018-06-15T12:23:05.027Z'
+  name: exness-sf-api
+  package_data:
+    author: exness
+    author_email: dev@exness.com
+    description: Exness secure feed api clients
+    extras_require:
+      dev: [ipython]
+    include_package_data: true
+    install_requires: [six>=1.6.1, pycrypto>=2.4.1, exness-mt-api, 'Django>=1.6.10,<2.0']
+    long_description: ''
+    name: exness-sf-api
+    packages: null
+    platforms: [OS Independent]
+    test_suite: ''
+    url: https://exness.com/
+    version: 0.20.0
+    zip_safe: false
+  path: web-core/exness-sf-api
+  python_percent: 99.83
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/web-core/exness-sf-api
+156:
+  created_at: '2016-01-14T09:55:40.054Z'
+  last_activity_at: '2018-06-25T15:11:07.890Z'
+  name: intranet-web-services
+  package_data: n/a
+  path: intranet/intranet-web-services
+  python_percent: 97.6
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/intranet/intranet-web-services
+158: {created_at: '2016-01-14T11:25:28.370Z', last_activity_at: '2016-01-26T20:00:18.155Z',
+  name: exness-public-api, path: site/exness-public-api, web_url: 'https://git.exness.io/site/exness-public-api'}
+160: {created_at: '2016-01-25T09:29:28.996Z', last_activity_at: '2017-07-07T04:33:29.809Z',
+  name: exness-models, path: site-utils/exness-models, web_url: 'https://git.exness.io/site-utils/exness-models'}
+161: {created_at: '2016-01-25T11:30:23.299Z', last_activity_at: '2018-04-30T08:04:32.378Z',
+  name: constants-storage, path: intranet/constants-storage, web_url: 'https://git.exness.io/intranet/constants-storage'}
+162: {created_at: '2016-01-25T17:06:39.490Z', last_activity_at: '2018-01-02T10:40:35.316Z',
+  name: recon-balance, path: py-services/recon-balance, web_url: 'https://git.exness.io/py-services/recon-balance'}
+163: {created_at: '2016-01-25T17:12:45.279Z', last_activity_at: '2018-06-15T12:48:39.278Z',
+  name: auto-withdrawals, path: py-services/auto-withdrawals, web_url: 'https://git.exness.io/py-services/auto-withdrawals'}
+164: {created_at: '2016-02-05T16:46:36.570Z', last_activity_at: '2018-06-25T15:32:14.414Z',
+  name: backend, path: public-site/backend, web_url: 'https://git.exness.io/public-site/backend'}
+165: {created_at: '2016-02-09T17:25:28.989Z', last_activity_at: '2016-02-09T18:24:58.390Z',
+  name: exness_contests, path: site/exness_contests, web_url: 'https://git.exness.io/site/exness_contests'}
+166: {created_at: '2016-02-10T12:54:27.117Z', last_activity_at: '2018-05-08T12:58:41.921Z',
+  name: py-thrift-client, path: thrift/py-thrift-client, web_url: 'https://git.exness.io/thrift/py-thrift-client'}
+167: {created_at: '2016-02-12T13:38:53.188Z', last_activity_at: '2018-05-09T12:47:25.392Z',
+  name: exness-django-commons, path: site-utils/exness-django-commons, web_url: 'https://git.exness.io/site-utils/exness-django-commons'}
+168: {created_at: '2016-02-12T16:36:36.261Z', last_activity_at: '2017-07-07T04:48:05.844Z',
+  name: persistent-cache-control, path: site-utils/persistent-cache-control, web_url: 'https://git.exness.io/site-utils/persistent-cache-control'}
+169: {created_at: '2016-02-12T16:40:41.192Z', last_activity_at: '2017-07-07T04:44:36.443Z',
+  name: django-ddos-protection, path: site-utils/django-ddos-protection, web_url: 'https://git.exness.io/site-utils/django-ddos-protection'}
+171: {created_at: '2016-02-15T15:36:11.920Z', last_activity_at: '2016-02-15T15:37:00.424Z',
+  name: exness-statistic-aggregation, path: site-utils/exness-statistic-aggregation,
+  web_url: 'https://git.exness.io/site-utils/exness-statistic-aggregation'}
+172: {created_at: '2016-02-22T12:06:10.675Z', last_activity_at: '2018-06-25T13:18:49.971Z',
+  name: intranet-web-frontend, path: intranet/intranet-web-frontend, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/intranet/intranet-web-frontend'}
+175: {created_at: '2016-02-26T10:55:49.710Z', last_activity_at: '2017-08-28T11:24:39.631Z',
+  name: exness-access-lists, path: site-utils/exness-access-lists, web_url: 'https://git.exness.io/site-utils/exness-access-lists'}
+177: {created_at: '2016-03-04T10:55:30.598Z', last_activity_at: '2017-10-18T13:05:11.622Z',
+  name: exness-currency-converter, path: site-utils/exness-currency-converter, web_url: 'https://git.exness.io/site-utils/exness-currency-converter'}
+178: {created_at: '2016-03-04T16:34:40.665Z', last_activity_at: '2016-03-25T16:25:31.540Z',
+  name: cloud-configs, path: ivan.skiridomov/cloud-configs, web_url: 'https://git.exness.io/ivan.skiridomov/cloud-configs'}
+179: {created_at: '2016-03-07T12:59:33.601Z', last_activity_at: '2018-06-18T15:07:30.927Z',
+  name: verificator-service, path: py-services/verificator-service, web_url: 'https://git.exness.io/py-services/verificator-service'}
+180: {created_at: '2016-03-09T12:14:08.886Z', last_activity_at: '2017-07-07T04:57:48.450Z',
+  name: bonuses-client, path: site-utils/bonuses-client, web_url: 'https://git.exness.io/site-utils/bonuses-client'}
+181: {created_at: '2016-03-09T15:31:44.496Z', last_activity_at: '2016-03-09T15:31:44.496Z',
+  name: QuoteGenerator, path: ilya.funtov/QuoteGenerator, web_url: 'https://git.exness.io/ilya.funtov/QuoteGenerator'}
+182: {created_at: '2016-03-16T14:58:33.479Z', last_activity_at: '2016-07-06T08:14:38.632Z',
+  name: ansible-playbooks, path: ivan.skiridomov/ansible-playbooks, web_url: 'https://git.exness.io/ivan.skiridomov/ansible-playbooks'}
+183: {created_at: '2016-03-17T08:36:45.305Z', last_activity_at: '2017-07-07T04:38:28.576Z',
+  name: autowithdrawals-blacklist, path: site-utils/autowithdrawals-blacklist, web_url: 'https://git.exness.io/site-utils/autowithdrawals-blacklist'}
+184: {created_at: '2016-03-29T18:10:44.710Z', last_activity_at: '2018-06-25T15:33:09.494Z',
+  name: static_member, path: site/static_member, web_url: 'https://git.exness.io/site/static_member'}
+185: {created_at: '2016-03-30T08:24:35.591Z', last_activity_at: '2017-05-03T11:47:37.619Z',
+  name: deployment, path: public-site/public_site_deployment, web_url: 'https://git.exness.io/public-site/public_site_deployment'}
+187: {created_at: '2016-04-12T10:45:20.269Z', last_activity_at: '2018-06-25T14:18:20.819Z',
+  name: bonuses, path: py-services/bonuses, web_url: 'https://git.exness.io/py-services/bonuses'}
+188: {created_at: '2016-04-12T11:40:50.197Z', last_activity_at: '2016-12-01T15:05:38.485Z',
+  name: cloud-config-generator, path: py-services/cloud-config-generator, web_url: 'https://git.exness.io/py-services/cloud-config-generator'}
+190: {created_at: '2016-04-13T07:55:13.252Z', last_activity_at: '2016-04-13T08:32:08.089Z',
+  name: remote-scep-cert-generation-plugin, path: nikolay.babkin/remote-scep-cert-generation-plugin,
+  web_url: 'https://git.exness.io/nikolay.babkin/remote-scep-cert-generation-plugin'}
+192: {created_at: '2016-04-16T06:46:22.886Z', last_activity_at: '2016-04-16T06:47:24.163Z',
+  name: vps-manager, path: ivan.skiridomov/vps-manager, web_url: 'https://git.exness.io/ivan.skiridomov/vps-manager'}
+193: {created_at: '2016-04-18T17:00:14.748Z', last_activity_at: '2016-04-18T18:45:34.639Z',
+  name: public-pa-nginx, path: ivan.skiridomov/public-pa-nginx, web_url: 'https://git.exness.io/ivan.skiridomov/public-pa-nginx'}
+194: {created_at: '2016-04-18T18:47:25.652Z', last_activity_at: '2018-02-23T09:00:45.186Z',
+  name: nginx-production, path: ivan.skiridomov/nginx-production, web_url: 'https://git.exness.io/ivan.skiridomov/nginx-production'}
+195: {created_at: '2016-04-28T17:25:42.419Z', last_activity_at: '2018-06-25T12:09:23.957Z',
+  name: personal-info, path: py-services/personal-info, web_url: 'https://git.exness.io/py-services/personal-info'}
+196: {created_at: '2016-05-04T17:38:40.057Z', last_activity_at: '2016-05-04T17:40:29.048Z',
+  name: epgsql, path: exmon/epgsql, web_url: 'https://git.exness.io/exmon/epgsql'}
+197: {created_at: '2016-05-04T18:11:16.447Z', last_activity_at: '2017-10-03T14:08:06.462Z',
+  name: erlang-pgsql, path: exmon/erlang-pgsql, web_url: 'https://git.exness.io/exmon/erlang-pgsql'}
+199: {created_at: '2016-05-05T10:47:10.962Z', last_activity_at: '2017-06-21T13:54:51.125Z',
+  name: certs, path: django-cluster/certs, web_url: 'https://git.exness.io/django-cluster/certs'}
+203: {created_at: '2016-05-25T06:50:15.362Z', last_activity_at: '2016-08-21T12:20:39.533Z',
+  name: reports-deployment, path: intranet/reports-deployment, web_url: 'https://git.exness.io/intranet/reports-deployment'}
+207: {created_at: '2016-05-26T13:27:30.979Z', last_activity_at: '2018-06-11T11:54:29.823Z',
+  name: crm-data-feed, path: py-services/crm-data-feed, web_url: 'https://git.exness.io/py-services/crm-data-feed'}
+209: {created_at: '2016-05-28T19:11:00.070Z', last_activity_at: '2016-07-06T08:39:48.443Z',
+  name: deployment, path: docker-cloud/deployment, web_url: 'https://git.exness.io/docker-cloud/deployment'}
+211: {created_at: '2016-06-07T12:14:56.023Z', last_activity_at: '2018-06-25T15:32:43.477Z',
+  name: templates, path: site/templates, web_url: 'https://git.exness.io/site/templates'}
+213: {created_at: '2016-06-14T11:47:51.477Z', last_activity_at: '2017-07-18T12:05:23.473Z',
+  name: deployment, path: py-services/deployment, web_url: 'https://git.exness.io/py-services/deployment'}
+214: {created_at: '2016-06-15T06:51:20.301Z', last_activity_at: '2018-03-23T08:10:00.985Z',
+  name: dev-env, path: devops/dev-env, web_url: 'https://git.exness.io/devops/dev-env'}
+215: {created_at: '2016-06-21T09:44:16.816Z', last_activity_at: '2018-03-08T14:38:15.786Z',
+  name: eslint-config-exness, path: js-libraries/eslint-config-exness, web_url: 'https://git.exness.io/js-libraries/eslint-config-exness'}
+217: {created_at: '2016-06-22T13:47:22.576Z', last_activity_at: '2017-12-04T14:18:20.104Z',
+  name: phone-mapper-script, path: py-services/phone-mapper-script, web_url: 'https://git.exness.io/py-services/phone-mapper-script'}
+218: {created_at: '2016-06-27T08:12:11.529Z', last_activity_at: '2018-05-04T12:18:00.951Z',
+  name: exness-alchemy-common-models, path: py-services/exness-alchemy-common-models,
+  web_url: 'https://git.exness.io/py-services/exness-alchemy-common-models'}
+219: {created_at: '2016-06-29T14:57:48.453Z', last_activity_at: '2017-07-07T05:32:28.869Z',
+  name: restful-simple-captcha, path: site/restful-simple-captcha, web_url: 'https://git.exness.io/site/restful-simple-captcha'}
+220: {created_at: '2016-07-01T08:19:11.350Z', last_activity_at: '2018-06-25T13:59:28.846Z',
+  name: personal-area, path: py-services/personal-area, web_url: 'https://git.exness.io/py-services/personal-area'}
+221: {created_at: '2016-07-07T11:39:37.210Z', last_activity_at: '2018-06-25T08:20:18.024Z',
+  name: kyc-rules, path: py-services/kyc-rules, web_url: 'https://git.exness.io/py-services/kyc-rules'}
+222: {created_at: '2016-07-18T08:07:22.107Z', last_activity_at: '2016-07-25T09:38:54.836Z',
+  name: test1, path: andrey.bodrov/test1, web_url: 'https://git.exness.io/andrey.bodrov/test1'}
+223: {created_at: '2016-07-19T07:39:30.378Z', last_activity_at: '2018-01-15T13:04:16.897Z',
+  name: exness-access-lists, path: py-core-libs/exness-access-lists, web_url: 'https://git.exness.io/py-core-libs/exness-access-lists'}
+224: {created_at: '2016-07-19T13:19:19.013Z', last_activity_at: '2017-04-11T07:55:11.980Z',
+  name: dev-env, path: intranet/dev-env, web_url: 'https://git.exness.io/intranet/dev-env'}
+225: {created_at: '2016-07-21T08:58:12.482Z', last_activity_at: '2016-08-04T09:38:16.037Z',
+  name: horizon-ubuntu, path: it/horizon-ubuntu, web_url: 'https://git.exness.io/it/horizon-ubuntu'}
+226: {created_at: '2016-07-21T15:23:05.691Z', last_activity_at: '2018-01-04T10:33:43.928Z',
+  name: thrift-services-node, path: exmon/thrift-services-node, web_url: 'https://git.exness.io/exmon/thrift-services-node'}
+227: {created_at: '2016-07-22T11:58:11.933Z', last_activity_at: '2016-07-25T09:25:39.177Z',
+  name: exness-casper-runner, path: js-libraries/exness-casper-runner, web_url: 'https://git.exness.io/js-libraries/exness-casper-runner'}
+229: {created_at: '2016-08-05T05:33:28.767Z', last_activity_at: '2016-10-05T13:55:09.719Z',
+  name: babel-jest-es6, path: js-libraries/babel-jest-es6, web_url: 'https://git.exness.io/js-libraries/babel-jest-es6'}
+230: {created_at: '2016-08-06T16:19:19.919Z', last_activity_at: '2016-08-11T09:04:51.659Z',
+  name: py-reqs, path: site/py-reqs, web_url: 'https://git.exness.io/site/py-reqs'}
+247: {created_at: '2016-09-08T11:42:35.462Z', last_activity_at: '2016-09-08T11:44:04.711Z',
+  name: task_434, path: ilya.samartsev/task_434, web_url: 'https://git.exness.io/ilya.samartsev/task_434'}
+249: {created_at: '2016-09-13T08:43:15.886Z', last_activity_at: '2016-09-13T08:47:34.948Z',
+  name: python-signable-protocol, path: thrift/python-signable-protocol, web_url: 'https://git.exness.io/thrift/python-signable-protocol'}
+250: {created_at: '2016-09-14T13:40:33.915Z', last_activity_at: '2016-09-14T19:46:55.357Z',
+  name: consul, path: it/consul, web_url: 'https://git.exness.io/it/consul'}
+251: {created_at: '2016-09-15T08:53:12.974Z', last_activity_at: '2016-09-15T08:53:14.391Z',
+  name: celery, path: it/celery, web_url: 'https://git.exness.io/it/celery'}
+252: {created_at: '2016-09-15T15:25:00.591Z', last_activity_at: '2018-06-05T09:23:08.405Z',
+  name: datatool, path: evgeny.zuev/datatool, web_url: 'https://git.exness.io/evgeny.zuev/datatool'}
+253: {created_at: '2016-09-20T07:50:20.281Z', last_activity_at: '2017-01-05T08:06:08.394Z',
+  name: task_414, path: ilya.samartsev/task_414, web_url: 'https://git.exness.io/ilya.samartsev/task_414'}
+259: {created_at: '2016-09-23T14:17:35.942Z', last_activity_at: '2016-09-23T14:17:36.888Z',
+  name: auxlib, path: stash_cpp/auxlib, web_url: 'https://git.exness.io/stash_cpp/auxlib'}
+260: {created_at: '2016-09-23T14:18:08.451Z', last_activity_at: '2016-09-23T14:18:09.411Z',
+  name: bridge2, path: stash_cpp/bridge2, web_url: 'https://git.exness.io/stash_cpp/bridge2'}
+261: {created_at: '2016-09-23T14:18:36.614Z', last_activity_at: '2016-09-23T14:18:37.358Z',
+  name: dependencies, path: stash_cpp/dependencies, web_url: 'https://git.exness.io/stash_cpp/dependencies'}
+262: {created_at: '2016-09-23T14:19:03.302Z', last_activity_at: '2016-09-23T14:19:04.245Z',
+  name: exapi, path: stash_cpp/exapi, web_url: 'https://git.exness.io/stash_cpp/exapi'}
+263: {created_at: '2016-09-23T14:19:29.747Z', last_activity_at: '2016-09-23T14:19:30.574Z',
+  name: forexpoker, path: stash_cpp/forexpoker, web_url: 'https://git.exness.io/stash_cpp/forexpoker'}
+264: {created_at: '2016-09-23T14:19:56.188Z', last_activity_at: '2016-09-23T14:19:56.946Z',
+  name: libs, path: stash_cpp/libs, web_url: 'https://git.exness.io/stash_cpp/libs'}
+265: {created_at: '2016-09-23T14:24:35.047Z', last_activity_at: '2016-09-23T14:24:35.994Z',
+  name: misc, path: stash_cpp/misc, web_url: 'https://git.exness.io/stash_cpp/misc'}
+266: {created_at: '2016-09-23T14:25:03.553Z', last_activity_at: '2016-09-23T14:25:04.361Z',
+  name: mt4fixserver, path: stash_cpp/mt4fixserver, web_url: 'https://git.exness.io/stash_cpp/mt4fixserver'}
+267: {created_at: '2016-09-23T14:25:41.346Z', last_activity_at: '2016-09-23T14:25:42.116Z',
+  name: mtfeed, path: stash_cpp/mtfeed, web_url: 'https://git.exness.io/stash_cpp/mtfeed'}
+268: {created_at: '2016-09-23T14:26:11.807Z', last_activity_at: '2016-09-23T14:26:12.685Z',
+  name: mtmonitor, path: stash_cpp/mtmonitor, web_url: 'https://git.exness.io/stash_cpp/mtmonitor'}
+270: {created_at: '2016-09-23T14:27:47.121Z', last_activity_at: '2016-09-23T14:27:48.142Z',
+  name: quoteplugin, path: stash_cpp/quoteplugin, web_url: 'https://git.exness.io/stash_cpp/quoteplugin'}
+271: {created_at: '2016-09-23T14:28:55.001Z', last_activity_at: '2016-09-23T14:28:55.784Z',
+  name: options, path: stash_cpp/options, web_url: 'https://git.exness.io/stash_cpp/options'}
+272: {created_at: '2016-09-23T14:29:24.140Z', last_activity_at: '2016-09-23T14:29:24.976Z',
+  name: sync, path: stash_cpp/sync, web_url: 'https://git.exness.io/stash_cpp/sync'}
+273: {created_at: '2016-09-23T14:29:57.510Z', last_activity_at: '2016-09-23T14:29:58.290Z',
+  name: tools, path: stash_cpp/tools, web_url: 'https://git.exness.io/stash_cpp/tools'}
+274: {created_at: '2016-09-23T14:30:28.387Z', last_activity_at: '2016-09-23T14:30:29.143Z',
+  name: binrpc, path: stash_cpp/binrpc, web_url: 'https://git.exness.io/stash_cpp/binrpc'}
+275: {created_at: '2016-09-23T14:31:05.840Z', last_activity_at: '2016-09-23T14:31:06.613Z',
+  name: exapiextensions, path: stash_cpp/exapiextensions, web_url: 'https://git.exness.io/stash_cpp/exapiextensions'}
+276: {created_at: '2016-09-23T14:32:33.396Z', last_activity_at: '2016-09-23T14:32:34.177Z',
+  name: exalpha, path: stash_cpp/exalpha, web_url: 'https://git.exness.io/stash_cpp/exalpha'}
+277: {created_at: '2016-09-23T14:38:42.143Z', last_activity_at: '2016-09-23T14:38:42.921Z',
+  name: ios-app, path: mobile/ios-app, web_url: 'https://git.exness.io/mobile/ios-app'}
+278: {created_at: '2016-09-23T14:40:28.191Z', last_activity_at: '2016-09-23T14:40:28.991Z',
+  name: sync_src, path: stash_cpp/sync_src, web_url: 'https://git.exness.io/stash_cpp/sync_src'}
+279: {created_at: '2016-09-23T14:42:08.446Z', last_activity_at: '2016-09-23T14:42:09.278Z',
+  name: algwproxy, path: stash_utils/algwproxy, web_url: 'https://git.exness.io/stash_utils/algwproxy'}
+280: {created_at: '2016-09-23T14:42:38.780Z', last_activity_at: '2016-09-23T14:42:39.671Z',
+  name: emir-scripts, path: stash_utils/emir-scripts, web_url: 'https://git.exness.io/stash_utils/emir-scripts'}
+281: {created_at: '2016-09-23T14:43:07.575Z', last_activity_at: '2016-09-23T14:43:08.383Z',
+  name: news-proxy, path: stash_utils/news-proxy, web_url: 'https://git.exness.io/stash_utils/news-proxy'}
+282: {created_at: '2016-09-23T14:43:34.408Z', last_activity_at: '2016-09-23T14:43:35.185Z',
+  name: planfix-daemon, path: stash_utils/planfix-daemon, web_url: 'https://git.exness.io/stash_utils/planfix-daemon'}
+283: {created_at: '2016-09-23T14:43:59.643Z', last_activity_at: '2016-09-23T14:44:00.477Z',
+  name: restart-dc, path: stash_utils/restart-dc, web_url: 'https://git.exness.io/stash_utils/restart-dc'}
+284: {created_at: '2016-09-23T14:45:03.582Z', last_activity_at: '2016-09-23T14:45:04.347Z',
+  name: sms2megaplan, path: stash_utils/sms2megaplan, web_url: 'https://git.exness.io/stash_utils/sms2megaplan'}
+285: {created_at: '2016-09-23T15:35:04.192Z', last_activity_at: '2016-09-23T15:35:04.965Z',
+  name: sms2rm, path: stash_utils/sms2rm, web_url: 'https://git.exness.io/stash_utils/sms2rm'}
+286: {created_at: '2016-09-23T15:35:46.024Z', last_activity_at: '2016-09-23T15:35:46.794Z',
+  name: sms-checker-notify, path: stash_utils/sms-checker-notify, web_url: 'https://git.exness.io/stash_utils/sms-checker-notify'}
+287: {created_at: '2016-09-23T15:36:26.870Z', last_activity_at: '2016-09-23T15:36:27.612Z',
+  name: social-contests, path: stash_utils/social-contests, web_url: 'https://git.exness.io/stash_utils/social-contests'}
+288: {created_at: '2016-09-23T15:36:52.774Z', last_activity_at: '2016-09-23T15:36:53.533Z',
+  name: web-call, path: stash_utils/web-call, web_url: 'https://git.exness.io/stash_utils/web-call'}
+289: {created_at: '2016-09-23T15:37:21.458Z', last_activity_at: '2016-09-23T15:37:22.322Z',
+  name: web-server-monitoring, path: stash_utils/web-server-monitoring, web_url: 'https://git.exness.io/stash_utils/web-server-monitoring'}
+291: {created_at: '2016-09-23T15:38:41.991Z', last_activity_at: '2016-09-23T15:38:42.765Z',
+  name: vps-admin, path: stash_utils/vps-admin, web_url: 'https://git.exness.io/stash_utils/vps-admin'}
+292: {created_at: '2016-09-23T15:39:27.812Z', last_activity_at: '2016-09-23T15:39:28.571Z',
+  name: vbullitin, path: stash_landing/vbullitin, web_url: 'https://git.exness.io/stash_landing/vbullitin'}
+293: {created_at: '2016-09-23T15:39:50.034Z', last_activity_at: '2016-09-23T15:39:50.786Z',
+  name: wordpress-blog, path: stash_landing/wordpress-blog, web_url: 'https://git.exness.io/stash_landing/wordpress-blog'}
+294: {created_at: '2016-09-23T15:40:57.104Z', last_activity_at: '2016-09-23T15:40:57.883Z',
+  name: bitcoinfeed, path: stash_mtfeeds/bitcoinfeed, web_url: 'https://git.exness.io/stash_mtfeeds/bitcoinfeed'}
+295: {created_at: '2016-09-23T15:41:55.434Z', last_activity_at: '2016-09-23T15:41:56.235Z',
+  name: mail-gate-web-app, path: stash_mt_experts/mail-gate-web-app, web_url: 'https://git.exness.io/stash_mt_experts/mail-gate-web-app'}
+296: {created_at: '2016-09-23T15:42:18.367Z', last_activity_at: '2016-09-23T15:42:19.155Z',
+  name: margin-mail-alert-expert, path: stash_mt_experts/margin-mail-alert-expert,
+  web_url: 'https://git.exness.io/stash_mt_experts/margin-mail-alert-expert'}
+297: {created_at: '2016-09-23T15:43:08.667Z', last_activity_at: '2016-09-23T15:43:09.450Z',
+  name: django-lamm-admin, path: stash_lamm/django-lamm-admin, web_url: 'https://git.exness.io/stash_lamm/django-lamm-admin'}
+298: {created_at: '2016-09-26T14:27:32.943Z', last_activity_at: '2016-12-16T13:29:40.990Z',
+  name: mt-data-consumer, path: py-services/mt-data-consumer, web_url: 'https://git.exness.io/py-services/mt-data-consumer'}
+299: {created_at: '2016-09-26T14:30:06.590Z', last_activity_at: '2017-07-12T15:12:43.172Z',
+  name: withdrawal-service, path: py-services/withdrawal-service, web_url: 'https://git.exness.io/py-services/withdrawal-service'}
+300: {created_at: '2016-09-28T07:53:43.175Z', last_activity_at: '2016-09-28T07:53:43.175Z',
+  name: catalog, path: rancher/catalog, web_url: 'https://git.exness.io/rancher/catalog'}
+301: {created_at: '2016-09-28T12:24:03.681Z', last_activity_at: '2016-09-30T05:48:30.560Z',
+  name: galera, path: rancher/galera, web_url: 'https://git.exness.io/rancher/galera'}
+308: {created_at: '2016-10-19T07:17:42.481Z', last_activity_at: '2018-06-25T16:48:52.295Z',
+  name: at-exness, path: qa/at-exness, web_url: 'https://git.exness.io/qa/at-exness'}
+310: {created_at: '2016-11-02T14:04:23.066Z', last_activity_at: '2018-04-13T09:08:31.425Z',
+  name: celery-orders, path: py-services/celery-orders, web_url: 'https://git.exness.io/py-services/celery-orders'}
+313: {created_at: '2016-11-14T13:59:16.103Z', last_activity_at: '2016-11-30T13:52:18.017Z',
+  name: billing, path: py-services/billing, web_url: 'https://git.exness.io/py-services/billing'}
+315: {created_at: '2016-11-19T10:16:41.456Z', last_activity_at: '2018-06-14T15:42:45.581Z',
+  name: orders, path: py-services/orders, web_url: 'https://git.exness.io/py-services/orders'}
+317: {created_at: '2016-11-23T12:43:18.475Z', last_activity_at: '2017-10-02T09:55:27.120Z',
+  name: ubuntu, path: dockerhub/ubuntu, web_url: 'https://git.exness.io/dockerhub/ubuntu'}
+318: {created_at: '2016-11-23T13:23:13.924Z', last_activity_at: '2018-05-31T09:27:17.764Z',
+  name: python, path: dockerhub/python, web_url: 'https://git.exness.io/dockerhub/python'}
+322: {created_at: '2016-11-25T13:41:43.416Z', last_activity_at: '2017-09-29T09:29:50.161Z',
+  name: docker, path: dockerhub/docker, web_url: 'https://git.exness.io/dockerhub/docker'}
+323: {created_at: '2016-11-28T12:08:36.417Z', last_activity_at: '2017-02-02T08:57:19.393Z',
+  name: ruby, path: dockerhub/ruby, web_url: 'https://git.exness.io/dockerhub/ruby'}
+324: {created_at: '2016-12-01T11:09:10.520Z', last_activity_at: '2016-12-01T11:09:10.520Z',
+  name: python, path: docs/python, web_url: 'https://git.exness.io/docs/python'}
+327: {created_at: '2016-12-05T13:07:17.416Z', last_activity_at: '2018-05-08T06:34:18.614Z',
+  name: thrift-utils, path: thrift/thrift-utils, web_url: 'https://git.exness.io/thrift/thrift-utils'}
+328: {created_at: '2016-12-06T09:06:54.029Z', last_activity_at: '2017-08-02T14:01:28.317Z',
+  name: data-export, path: alexey.kolmakov/data-export, web_url: 'https://git.exness.io/alexey.kolmakov/data-export'}
+329: {created_at: '2016-12-07T11:06:13.112Z', last_activity_at: '2017-11-15T12:42:53.280Z',
+  name: bonus_stats, path: pavel.liashkov/bonus_stats, web_url: 'https://git.exness.io/pavel.liashkov/bonus_stats'}
+331: {created_at: '2016-12-12T11:15:21.457Z', last_activity_at: '2016-12-12T11:15:21.457Z',
+  name: thrift_usage_sample, path: ilya.samartsev/thrift_usage_sample, web_url: 'https://git.exness.io/ilya.samartsev/thrift_usage_sample'}
+334: {created_at: '2016-12-16T08:22:29.932Z', last_activity_at: '2016-12-16T08:22:29.932Z',
+  name: web-pa, path: alexey.bykov/web-pa, web_url: 'https://git.exness.io/alexey.bykov/web-pa'}
+335: {created_at: '2016-12-19T08:55:14.494Z', last_activity_at: '2016-12-19T08:55:14.494Z',
+  name: fx-analyze, path: alexey.kolmakov/fx-analyze, web_url: 'https://git.exness.io/alexey.kolmakov/fx-analyze'}
+337: {created_at: '2016-12-22T07:48:07.168Z', last_activity_at: '2016-12-22T09:06:39.922Z',
+  name: log-parser, path: alexey.kolmakov/log-parser, web_url: 'https://git.exness.io/alexey.kolmakov/log-parser'}
+340: {created_at: '2016-12-23T14:39:58.533Z', last_activity_at: '2018-06-25T10:50:10.790Z',
+  name: pandora, path: BA/pandora, web_url: 'https://git.exness.io/BA/pandora'}
+342: {created_at: '2017-01-11T16:40:06.463Z', last_activity_at: '2017-01-11T16:40:06.463Z',
+  name: dev-env, path: andrey.bodrov/dev-env, web_url: 'https://git.exness.io/andrey.bodrov/dev-env'}
+343: {created_at: '2017-01-12T13:18:49.674Z', last_activity_at: '2018-06-21T12:21:55.514Z',
+  name: configs, path: devops/configs, web_url: 'https://git.exness.io/devops/configs'}
+344: {created_at: '2017-01-18T08:36:34.196Z', last_activity_at: '2018-02-23T13:09:41.851Z',
+  name: xenon, path: php/xenon, web_url: 'https://git.exness.io/php/xenon'}
+346: {created_at: '2017-01-18T11:57:10.789Z', last_activity_at: '2017-01-18T11:57:10.789Z',
+  name: vault, path: dockerhub/vault, web_url: 'https://git.exness.io/dockerhub/vault'}
+347: {created_at: '2017-01-18T19:02:59.253Z', last_activity_at: '2018-05-28T08:58:00.107Z',
+  name: isomorphic-boilerplate, path: js-libraries/isomorphic-boilerplate, web_url: 'https://git.exness.io/js-libraries/isomorphic-boilerplate'}
+349: {created_at: '2017-01-19T13:33:24.860Z', last_activity_at: '2018-04-05T07:24:24.879Z',
+  name: stylelint-config-exness, path: js-libraries/stylelint-config-exness, web_url: 'https://git.exness.io/js-libraries/stylelint-config-exness'}
+350: {created_at: '2017-01-19T17:08:18.337Z', last_activity_at: '2017-01-19T17:08:18.337Z',
+  name: postgres, path: dockerhub/postgres, web_url: 'https://git.exness.io/dockerhub/postgres'}
+354: {created_at: '2017-01-24T15:12:23.466Z', last_activity_at: '2018-06-25T10:51:39.945Z',
+  name: nginx, path: dockerhub/nginx, web_url: 'https://git.exness.io/dockerhub/nginx'}
+358: {created_at: '2017-01-26T13:36:30.552Z', last_activity_at: '2018-01-25T12:08:50.493Z',
+  name: ba-964-kyc-report, path: alexey.kolmakov/ba-964-kyc-report, web_url: 'https://git.exness.io/alexey.kolmakov/ba-964-kyc-report'}
+361: {created_at: '2017-01-31T18:48:33.005Z', last_activity_at: '2018-03-07T13:16:49.018Z',
+  name: node, path: dockerhub/node, web_url: 'https://git.exness.io/dockerhub/node'}
+362: {created_at: '2017-02-01T13:56:41.291Z', last_activity_at: '2018-05-22T11:14:47.404Z',
+  name: flow-config-exness, path: js-libraries/flow-config-exness, web_url: 'https://git.exness.io/js-libraries/flow-config-exness'}
+363: {created_at: '2017-02-02T07:55:48.253Z', last_activity_at: '2017-07-25T14:12:21.657Z',
+  name: release-managment, path: devops/release-managment, web_url: 'https://git.exness.io/devops/release-managment'}
+365: {created_at: '2017-02-07T07:01:24.711Z', last_activity_at: '2017-02-15T07:26:18.342Z',
+  name: FINBACKLOG-336, path: alexey.kolmakov/FINBACKLOG-336, web_url: 'https://git.exness.io/alexey.kolmakov/FINBACKLOG-336'}
+367: {created_at: '2017-02-08T11:00:21.845Z', last_activity_at: '2017-04-19T09:53:19.837Z',
+  name: frontend, path: andrey.bodrov/frontend, web_url: 'https://git.exness.io/andrey.bodrov/frontend'}
+368: {created_at: '2017-02-09T12:20:33.356Z', last_activity_at: '2018-01-31T13:22:18.989Z',
+  name: public-express, path: website-ng/public-express, web_url: 'https://git.exness.io/website-ng/public-express'}
+369: {created_at: '2017-02-09T14:06:35.723Z', last_activity_at: '2017-05-12T10:03:00.998Z',
+  name: css-framework, path: js-libraries/css-framework, web_url: 'https://git.exness.io/js-libraries/css-framework'}
+370: {created_at: '2017-02-10T15:07:08.896Z', last_activity_at: '2017-02-10T15:07:08.896Z',
+  name: isomorphic-boilerplate, path: nikita.pozdnyakov/isomorphic-boilerplate, web_url: 'https://git.exness.io/nikita.pozdnyakov/isomorphic-boilerplate'}
+371: {created_at: '2017-02-13T20:26:51.295Z', last_activity_at: '2017-02-17T15:44:59.296Z',
+  name: intranet-tests, path: evgeny.zuev/intranet-tests, python_percent: 100.0, req_sources: empty,
+  web_url: 'https://git.exness.io/evgeny.zuev/intranet-tests'}
+372: {created_at: '2017-02-14T13:41:10.768Z', last_activity_at: '2017-07-28T13:18:13.581Z',
+  name: nginx-template, path: website-ng/nginx-template, web_url: 'https://git.exness.io/website-ng/nginx-template'}
+373: {created_at: '2017-02-16T09:54:49.336Z', last_activity_at: '2017-12-18T12:42:01.529Z',
+  name: exness-app-ios, path: mobile/exness-app-ios, web_url: 'https://git.exness.io/mobile/exness-app-ios'}
+374: {created_at: '2017-02-16T09:55:24.651Z', last_activity_at: '2017-07-24T16:13:09.873Z',
+  name: exness-app-android, path: mobile/exness-app-android, web_url: 'https://git.exness.io/mobile/exness-app-android'}
+375: {created_at: '2017-02-17T10:10:11.385Z', last_activity_at: '2017-08-21T09:53:04.630Z',
+  name: pwa_boilerplate, path: andrey.bodrov/pwa_boilerplate, web_url: 'https://git.exness.io/andrey.bodrov/pwa_boilerplate'}
+377: {created_at: '2017-02-18T06:07:13.498Z', last_activity_at: '2017-02-20T09:02:38.538Z',
+  name: full-stack-team, path: hakaton/full-stack-team, web_url: 'https://git.exness.io/hakaton/full-stack-team'}
+378: {created_at: '2017-02-18T06:07:58.658Z', last_activity_at: '2017-02-18T06:07:58.658Z',
+  name: pwa-team, path: hakaton/pwa-team, web_url: 'https://git.exness.io/hakaton/pwa-team'}
+379: {created_at: '2017-02-18T06:08:22.224Z', last_activity_at: '2017-02-19T09:22:21.919Z',
+  name: aqaba-team, path: hakaton/aqaba-team, web_url: 'https://git.exness.io/hakaton/aqaba-team'}
+381: {created_at: '2017-02-20T12:08:53.850Z', last_activity_at: '2017-02-20T12:08:53.850Z',
+  name: server-prepare, path: devops/server-prepare, web_url: 'https://git.exness.io/devops/server-prepare'}
+383: {created_at: '2017-02-22T09:33:42.472Z', last_activity_at: '2017-02-23T09:15:46.048Z',
+  name: nginx-template, path: fedor.buturlin/nginx-template, web_url: 'https://git.exness.io/fedor.buturlin/nginx-template'}
+384: {created_at: '2017-02-24T12:57:56.665Z', last_activity_at: '2017-02-24T12:57:56.665Z',
+  name: thrift_server_example, path: ilya.samartsev/thrift_server_example, web_url: 'https://git.exness.io/ilya.samartsev/thrift_server_example'}
+385: {created_at: '2017-02-24T14:48:20.778Z', last_activity_at: '2018-04-20T12:12:41.217Z',
+  name: thrift-server, path: php/thrift-server, web_url: 'https://git.exness.io/php/thrift-server'}
+387: {created_at: '2017-02-25T05:49:39.561Z', last_activity_at: '2018-05-08T08:44:04.582Z',
+  name: thrift-stubs, path: php/thrift-stubs, web_url: 'https://git.exness.io/php/thrift-stubs'}
+388: {created_at: '2017-02-25T08:45:30.048Z', last_activity_at: '2018-06-25T10:07:10.122Z',
+  name: thrift-client, path: php/thrift-client, web_url: 'https://git.exness.io/php/thrift-client'}
+389: {created_at: '2017-02-28T10:46:10.697Z', last_activity_at: '2017-03-10T13:47:11.126Z',
+  name: thrift-client-example, path: php/thrift-client-example, web_url: 'https://git.exness.io/php/thrift-client-example'}
+391: {created_at: '2017-03-01T14:57:55.474Z', last_activity_at: '2018-06-25T14:51:07.017Z',
+  name: exnessimo, path: js-libraries/exnessimo, web_url: 'https://git.exness.io/js-libraries/exnessimo'}
+393: {created_at: '2017-03-03T08:46:20.356Z', last_activity_at: '2017-03-03T15:10:59.205Z',
+  name: BA-1136-magic-22, path: alexey.kolmakov/BA-1136-magic-22, web_url: 'https://git.exness.io/alexey.kolmakov/BA-1136-magic-22'}
+394: {created_at: '2017-03-03T12:09:39.225Z', last_activity_at: '2018-06-04T08:50:50.201Z',
+  name: ad-hoc-reports, path: alexey.kolmakov/ad-hoc-reports, web_url: 'https://git.exness.io/alexey.kolmakov/ad-hoc-reports'}
+395: {created_at: '2017-03-06T09:39:28.131Z', last_activity_at: '2018-06-25T10:00:54.538Z',
+  name: FINBACKLOG-360-open-orders-report, path: alexey.kolmakov/FINBACKLOG-360-open-orders-report,
+  web_url: 'https://git.exness.io/alexey.kolmakov/FINBACKLOG-360-open-orders-report'}
+396: {created_at: '2017-03-06T13:31:43.215Z', last_activity_at: '2017-03-06T13:31:43.215Z',
+  name: BA-1147-eligible-funds-report, path: alexey.kolmakov/BA-1147-eligible-funds-report,
+  web_url: 'https://git.exness.io/alexey.kolmakov/BA-1147-eligible-funds-report'}
+400: {created_at: '2017-03-17T10:27:37.608Z', last_activity_at: '2018-03-22T15:13:21.404Z',
+  name: thrift-ping, path: devops/thrift-ping, web_url: 'https://git.exness.io/devops/thrift-ping'}
+410: {created_at: '2017-03-30T10:11:39.919Z', last_activity_at: '2018-06-13T12:36:05.144Z',
+  name: ebisu, path: BA/ebisu, web_url: 'https://git.exness.io/BA/ebisu'}
+411: {created_at: '2017-03-30T15:35:06.469Z', last_activity_at: '2017-03-30T15:35:06.469Z',
+  name: release-managment, path: alexey.firsov/release-managment, web_url: 'https://git.exness.io/alexey.firsov/release-managment'}
+412: {created_at: '2017-04-04T08:23:50.568Z', last_activity_at: '2017-08-21T07:42:44.763Z',
+  name: contentful-utils, path: website-ng/contentful-utils, web_url: 'https://git.exness.io/website-ng/contentful-utils'}
+414: {created_at: '2017-04-07T14:50:07.022Z', last_activity_at: '2017-07-07T04:41:46.209Z',
+  name: exness-request-id, path: site-utils/exness-request-id, web_url: 'https://git.exness.io/site-utils/exness-request-id'}
+415: {created_at: '2017-04-13T14:03:13.180Z', last_activity_at: '2018-06-25T21:10:17.603Z',
+  name: frontend, path: partner/frontend, web_url: 'https://git.exness.io/partner/frontend'}
+417: {created_at: '2017-04-22T12:12:35.169Z', last_activity_at: '2017-04-22T12:12:35.169Z',
+  name: frontend, path: semyon.chaunin/frontend, web_url: 'https://git.exness.io/semyon.chaunin/frontend'}
+418: {created_at: '2017-04-24T09:26:46.785Z', last_activity_at: '2017-07-07T06:00:11.175Z',
+  name: kyc-document-files, path: intranet/kyc-document-files, web_url: 'https://git.exness.io/intranet/kyc-document-files'}
+419: {created_at: '2017-04-24T14:25:16.852Z', last_activity_at: '2017-07-20T14:35:12.479Z',
+  name: sysec-report-2abc, path: igor.matcko/sysec-report-2abc, web_url: 'https://git.exness.io/igor.matcko/sysec-report-2abc'}
+421: {created_at: '2017-04-25T09:44:22.436Z', last_activity_at: '2017-04-25T09:44:22.436Z',
+  name: bacefook, path: ilya.samartsev/bacefook, web_url: 'https://git.exness.io/ilya.samartsev/bacefook'}
+423: {created_at: '2017-05-01T17:01:56.277Z', last_activity_at: '2018-06-06T08:45:38.731Z',
+  name: notification, path: py-services/notification, web_url: 'https://git.exness.io/py-services/notification'}
+424: {created_at: '2017-05-02T06:01:03.580Z', last_activity_at: '2018-06-22T14:15:03.344Z',
+  name: partner-rest, path: partner/partner-rest, web_url: 'https://git.exness.io/partner/partner-rest'}
+426: {created_at: '2017-05-10T08:25:46.043Z', last_activity_at: '2017-09-28T11:07:14.743Z',
+  name: cardpay_salesforce, path: ilya.samartsev/cardpay_salesforce, web_url: 'https://git.exness.io/ilya.samartsev/cardpay_salesforce'}
+427: {created_at: '2017-05-15T09:50:05.221Z', last_activity_at: '2017-07-03T09:30:30.721Z',
+  name: backend, path: roofbar/backend, web_url: 'https://git.exness.io/roofbar/backend'}
+428: {created_at: '2017-05-16T18:42:06.719Z', last_activity_at: '2017-07-28T13:43:46.704Z',
+  name: roofbar-thrift, path: roofbar/roofbar-thrift, web_url: 'https://git.exness.io/roofbar/roofbar-thrift'}
+430: {created_at: '2017-05-19T07:37:25.979Z', last_activity_at: '2017-05-19T07:37:25.979Z',
+  name: kyc_cl, path: loparevdv/kyc_cl, web_url: 'https://git.exness.io/loparevdv/kyc_cl'}
+431: {created_at: '2017-05-20T09:18:09.066Z', last_activity_at: '2018-02-27T14:32:17.337Z',
+  name: roofbar-service, path: roofbar/roofbar-service, web_url: 'https://git.exness.io/roofbar/roofbar-service'}
+434: {created_at: '2017-05-24T11:18:16.949Z', last_activity_at: '2017-05-24T11:18:16.949Z',
+  name: test-pages, path: ivan.skiridomov/test-pages, web_url: 'https://git.exness.io/ivan.skiridomov/test-pages'}
+435: {created_at: '2017-05-24T12:40:56.199Z', last_activity_at: '2017-06-06T11:32:18.420Z',
+  name: load-tests, path: website-ng/loadTests, web_url: 'https://git.exness.io/website-ng/loadTests'}
+440: {created_at: '2017-05-26T09:31:42.713Z', last_activity_at: '2017-05-26T09:31:42.713Z',
+  name: nginx-public-old, path: devops/nginx-public-old, web_url: 'https://git.exness.io/devops/nginx-public-old'}
+442: {created_at: '2017-05-27T18:45:59.136Z', last_activity_at: '2017-11-10T15:28:13.319Z',
+  name: thrift-builder, path: evgeny.zuev/thrift-builder, web_url: 'https://git.exness.io/evgeny.zuev/thrift-builder'}
+443: {created_at: '2017-05-29T06:09:46.464Z', last_activity_at: '2018-06-25T12:56:29.723Z',
+  name: partner-ship, path: partner/partner-ship, web_url: 'https://git.exness.io/partner/partner-ship'}
+444: {created_at: '2017-05-29T13:21:50.462Z', last_activity_at: '2018-05-03T10:35:43.971Z',
+  name: exness-tag-manager, path: js-libraries/exness-tag-manager, web_url: 'https://git.exness.io/js-libraries/exness-tag-manager'}
+445: {created_at: '2017-05-30T07:15:20.202Z', last_activity_at: '2017-10-05T11:10:47.190Z',
+  name: npw-web-api-tests, path: website-ng/npw-web-api-tests, web_url: 'https://git.exness.io/website-ng/npw-web-api-tests'}
+446: {created_at: '2017-05-30T07:16:09.157Z', last_activity_at: '2017-05-30T07:16:09.157Z',
+  name: npw-ui-tests, path: website-ng/npw-ui-tests, web_url: 'https://git.exness.io/website-ng/npw-ui-tests'}
+448: {created_at: '2017-06-03T16:59:44.484Z', last_activity_at: '2017-06-03T16:59:44.484Z',
+  name: secrets-vault, path: roofbar/secrets-vault, web_url: 'https://git.exness.io/roofbar/secrets-vault'}
+451: {created_at: '2017-06-12T11:19:55.783Z', last_activity_at: '2018-03-15T14:23:57.398Z',
+  name: BeatBot, path: mobile/BeatBot, web_url: 'https://git.exness.io/mobile/BeatBot'}
+452: {created_at: '2017-06-13T12:07:38.255Z', last_activity_at: '2017-10-21T19:02:20.278Z',
+  name: exness-rest, path: mobile/exness-rest, web_url: 'https://git.exness.io/mobile/exness-rest'}
+455: {created_at: '2017-06-17T10:11:21.488Z', last_activity_at: '2017-06-17T10:11:21.488Z',
+  name: config-server-test, path: ivan.skiridomov/config-server-test, web_url: 'https://git.exness.io/ivan.skiridomov/config-server-test'}
+457: {created_at: '2017-06-17T19:54:58.488Z', last_activity_at: '2018-04-30T08:04:36.261Z',
+  name: locale, path: site/locale, web_url: 'https://git.exness.io/site/locale'}
+460: {created_at: '2017-06-20T11:16:46.561Z', last_activity_at: '2018-06-22T14:00:43.130Z',
+  name: rancher-catalog, path: devops/rancher-catalog, web_url: 'https://git.exness.io/devops/rancher-catalog'}
+462: {created_at: '2017-06-22T12:12:56.739Z', last_activity_at: '2018-06-19T13:14:13.090Z',
+  name: sssd, path: matvey.marinin/sssd, web_url: 'https://git.exness.io/matvey.marinin/sssd'}
+463: {created_at: '2017-06-22T13:23:08.023Z', last_activity_at: '2017-06-22T13:23:08.023Z',
+  name: websocket-server-emulator, path: sergey.konkov/websocket-server-emulator,
+  web_url: 'https://git.exness.io/sergey.konkov/websocket-server-emulator'}
+464: {created_at: '2017-06-24T12:46:16.563Z', last_activity_at: '2017-09-14T15:58:46.865Z',
+  name: redux-wait-for-action-exness, path: js-libraries/redux-wait-for-action-exness,
+  python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/js-libraries/redux-wait-for-action-exness'}
+465: {created_at: '2017-06-26T08:49:48.091Z', last_activity_at: '2017-06-26T08:49:48.091Z',
+  name: datahub-wokrshop-01, path: alexey.kolmakov/datahub-wokrshop-01, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/alexey.kolmakov/datahub-wokrshop-01'}
+466: {created_at: '2017-06-26T11:43:13.383Z', last_activity_at: '2017-06-26T11:43:13.383Z',
+  name: dynpay, path: payments/dynpay, python_percent: 100.0, req_sources: empty,
+  web_url: 'https://git.exness.io/payments/dynpay'}
+468: {created_at: '2017-06-27T10:22:56.203Z', last_activity_at: '2017-10-24T07:11:32.929Z',
+  name: traders-pa-front, path: semyon.chaunin/new-traders-pa-refactoring, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/semyon.chaunin/new-traders-pa-refactoring'}
+470: {created_at: '2017-06-28T12:15:26.114Z', last_activity_at: '2017-10-23T15:19:05.938Z',
+  name: rancher-gitlab-deploy, path: dockerhub/rancher-gitlab-deploy, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/dockerhub/rancher-gitlab-deploy'}
+471: {created_at: '2017-06-28T15:30:44.799Z', last_activity_at: '2017-06-28T15:30:44.799Z',
+  name: rancher-dns-update, path: dockerhub/rancher-dns-update, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/dockerhub/rancher-dns-update'}
+474: {created_at: '2017-07-05T12:40:35.787Z', last_activity_at: '2018-04-26T09:37:11.036Z',
+  name: locale, path: public-site/locale, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/public-site/locale'}
+475: {created_at: '2017-07-07T08:02:59.198Z', last_activity_at: '2018-06-19T08:06:31.133Z',
+  name: ansible, path: matvey.marinin/ansible, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/matvey.marinin/ansible'}
+479: {created_at: '2017-07-14T16:52:33.035Z', last_activity_at: '2017-07-14T16:52:33.035Z',
+  name: automatica, path: devops/automatica, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/devops/automatica'}
+481: {created_at: '2017-07-20T04:50:31.657Z', last_activity_at: '2017-09-25T14:00:34.504Z',
+  name: intranet-web-frontend-iso, path: intranet/intranet-web-frontend-iso, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/intranet/intranet-web-frontend-iso'}
+482: {created_at: '2017-07-20T08:39:02.462Z', last_activity_at: '2017-07-20T08:39:02.462Z',
+  name: isomorphic-boilerplate, path: ivan.skiridomov/isomorphic-boilerplate, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/ivan.skiridomov/isomorphic-boilerplate'}
+483: {created_at: '2017-07-20T17:07:59.246Z', last_activity_at: '2017-07-20T17:07:59.246Z',
+  name: public-certs, path: devops/public-certs, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/devops/public-certs'}
+489: {created_at: '2017-07-25T09:56:33.206Z', last_activity_at: '2017-07-25T09:56:33.206Z',
+  name: ansible-role-glusterfs, path: matvey.marinin/ansible-role-glusterfs, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/matvey.marinin/ansible-role-glusterfs'}
+494: {created_at: '2017-07-27T15:22:28.311Z', last_activity_at: '2017-07-28T12:53:52.032Z',
+  name: web-api-partner-tests, path: sergey.konkov/web-api-partner-tests, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/sergey.konkov/web-api-partner-tests'}
+495: {created_at: '2017-07-28T08:39:03.682Z', last_activity_at: '2017-08-01T06:08:30.997Z',
+  name: dev-env, path: website-ng/dev-env, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/website-ng/dev-env'}
+497: {created_at: '2017-07-28T13:28:19.431Z', last_activity_at: '2017-12-28T10:03:47.806Z',
+  name: contentful-merge, path: website-ng/contentful-merge, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/website-ng/contentful-merge'}
+499: {created_at: '2017-08-04T07:13:23.755Z', last_activity_at: '2017-08-04T07:13:23.755Z',
+  name: BeatBot, path: roman.tsopin/BeatBot, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/roman.tsopin/BeatBot'}
+502:
+  created_at: '2017-08-07T11:59:18.447Z'
+  last_activity_at: '2017-09-22T14:41:39.326Z'
+  name: at-integration-cb
+  path: evgeniy.moskalenko/at-integration-cb
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/evgeniy.moskalenko/at-integration-cb
+503: {created_at: '2017-08-07T13:17:09.338Z', last_activity_at: '2017-10-10T07:35:01.115Z',
+  name: laravel-hive-client, path: php/laravel-hive-client, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/php/laravel-hive-client'}
+504: {created_at: '2017-08-07T13:22:12.833Z', last_activity_at: '2018-04-13T06:11:56.436Z',
+  name: laravel-mt4rt-client, path: php/laravel-mt4rt-client, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/php/laravel-mt4rt-client'}
+505: {created_at: '2017-08-07T13:33:32.022Z', last_activity_at: '2018-04-13T06:13:07.077Z',
+  name: laravel-currency-converter, path: php/laravel-currency-converter, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/php/laravel-currency-converter'}
+506: {created_at: '2017-08-08T07:36:05.187Z', last_activity_at: '2017-08-23T08:17:18.769Z',
+  name: locales, path: site/locales, python_percent: 100.0, req_sources: empty, web_url: 'https://git.exness.io/site/locales'}
+508:
+  created_at: '2017-08-11T12:53:38.112Z'
+  last_activity_at: '2018-05-17T10:39:02.165Z'
+  name: magic
+  path: BA/magic
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/BA/magic
+510: {created_at: '2017-08-16T16:08:34.704Z', last_activity_at: '2017-08-18T09:32:43.009Z',
+  name: testrail-testrunner, path: sergey.konkov/testrail-testrunner, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/sergey.konkov/testrail-testrunner'}
+511: {created_at: '2017-08-18T07:33:21.515Z', last_activity_at: '2017-10-12T21:19:19.369Z',
+  name: at-beatbot-rest, path: evgeniy.moskalenko/at-beatbot-rest, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/evgeniy.moskalenko/at-beatbot-rest'}
+512: {created_at: '2017-08-18T13:26:43.336Z', last_activity_at: '2017-08-18T13:26:43.336Z',
+  name: thrift3, path: ilya.samartsev/thrift3, python_percent: 100.0, req_sources: empty,
+  web_url: 'https://git.exness.io/ilya.samartsev/thrift3'}
+513: {created_at: '2017-08-18T14:35:25.902Z', last_activity_at: '2017-11-16T09:17:09.305Z',
+  name: ansible-zabbix-agent, path: matvey.marinin/ansible-zabbix-agent, python_percent: 100.0,
+  req_sources: empty, web_url: 'https://git.exness.io/matvey.marinin/ansible-zabbix-agent'}
+515:
+  created_at: '2017-08-21T13:15:48.040Z'
+  last_activity_at: '2017-08-21T13:15:48.040Z'
+  name: linotype
+  path: ilya.samartsev/linotype
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/ilya.samartsev/linotype
+517:
+  created_at: '2017-08-23T17:42:23.248Z'
+  last_activity_at: '2017-11-02T10:54:08.582Z'
+  name: pyranchossh
+  path: devops/pyranchossh
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/devops/pyranchossh
+518:
+  created_at: '2017-08-25T13:41:51.383Z'
+  last_activity_at: '2017-09-05T08:35:10.163Z'
+  name: lithium
+  path: ilya.samartsev/lithium
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/ilya.samartsev/lithium
+519: {created_at: '2017-08-26T05:51:17.866Z', last_activity_at: '2017-08-26T05:51:17.866Z',
+  name: clusterization, path: alexey.kolmakov/clusterization, python_percent: n/a,
+  req_sources: empty, web_url: 'https://git.exness.io/alexey.kolmakov/clusterization'}
+520:
+  created_at: '2017-08-28T12:02:43.431Z'
+  last_activity_at: '2018-06-19T06:42:07.541Z'
+  name: partner-stat
+  path: partner/partner-stat
+  python_percent: 98.09
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/partner/partner-stat
+522: {created_at: '2017-08-28T20:34:39.658Z', last_activity_at: '2018-06-25T15:33:16.949Z',
+  name: pootle_locale, path: site/pootle_locale, python_percent: 100.0, req_sources: empty,
+  web_url: 'https://git.exness.io/site/pootle_locale'}
+523: {created_at: '2017-08-29T14:57:19.460Z', last_activity_at: '2017-08-30T21:09:10.154Z',
+  name: at-kyc-rest, path: evgeniy.moskalenko/at-kyc-rest, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/evgeniy.moskalenko/at-kyc-rest'}
+526: {created_at: '2017-08-31T06:55:49.762Z', last_activity_at: '2018-06-21T14:06:58.900Z',
+  name: at-broker-rest, path: qa/at-broker-rest, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/qa/at-broker-rest'}
+532: {created_at: '2017-09-04T10:32:09.580Z', last_activity_at: '2017-09-04T11:41:43.918Z',
+  name: react-dates-exness, path: js-libraries/react-dates-exness, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/js-libraries/react-dates-exness'}
+533: {created_at: '2017-09-04T12:29:20.888Z', last_activity_at: '2018-06-25T11:52:54.333Z',
+  name: femida, path: BA/femida, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/BA/femida'}
+534:
+  created_at: '2017-09-04T12:31:56.615Z'
+  last_activity_at: '2018-04-02T14:23:39.018Z'
+  name: martinez
+  path: BA/martinez
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/BA/martinez
+541:
+  created_at: '2017-09-07T11:51:52.902Z'
+  last_activity_at: '2018-06-02T12:25:10.339Z'
+  name: generic
+  path: generic/generic
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/generic/generic
+542: {created_at: '2017-09-09T10:49:30.572Z', last_activity_at: '2018-02-22T15:00:16.721Z',
+  name: Candles, path: mobile/Candles, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/mobile/Candles'}
+544:
+  created_at: '2017-09-11T08:27:48.986Z'
+  last_activity_at: '2018-05-25T12:30:34.688Z'
+  name: bellini
+  path: BA/bellini
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/BA/bellini
+547:
+  created_at: '2017-09-19T06:10:16.070Z'
+  last_activity_at: '2017-09-27T12:02:40.828Z'
+  name: fake-zopim
+  path: ilya.samartsev/fake-zopim
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/ilya.samartsev/fake-zopim
+548: {created_at: '2017-09-19T11:03:43.083Z', last_activity_at: '2017-10-10T07:18:07.772Z',
+  name: pootle, path: site/pootle, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/site/pootle'}
+549: {created_at: '2017-09-20T06:41:43.000Z', last_activity_at: '2017-09-28T12:21:55.202Z',
+  name: at-partner-rest, path: evgeniy.moskalenko/at-partner-rest, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/evgeniy.moskalenko/at-partner-rest'}
+553: {created_at: '2017-09-25T07:31:30.240Z', last_activity_at: '2018-06-15T15:49:38.860Z',
+  name: at-beatbot-appium, path: evgeniy.moskalenko/at-beatbot-appium, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/evgeniy.moskalenko/at-beatbot-appium'}
+554: {created_at: '2017-09-25T12:24:21.583Z', last_activity_at: '2018-03-03T23:09:56.596Z',
+  name: bitcoin-core, path: bitcoin/bitcoin_core, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/bitcoin/bitcoin_core'}
+558: {created_at: '2017-09-27T12:17:17.896Z', last_activity_at: '2018-01-16T14:43:47.840Z',
+  name: local-site, path: andrey.beresnev/local-site, python_percent: 75.89, req_sources: empty,
+  web_url: 'https://git.exness.io/andrey.beresnev/local-site'}
+559:
+  created_at: '2017-09-27T12:33:34.013Z'
+  last_activity_at: '2017-09-28T09:56:53.610Z'
+  name: fake-cardpay
+  path: ilya.samartsev/fake-cardpay
+  python_percent: 93.3
+  req_sources: [requirements.txt]
+  web_url: https://git.exness.io/ilya.samartsev/fake-cardpay
+560: {created_at: '2017-09-28T10:31:38.951Z', last_activity_at: '2017-09-28T12:10:17.974Z',
+  name: python, path: custom-docker-images/python, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/custom-docker-images/python'}
+561:
+  created_at: '2017-09-28T11:24:07.307Z'
+  last_activity_at: '2018-06-25T16:21:10.009Z'
+  name: bitcoin-payment
+  path: bitcoin/bitcoin-payment
+  python_percent: 98.23
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/bitcoin/bitcoin-payment
+563: {created_at: '2017-09-28T14:36:32.414Z', last_activity_at: '2017-10-10T15:07:50.852Z',
+  name: alpine, path: dockerhub/alpine, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/dockerhub/alpine'}
+564: {created_at: '2017-09-29T07:41:35.150Z', last_activity_at: '2018-04-16T11:42:16.047Z',
+  name: composer, path: dockerhub/composer, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/dockerhub/composer'}
+565: {created_at: '2017-10-02T07:36:47.189Z', last_activity_at: '2017-10-02T07:36:47.189Z',
+  name: tetraweb-php, path: dockerhub/tetraweb-php, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/dockerhub/tetraweb-php'}
+568: {created_at: '2017-10-03T15:28:55.536Z', last_activity_at: '2017-10-03T15:28:55.536Z',
+  name: local-site, path: ildar.migranov/local-site, python_percent: 75.89, req_sources: empty,
+  web_url: 'https://git.exness.io/ildar.migranov/local-site'}
+569:
+  created_at: '2017-10-04T10:29:03.051Z'
+  last_activity_at: '2018-01-04T12:15:34.225Z'
+  name: BA-1794-retro-tick-migration
+  path: alexey.kolmakov/BA-1794-retro-tick-migration
+  python_percent: 46.05
+  req_sources: [requirements.txt]
+  web_url: https://git.exness.io/alexey.kolmakov/BA-1794-retro-tick-migration
+574:
+  created_at: '2017-10-08T08:45:37.153Z'
+  last_activity_at: '2018-06-25T17:47:16.712Z'
+  name: aioproxy
+  path: aiolibs/aioproxy
+  python_percent: 97.78
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/aiolibs/aioproxy
+575: {created_at: '2017-10-08T15:15:36.319Z', last_activity_at: '2018-05-29T13:02:28.457Z',
+  name: my_nginx, path: ilia.sayakhov/my_nginx, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/ilia.sayakhov/my_nginx'}
+576: {created_at: '2017-10-12T06:18:51.630Z', last_activity_at: '2018-03-08T09:54:00.633Z',
+  name: beatbot-leaderboard, path: mobile/beatbot-leaderboard, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/mobile/beatbot-leaderboard'}
+577: {created_at: '2017-10-12T15:00:19.196Z', last_activity_at: '2017-10-18T07:50:35.292Z',
+  name: ecn-lp-mon, path: matvey.marinin/ecn-lp-mon, python_percent: 100.0, req_sources: empty,
+  web_url: 'https://git.exness.io/matvey.marinin/ecn-lp-mon'}
+579:
+  created_at: '2017-10-17T07:03:39.201Z'
+  last_activity_at: '2018-05-17T13:36:28.108Z'
+  name: marple
+  path: BA/marple
+  python_percent: 98.52
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/BA/marple
+580: {created_at: '2017-10-18T09:16:47.445Z', last_activity_at: '2018-02-22T15:52:50.751Z',
+  name: beatbot-boarding, path: mobile/beatbot-boarding, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/mobile/beatbot-boarding'}
+582: {created_at: '2017-10-19T13:38:35.714Z', last_activity_at: '2017-10-19T13:38:35.714Z',
+  name: beatbot-boarding, path: andrey.beresnev/beatbot-boarding, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/andrey.beresnev/beatbot-boarding'}
+586: {created_at: '2017-10-21T17:35:41.557Z', last_activity_at: '2017-10-21T17:35:41.557Z',
+  name: exness-thrift-go, path: mobile/exness-thrift-go, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/mobile/exness-thrift-go'}
+587: {created_at: '2017-10-24T07:27:25.886Z', last_activity_at: '2018-06-19T05:53:19.284Z',
+  name: traders-pa-front, path: site/traders-pa-front, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/site/traders-pa-front'}
+591:
+  created_at: '2017-10-26T06:41:34.744Z'
+  last_activity_at: '2017-11-02T07:06:50.439Z'
+  name: flycatcher
+  path: ilya.samartsev/flycatcher
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/ilya.samartsev/flycatcher
+592:
+  created_at: '2017-10-27T08:48:48.136Z'
+  last_activity_at: '2017-10-27T09:51:41.185Z'
+  name: manhattan
+  path: ilya.samartsev/manhattan
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/ilya.samartsev/manhattan
+595: {created_at: '2017-10-31T07:07:59.493Z', last_activity_at: '2018-01-16T11:03:41.854Z',
+  name: tick-history-js, path: nikita.khristinin/tick-history-js, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/nikita.khristinin/tick-history-js'}
+596: {created_at: '2017-10-31T07:26:23.158Z', last_activity_at: '2018-01-22T15:51:51.025Z',
+  name: ios-area-mvp, path: mobile/ios-area-mvp, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/mobile/ios-area-mvp'}
+598: {created_at: '2017-11-02T16:16:32.265Z', last_activity_at: '2018-05-14T08:57:57.454Z',
+  name: firebase-functions-notification, path: mobile/push-cloud-functions, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/mobile/push-cloud-functions'}
+600: {created_at: '2017-11-05T18:41:42.239Z', last_activity_at: '2017-11-06T12:08:33.305Z',
+  name: mt5api, path: alexey.bykov/mt5api, python_percent: 100.0, req_sources: empty,
+  web_url: 'https://git.exness.io/alexey.bykov/mt5api'}
+603:
+  created_at: '2017-11-07T08:16:20.468Z'
+  last_activity_at: '2018-06-25T15:48:09.208Z'
+  name: bitcoin-corp
+  path: bitcoin/bitcoin-corp
+  python_percent: 94.39
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/bitcoin/bitcoin-corp
+604: {created_at: '2017-11-07T08:57:07.184Z', last_activity_at: '2017-11-07T08:57:07.184Z',
+  name: nginx-production, path: andrey.beresnev/nginx-production, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/andrey.beresnev/nginx-production'}
+605:
+  created_at: '2017-11-08T12:21:50.362Z'
+  last_activity_at: '2017-11-08T12:21:50.362Z'
+  name: datatool
+  path: andrey.beresnev/datatool
+  python_percent: 100.0
+  req_sources: [requirements.txt]
+  web_url: https://git.exness.io/andrey.beresnev/datatool
+608: {created_at: '2017-11-10T09:46:32.754Z', last_activity_at: '2018-06-15T15:34:41.067Z',
+  name: selenoid-exness, path: evgeniy.moskalenko/selenoid-exness, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/evgeniy.moskalenko/selenoid-exness'}
+610:
+  created_at: '2017-11-15T12:14:27.509Z'
+  last_activity_at: '2017-11-15T15:40:27.673Z'
+  name: bonus_stats
+  path: dmitry.kryukov/bonus_stats
+  python_percent: 100.0
+  req_sources: [requirements.txt]
+  web_url: https://git.exness.io/dmitry.kryukov/bonus_stats
+611:
+  created_at: '2017-11-16T09:04:28.662Z'
+  last_activity_at: '2018-02-08T06:48:20.250Z'
+  name: nightjar
+  path: BA/nightjar
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/BA/nightjar
+612:
+  created_at: '2017-11-16T12:55:48.120Z'
+  last_activity_at: '2018-02-08T06:52:00.953Z'
+  name: magma
+  path: BA/magma
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/BA/magma
+614:
+  created_at: '2017-11-20T12:23:52.132Z'
+  last_activity_at: '2018-01-04T15:34:09.836Z'
+  name: bonus_stats
+  path: py-services/bonus_stats
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/py-services/bonus_stats
+619:
+  created_at: '2017-11-23T15:09:02.264Z'
+  last_activity_at: '2018-02-22T14:20:21.132Z'
+  name: bonus-distributor
+  path: mobile/bonus-distributor
+  python_percent: 97.36
+  req_sources: [requirements.txt]
+  web_url: https://git.exness.io/mobile/bonus-distributor
+622:
+  created_at: '2017-11-27T08:57:49.223Z'
+  last_activity_at: '2017-11-28T08:38:25.366Z'
+  name: terminate-clients
+  path: igor.matcko/terminate-clients
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/igor.matcko/terminate-clients
+625: {created_at: '2017-11-27T15:19:50.890Z', last_activity_at: '2018-02-15T12:29:07.051Z',
+  name: firebase-functions-localization, path: mobile/firebase-functions-localization,
+  python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/mobile/firebase-functions-localization'}
+627:
+  created_at: '2017-11-30T08:53:47.660Z'
+  last_activity_at: '2018-06-14T14:41:22.107Z'
+  name: exness-bitcoin
+  path: bitcoin/exness-bitcoin
+  python_percent: 98.88
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/bitcoin/exness-bitcoin
+629: {created_at: '2017-11-30T13:40:27.454Z', last_activity_at: '2017-12-04T14:30:18.436Z',
+  name: ba-services, path: igor.matcko/ba-cb-services, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/igor.matcko/ba-cb-services'}
+630:
+  created_at: '2017-12-01T13:05:56.870Z'
+  last_activity_at: '2017-12-05T12:34:33.826Z'
+  name: cover-local-diff
+  path: devops/cover-local-diff
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/devops/cover-local-diff
+631: {created_at: '2017-12-04T11:53:33.500Z', last_activity_at: '2018-02-06T09:10:05.997Z',
+  name: beatbot-test, path: mobile/beatbot-test, python_percent: 70.01, req_sources: empty,
+  web_url: 'https://git.exness.io/mobile/beatbot-test'}
+633: {created_at: '2017-12-06T09:19:22.107Z', last_activity_at: '2018-02-27T15:06:12.675Z',
+  name: ba-2373, path: igor.matcko/ba-2373, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/igor.matcko/ba-2373'}
+636: {created_at: '2017-12-06T15:21:27.073Z', last_activity_at: '2018-02-27T13:03:29.106Z',
+  name: android-arch-project, path: mobile/android-arch-project, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/mobile/android-arch-project'}
+637:
+  created_at: '2017-12-07T12:12:30.672Z'
+  last_activity_at: '2017-12-18T09:02:07.588Z'
+  name: scripts
+  path: pavel.liashkov/scripts
+  python_percent: 100.0
+  req_sources: [requirements.txt]
+  web_url: https://git.exness.io/pavel.liashkov/scripts
+648: {created_at: '2017-12-08T09:06:26.564Z', last_activity_at: '2018-01-05T10:23:18.818Z',
+  name: withdraw, path: david.djanyan/withdraw, python_percent: 99.49, req_sources: empty,
+  web_url: 'https://git.exness.io/david.djanyan/withdraw'}
+649: {created_at: '2017-12-11T12:42:28.275Z', last_activity_at: '2018-01-05T10:23:16.474Z',
+  name: deposit, path: david.djanyan/deposit, python_percent: 98.35, req_sources: empty,
+  web_url: 'https://git.exness.io/david.djanyan/deposit'}
+650: {created_at: '2017-12-11T12:53:20.293Z', last_activity_at: '2018-01-05T14:04:03.265Z',
+  name: billing, path: david.djanyan/billing, python_percent: 44.79, req_sources: empty,
+  web_url: 'https://git.exness.io/david.djanyan/billing'}
+651:
+  created_at: '2017-12-13T08:03:35.285Z'
+  last_activity_at: '2018-06-25T10:39:05.954Z'
+  name: marple2
+  path: BA/marple2
+  python_percent: 98.55
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/BA/marple2
+670:
+  created_at: '2018-01-02T09:39:35.300Z'
+  last_activity_at: '2018-03-15T15:45:24.429Z'
+  name: exness-rest-errors
+  path: site/exness-rest-errors
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/site/exness-rest-errors
+674: {created_at: '2018-01-03T07:46:03.338Z', last_activity_at: '2018-01-10T09:18:10.719Z',
+  name: at-phone-balancer, path: qa/at-phone-balancer, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/qa/at-phone-balancer'}
+676: {created_at: '2018-01-05T15:42:02.880Z', last_activity_at: '2018-06-25T12:05:13.338Z',
+  name: billing, path: secure-services/billing, python_percent: 45.28, req_sources: empty,
+  web_url: 'https://git.exness.io/secure-services/billing'}
+677: {created_at: '2018-01-05T15:44:06.470Z', last_activity_at: '2018-06-19T07:47:02.448Z',
+  name: deposit, path: secure-services/deposit, python_percent: 98.56, req_sources: empty,
+  web_url: 'https://git.exness.io/secure-services/deposit'}
+678: {created_at: '2018-01-05T15:45:25.411Z', last_activity_at: '2018-06-15T15:02:33.612Z',
+  name: withdrawal, path: secure-services/withdrawal, python_percent: 99.58, req_sources: empty,
+  web_url: 'https://git.exness.io/secure-services/withdrawal'}
+679:
+  created_at: '2018-01-05T15:48:17.346Z'
+  last_activity_at: '2018-02-23T09:59:15.821Z'
+  name: deposit_router
+  path: secure-services/deposit_router
+  python_percent: 89.25
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/secure-services/deposit_router
+680: {created_at: '2018-01-08T13:15:55.339Z', last_activity_at: '2018-02-28T08:14:43.599Z',
+  name: at-celery-rest, path: qa/at-celery-rest, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/qa/at-celery-rest'}
+681: {created_at: '2018-01-08T14:36:35.061Z', last_activity_at: '2018-06-15T09:54:04.510Z',
+  name: broker_api, path: site/broker_api, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/site/broker_api'}
+682: {created_at: '2018-01-08T14:44:51.998Z', last_activity_at: '2018-01-23T08:59:49.041Z',
+  name: Best_Execution_Analysis, path: natalya.mirza/Best_Execution_Analysis, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/natalya.mirza/Best_Execution_Analysis'}
+688: {created_at: '2018-01-15T08:31:55.013Z', last_activity_at: '2018-01-15T08:31:55.013Z',
+  name: gitlab-registry-cleaner, path: matvey.marinin/gitlab-registry-cleaner, python_percent: 100.0,
+  req_sources: empty, web_url: 'https://git.exness.io/matvey.marinin/gitlab-registry-cleaner'}
+689: {created_at: '2018-01-16T08:48:52.266Z', last_activity_at: '2018-06-04T12:58:08.250Z',
+  name: at-partner-ui, path: qa/at-partner-ui, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/qa/at-partner-ui'}
+691: {created_at: '2018-01-16T14:57:52.839Z', last_activity_at: '2018-02-19T15:14:33.542Z',
+  name: scripts, path: alexey.bykov/scripts, python_percent: 94.38, req_sources: empty,
+  web_url: 'https://git.exness.io/alexey.bykov/scripts'}
+695: {created_at: '2018-01-18T09:02:25.429Z', last_activity_at: '2018-01-18T09:02:25.429Z',
+  name: mongo, path: dockerhub/mongo, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/dockerhub/mongo'}
+696: {created_at: '2018-01-19T12:33:47.601Z', last_activity_at: '2018-01-29T07:32:10.246Z',
+  name: quotes-dashboard, path: matvey.marinin/quotes-dashboard, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/matvey.marinin/quotes-dashboard'}
+697: {created_at: '2018-01-22T15:24:34.640Z', last_activity_at: '2018-02-21T15:31:05.607Z',
+  name: gitlab, path: test.env/gitlab, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/test.env/gitlab'}
+698: {created_at: '2018-01-23T13:56:35.465Z', last_activity_at: '2018-02-06T08:04:51.085Z',
+  name: android-quotes-app-widget, path: mobile/android-quotes-app-widget, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/mobile/android-quotes-app-widget'}
+701: {created_at: '2018-01-26T07:41:39.408Z', last_activity_at: '2018-01-26T07:41:39.408Z',
+  name: ba-2499, path: igor.matcko/ba-2499, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/igor.matcko/ba-2499'}
+706:
+  created_at: '2018-01-26T15:38:52.486Z'
+  last_activity_at: '2018-06-22T15:16:12.321Z'
+  name: partner-rebate
+  path: partner/partner-rebate
+  python_percent: 98.3
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/partner/partner-rebate
+707:
+  created_at: '2018-01-28T20:15:26.801Z'
+  last_activity_at: '2018-06-25T13:48:24.934Z'
+  name: agentcommission
+  path: evgeny.zuev/agentcommission
+  python_percent: 97.67
+  req_sources: [requirements.txt]
+  web_url: https://git.exness.io/evgeny.zuev/agentcommission
+709:
+  created_at: '2018-01-31T15:52:23.789Z'
+  last_activity_at: '2018-03-30T07:40:09.725Z'
+  name: move-clients
+  path: evgeny.zuev/move-clients
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/evgeny.zuev/move-clients
+710: {created_at: '2018-01-31T16:10:58.201Z', last_activity_at: '2018-03-20T08:31:04.616Z',
+  name: android-kyc-documents, path: mobile/android-kyc-documents, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/mobile/android-kyc-documents'}
+711: {created_at: '2018-02-02T15:54:50.032Z', last_activity_at: '2018-06-25T09:40:43.091Z',
+  name: iOS-personal-area, path: mobile/iOS-personal-area, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/mobile/iOS-personal-area'}
+712: {created_at: '2018-02-05T15:50:54.673Z', last_activity_at: '2018-02-05T15:50:54.673Z',
+  name: nativedocker, path: dmitry.kryukov/nativedocker, python_percent: 96.48, req_sources: empty,
+  web_url: 'https://git.exness.io/dmitry.kryukov/nativedocker'}
+716: {created_at: '2018-02-07T16:09:26.968Z', last_activity_at: '2018-06-11T08:43:05.633Z',
+  name: site-docker-compose, path: pavel.liashkov/site-docker-compose, python_percent: 90.23,
+  req_sources: empty, web_url: 'https://git.exness.io/pavel.liashkov/site-docker-compose'}
+717: {created_at: '2018-02-08T09:18:03.005Z', last_activity_at: '2018-04-13T06:15:02.187Z',
+  name: laravel-constants, path: php/laravel-constants, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/php/laravel-constants'}
+718:
+  created_at: '2018-02-08T12:53:10.084Z'
+  last_activity_at: '2018-02-09T09:35:11.387Z'
+  name: django-pgreconnect
+  path: alexey.panaetov/django-pgreconnect
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/alexey.panaetov/django-pgreconnect
+720: {created_at: '2018-02-12T08:28:28.704Z', last_activity_at: '2018-02-12T10:24:03.033Z',
+  name: gradle, path: dockerhub/gradle, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/dockerhub/gradle'}
+723:
+  created_at: '2018-02-14T14:15:58.084Z'
+  last_activity_at: '2018-06-20T13:05:05.126Z'
+  name: b2b-api
+  path: evgeny.zuev/b2b-api
+  python_percent: 97.53
+  req_sources: [requirements.txt]
+  web_url: https://git.exness.io/evgeny.zuev/b2b-api
+724: {created_at: '2018-02-14T15:24:24.998Z', last_activity_at: '2018-05-24T07:03:17.265Z',
+  name: mms-protobuf, path: common/mms-protobuf, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/common/mms-protobuf'}
+726: {created_at: '2018-02-15T12:27:26.709Z', last_activity_at: '2018-02-15T12:27:26.709Z',
+  name: firebase-functions-localization, path: maxim.popov/firebase-functions-localization,
+  python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/maxim.popov/firebase-functions-localization'}
+727:
+  created_at: '2018-02-15T14:07:40.222Z'
+  last_activity_at: '2018-02-23T09:42:20.311Z'
+  name: paprikash
+  path: BA/paprikash
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/BA/paprikash
+728:
+  created_at: '2018-02-20T08:25:24.828Z'
+  last_activity_at: '2018-06-25T11:50:13.616Z'
+  name: exness-aio-thrift
+  path: aiolibs/exness-aio-thrift
+  python_percent: 99.66
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/aiolibs/exness-aio-thrift
+730: {created_at: '2018-02-21T08:58:25.722Z', last_activity_at: '2018-02-21T08:58:25.722Z',
+  name: VKYC-files-encryption, path: evgeny.protopopov/VKYC-files-encryption, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/evgeny.protopopov/VKYC-files-encryption'}
+731:
+  created_at: '2018-02-21T15:45:39.817Z'
+  last_activity_at: '2018-03-20T10:48:27.568Z'
+  name: exness-logger
+  path: web-core/exness_logger
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/web-core/exness_logger
+732: {created_at: '2018-02-21T17:48:14.173Z', last_activity_at: '2018-02-21T17:48:14.173Z',
+  name: exnessaur, path: py-services/exnessaur, python_percent: 100.0, req_sources: empty,
+  web_url: 'https://git.exness.io/py-services/exnessaur'}
+733: {created_at: '2018-02-22T06:46:22.389Z', last_activity_at: '2018-02-22T06:46:22.389Z',
+  name: fake-smtp, path: pavel.liashkov/fake-smtp, python_percent: n/a, req_sources: empty,
+  web_url: 'https://git.exness.io/pavel.liashkov/fake-smtp'}
+734:
+  created_at: '2018-02-23T14:49:44.056Z'
+  last_activity_at: '2018-06-04T08:53:49.676Z'
+  name: detroit
+  path: BA/detroit
+  python_percent: 99.52
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/BA/detroit
+735: {created_at: '2018-02-26T06:49:37.995Z', last_activity_at: '2018-04-25T13:24:45.283Z',
+  name: terraform_B2B, path: evgeny.protopopov/terraform_B2B, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/evgeny.protopopov/terraform_B2B'}
+740: {created_at: '2018-03-01T14:41:25.492Z', last_activity_at: '2018-05-16T07:00:30.868Z',
+  name: php, path: dockerhub/php, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/dockerhub/php'}
+744: {created_at: '2018-03-02T10:45:11.102Z', last_activity_at: '2018-05-16T06:43:37.063Z',
+  name: invoice_processing, path: tatyana.skuridina/invoice_processing, python_percent: 100.0,
+  req_sources: empty, web_url: 'https://git.exness.io/tatyana.skuridina/invoice_processing'}
+749:
+  created_at: '2018-03-05T10:05:35.995Z'
+  last_activity_at: '2018-06-25T11:21:40.627Z'
+  name: payment-limits
+  path: py-services/payment-limits
+  python_percent: 86.18
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/py-services/payment-limits
+750:
+  created_at: '2018-03-07T12:00:17.737Z'
+  last_activity_at: '2018-03-07T12:00:17.737Z'
+  name: datatool
+  path: BA/datatool
+  python_percent: 100.0
+  req_sources: [requirements.txt]
+  web_url: https://git.exness.io/BA/datatool
+751:
+  created_at: '2018-03-07T12:16:18.814Z'
+  last_activity_at: '2018-06-25T15:07:07.141Z'
+  name: exness-payment
+  path: psp/exness-payment
+  python_percent: 99.89
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/psp/exness-payment
+752: {created_at: '2018-03-07T13:33:35.426Z', last_activity_at: '2018-03-07T13:33:35.426Z',
+  name: bitcoin-docker-compose, path: bitcoin/bitcoin-docker-compose, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/bitcoin/bitcoin-docker-compose'}
+753:
+  created_at: '2018-03-07T16:02:53.419Z'
+  last_activity_at: '2018-03-21T14:17:54.977Z'
+  name: auto_test_framework
+  path: py-services/auto_test_framework
+  python_percent: 92.98
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/py-services/auto_test_framework
+754: {created_at: '2018-03-08T11:43:16.948Z', last_activity_at: '2018-03-08T11:43:16.948Z',
+  name: thrift-stubs-generator, path: php/thrift-stubs-generator, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/php/thrift-stubs-generator'}
+759: {created_at: '2018-03-13T15:48:49.614Z', last_activity_at: '2018-03-26T15:19:06.413Z',
+  name: selenoid-ansible, path: evgeniy.moskalenko/selenoid-ansible, python_percent: 0,
+  req_sources: empty, web_url: 'https://git.exness.io/evgeniy.moskalenko/selenoid-ansible'}
+761:
+  created_at: '2018-03-14T12:06:07.146Z'
+  last_activity_at: '2018-03-15T11:29:25.207Z'
+  name: deploy_ranher
+  path: devops/deploy_ranher
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/devops/deploy_ranher
+765:
+  created_at: '2018-03-14T15:03:41.489Z'
+  last_activity_at: '2018-06-08T08:41:50.244Z'
+  name: exness-aiolibs
+  path: aiolibs/exness-aiolibs
+  python_percent: 98.78
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/aiolibs/exness-aiolibs
+769:
+  created_at: '2018-03-16T08:28:39.745Z'
+  last_activity_at: '2018-06-25T13:33:35.948Z'
+  name: payment-api
+  path: psp/payment-api
+  python_percent: 73.61
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/psp/payment-api
+770:
+  created_at: '2018-03-16T16:50:02.923Z'
+  last_activity_at: '2018-03-21T14:38:07.983Z'
+  name: payments-systems
+  path: pavel.fokin/payments-systems
+  python_percent: 51.7
+  req_sources: [requirements.txt]
+  web_url: https://git.exness.io/pavel.fokin/payments-systems
+772:
+  created_at: '2018-03-19T13:05:11.084Z'
+  last_activity_at: '2018-03-22T11:53:38.415Z'
+  name: test_tp_service
+  path: py-services/test_tp_service
+  python_percent: 84.49
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/py-services/test_tp_service
+777: {created_at: '2018-03-20T07:25:08.341Z', last_activity_at: '2018-06-22T10:25:19.111Z',
+  name: at-thrift-java, path: qa/at-thrift-java, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/qa/at-thrift-java'}
+779:
+  created_at: '2018-03-23T01:32:45.698Z'
+  last_activity_at: '2018-03-23T03:06:59.992Z'
+  name: secure-storage
+  path: david.djanyan/secure-storage
+  python_percent: 88.53
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/david.djanyan/secure-storage
+781: {created_at: '2018-03-26T07:54:04.632Z', last_activity_at: '2018-04-04T14:08:03.799Z',
+  name: digital-feed, path: partner/digital-feed, python_percent: 100.0, req_sources: empty,
+  web_url: 'https://git.exness.io/partner/digital-feed'}
+784:
+  created_at: '2018-03-30T03:14:39.968Z'
+  last_activity_at: '2018-04-04T08:22:19.941Z'
+  name: chinese-ocr
+  path: ilia.sayakhov/chinese-ocr
+  python_percent: 97.87
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/ilia.sayakhov/chinese-ocr
+789:
+  created_at: '2018-04-04T14:19:11.713Z'
+  last_activity_at: '2018-05-23T15:37:05.283Z'
+  name: payment-mock
+  path: psp/payment-mock
+  python_percent: 77.39
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/psp/payment-mock
+791:
+  created_at: '2018-04-06T14:45:55.131Z'
+  last_activity_at: '2018-04-18T08:16:23.558Z'
+  name: cesi_logs_viewer
+  path: alexey.shevchenko/cesi_logs_viewer
+  python_percent: 100.0
+  req_sources: [requirements.txt]
+  web_url: https://git.exness.io/alexey.shevchenko/cesi_logs_viewer
+793:
+  created_at: '2018-04-12T08:38:21.493Z'
+  last_activity_at: '2018-06-18T12:20:15.827Z'
+  name: docs_uploading
+  path: py-services/docs_uploading
+  python_percent: 97.14
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/py-services/docs_uploading
+794: {created_at: '2018-04-13T07:07:15.200Z', last_activity_at: '2018-05-07T18:22:34.423Z',
+  name: rancher-cli, path: dockerhub/rancher-cli, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/dockerhub/rancher-cli'}
+796: {created_at: '2018-04-16T09:07:37.460Z', last_activity_at: '2018-04-16T09:07:37.460Z',
+  name: nginx, path: ilya.samartsev/nginx, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/ilya.samartsev/nginx'}
+798: {created_at: '2018-04-17T14:01:50.531Z', last_activity_at: '2018-04-17T14:01:50.531Z',
+  name: mickey-mouse, path: dmitry.guselnikov/mickey-mouse, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/dmitry.guselnikov/mickey-mouse'}
+817: {created_at: '2018-04-27T14:34:34.082Z', last_activity_at: '2018-04-27T14:34:34.082Z',
+  name: docs, path: maxim.stanovov/docs, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/maxim.stanovov/docs'}
+818: {created_at: '2018-04-30T08:48:37.607Z', last_activity_at: '2018-04-30T08:48:37.607Z',
+  name: maven, path: dockerhub/maven, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/dockerhub/maven'}
+819: {created_at: '2018-04-30T10:41:14.902Z', last_activity_at: '2018-06-21T10:24:50.853Z',
+  name: forex-build, path: semyon.chaunin/forex-build, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/semyon.chaunin/forex-build'}
+820:
+  created_at: '2018-04-30T12:13:22.555Z'
+  last_activity_at: '2018-04-30T12:13:22.555Z'
+  name: thrift-check
+  path: pavel.liashkov/thrift-check
+  python_percent: 97.11
+  req_sources: [reqs.txt]
+  web_url: https://git.exness.io/pavel.liashkov/thrift-check
+827:
+  created_at: '2018-05-08T14:52:45.871Z'
+  last_activity_at: '2018-05-16T10:39:19.700Z'
+  name: exness-pytest
+  path: generic/exness-pytest
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/generic/exness-pytest
+828:
+  created_at: '2018-05-10T12:03:52.830Z'
+  last_activity_at: '2018-06-22T16:10:40.992Z'
+  name: kafka_pixel
+  path: aiolibs/kafka_pixel
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/aiolibs/kafka_pixel
+829:
+  created_at: '2018-05-10T16:43:46.206Z'
+  last_activity_at: '2018-05-15T13:20:07.288Z'
+  name: payment-fake
+  path: psp/payment-fake
+  python_percent: 57.95
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/psp/payment-fake
+831:
+  created_at: '2018-05-11T06:46:47.134Z'
+  last_activity_at: '2018-05-11T06:46:47.134Z'
+  name: exness-aiothrift
+  path: dmitry.kryukov/exness-aiothrift
+  python_percent: 99.82
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/dmitry.kryukov/exness-aiothrift
+839:
+  created_at: '2018-05-22T05:01:07.254Z'
+  last_activity_at: '2018-05-22T12:27:37.230Z'
+  name: ba-3023
+  path: igor.matcko/ba-3023
+  python_percent: 100.0
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/igor.matcko/ba-3023
+841: {created_at: '2018-05-24T13:05:08.706Z', last_activity_at: '2018-05-25T12:33:44.634Z',
+  name: exnessinfo, path: fedor.buturlin/exnessinfo, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/fedor.buturlin/exnessinfo'}
+842: {created_at: '2018-05-25T13:34:31.489Z', last_activity_at: '2018-06-01T08:29:46.221Z',
+  name: ac-pay, path: b2b-services/ac-pay, python_percent: 95.14, req_sources: empty,
+  web_url: 'https://git.exness.io/b2b-services/ac-pay'}
+850: {created_at: '2018-06-01T14:10:09.277Z', last_activity_at: '2018-06-25T17:29:34.896Z',
+  name: toolbox, path: evgeny.zuev/toolbox, python_percent: 100.0, req_sources: empty,
+  web_url: 'https://git.exness.io/evgeny.zuev/toolbox'}
+853: {created_at: '2018-06-04T11:36:02.091Z', last_activity_at: '2018-06-04T15:11:50.411Z',
+  name: swagger-api, path: qa/swagger-api, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/qa/swagger-api'}
+857:
+  created_at: '2018-06-06T13:14:32.752Z'
+  last_activity_at: '2018-06-25T11:53:37.218Z'
+  name: exchange-rates
+  path: psp/exchange-rates
+  python_percent: 48.67
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/psp/exchange-rates
+860: {created_at: '2018-06-08T05:41:57.308Z', last_activity_at: '2018-06-22T14:50:32.728Z',
+  name: at-partner, path: qa/at-partner, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/qa/at-partner'}
+871: {created_at: '2018-06-13T15:01:34.471Z', last_activity_at: '2018-06-13T15:01:34.471Z',
+  name: at-b2b, path: qa/at-b2b, python_percent: 0, req_sources: empty, web_url: 'https://git.exness.io/qa/at-b2b'}
+876:
+  created_at: '2018-06-18T07:34:43.187Z'
+  last_activity_at: '2018-06-18T07:34:43.187Z'
+  name: exness_error_rest
+  path: python-committee/exness_error_rest
+  python_percent: 90.91
+  req_sources: [setup.py]
+  web_url: https://git.exness.io/python-committee/exness_error_rest
+879: {created_at: '2018-06-20T10:30:53.013Z', last_activity_at: '2018-06-20T14:11:51.934Z',
+  name: Exness.Date, path: tp/nugets/Exness.Date, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/tp/nugets/Exness.Date'}
+881: {skip: true}
+882: {skip: true}
+883: {created_at: '2018-06-20T14:36:35.203Z', last_activity_at: '2018-06-21T10:11:24.493Z',
+  name: Exness.Sqlpp.Sqlite, path: tp/nugets/Exness.Sqlpp.Sqlite, python_percent: n/a,
+  req_sources: empty, web_url: 'https://git.exness.io/tp/nugets/Exness.Sqlpp.Sqlite'}
+884: {created_at: '2018-06-20T14:42:27.029Z', last_activity_at: '2018-06-21T14:42:40.814Z',
+  name: Exness.Sqlite, path: tp/nugets/Exness.Sqlite, python_percent: 0, req_sources: empty,
+  web_url: 'https://git.exness.io/tp/nugets/Exness.Sqlite'}
+885: {created_at: '2018-06-24T21:28:50.195Z', last_activity_at: '2018-06-25T19:38:07.549Z',
+  name: deparse, path: david.djanyan/deparse, python_percent: 100.0, req_sources: empty,
+  web_url: 'https://git.exness.io/david.djanyan/deparse'}
+886: {created_at: '2018-06-25T07:39:21.586Z', last_activity_at: '2018-06-25T07:39:21.586Z',
+  name: gtest, path: tp/nugets/gtest, python_percent: 11.42, req_sources: empty, web_url: 'https://git.exness.io/tp/nugets/gtest'}

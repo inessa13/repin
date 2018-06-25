@@ -16,24 +16,18 @@ GL_PER_PAGE = 10
 MIN_PYTHON_PERCENT = 10
 
 
-def error(message, *args, **kwargs):
+def error(message):
     CLR_FAIL = '\033[91m'
-    if args or kwargs:
-        message = message.format(*args, **kwargs)
     logger.error(CLR_FAIL + message + CLR_END)
 
 
-def warn(message, *args, **kwargs):
+def warn(message):
     CLR_WARNING = '\033[93m'
-    if args or kwargs:
-        message = message.format(*args, **kwargs)
     logger.warn(CLR_WARNING + message + CLR_END)
 
 
-def success(message, *args, **kwargs):
+def success(message):
     CLR_OKGREEN = '\033[92m'
-    if args or kwargs:
-        message = message.format(*args, **kwargs)
     logger.warn(CLR_OKGREEN + message + CLR_END)
 
 
@@ -60,7 +54,13 @@ def load_python_module(project, path):
             return None
 
     locals_ = {}
-    exec(base64.b64decode(version_file.content).decode(), globals(), locals_)
+    try:
+        exec(base64.b64decode(version_file.content).decode(), globals(), locals_)
+    except KeyboardInterrupt:
+        raise
+    except:
+        return 'n/a'
+
     return type('PythonModule', (), locals_)
 
 
@@ -91,13 +91,23 @@ def parse_setup(project, cached):
         m = re.match(r'import\s+([._\w]+)(:?\s+as\s+([.\w]+))?', line)
         if m:
             version_path = m.group(1).replace('.', '/')
-            version = load_python_module(project, version_path)
+            try:
+                version = load_python_module(project, version_path)
+            except KeyboardInterrupt:
+                raise
+            except:
+                logging.exception('setup.py parse failed')
+                cached['package_data'] = 'n/a'
+                return cached
+
             if version:
                 if m.group(3):
                     setup_locals[m.group(3)] = version
                 elif '.' not in m.group(1):
                     setup_locals[m.group(1)] = version
                 else:
+                    error('fixme: import nested lib')
+                    continue
                     path = m.group(1).split('.')
                     part = path.pop()
                     dx = setup_locals[part] = mock.Mock()
@@ -112,6 +122,8 @@ def parse_setup(project, cached):
 
     try:
         exec('\n'.join(eval_content), globals(), setup_locals)
+    except KeyboardInterrupt:
+        raise
     except:
         logging.exception('setup.py parse failed')
         cached['package_data'] = 'n/a'
@@ -137,6 +149,8 @@ def parse_requirements(project, cached, name):
 def _load_python_percent(project):
     try:
         python_percent = project.languages().get('Python', 0)
+    except KeyboardInterrupt:
+        raise
     except:
         logging.exception('python_percent failed')
         python_percent = 'n/a'
@@ -144,7 +158,7 @@ def _load_python_percent(project):
     return python_percent
 
 
-def add_cache(project, project_cache=None, force=False, save=True):
+def add_cache(project, project_cache=None, force=False, save=True, fast=False):
     project_cache = project_cache or get_project_data() or {}
 
     cached = project_cache.setdefault(project.id, {})
@@ -152,7 +166,7 @@ def add_cache(project, project_cache=None, force=False, save=True):
     if not force and cached.get('skip'):
         return cached
 
-    if not cached.get('python_percent') or cached['python_percent'] == 'n/a':
+    if not fast and (not cached.get('python_percent') or cached['python_percent'] == 'n/a'):
         python_percent = _load_python_percent(project)
         if not force and isinstance(python_percent, float) and python_percent < MIN_PYTHON_PERCENT:
             cached['skip'] = True
@@ -160,7 +174,7 @@ def add_cache(project, project_cache=None, force=False, save=True):
 
         cached['python_percent'] = python_percent
 
-    if cached.get('req_sources') is None:
+    if not fast and cached.get('req_sources') is None:
         req_sources = []
         for file in ('setup.py', 'requirements.txt', 'reqs.txt'):
             try:
@@ -210,20 +224,20 @@ def fix_cache(gl, project_cache, pid, cached):
         is_broken = _is_broken(cached)
         name = cached.get('name') or pid
         if not is_broken:
-            success('{}: package fixed', name)
+            success('{}: package fixed'.format(name))
             save_project_data(project_cache)
 
     if not is_broken and missing_package_data:
         _collect_requirements(project, cached)
         missing_package_data = _unknown(cached.get('package_data'))
         if not missing_package_data:
-            success('{}: package data collected', name)
+            success('{}: package data collected'.format(name))
             save_project_data(project_cache)
 
     if is_broken:
-        error('{}: is broken yet', name)
+        error('{}: is broken yet'.format(name))
     if missing_package_data:
-        error('{}: missing package_data yet', name)
+        error('{}: missing package_data yet'.format(name))
 
     return not is_broken and not missing_package_data
 
@@ -259,44 +273,38 @@ def cmd_collect(namespace):
     if namespace.project == 'all':
         page = 1
         projects = gl.projects.list(page=page, per_page=GL_PER_PAGE)
+        interrupted = False
         while projects:
-            for project in projects:
-                print(project.name)
-                add_cache(project, project_cache, force=False, save=True)
+            for index, project in enumerate(projects):
+                warn('{}: collecting... ({})'.format(
+                    project.name, index + 1 + (page - 1) * GL_PER_PAGE))
+                try:
+                    add_cache(project, project_cache, force=False, save=True, fast=namespace.fast)
+                except KeyboardInterrupt:
+                    warn('Interrupted')
+                    interrupted = True
+                    break
+                # TODO: save on finally
+            if interrupted:
+                break
 
             page += 1
             projects = gl.projects.list(page=page, per_page=GL_PER_PAGE)
-
-    elif namespace.project == 'broken':
-        fixed, skipped = 0, 0
-        for pid, cached in project_cache.items():
-            if cached.get('skip'):
-                skipped += 1
-            fixed += fix_cache(project_cache, pid, cached)
-
-        warn(
-            'fixed: {}, python: {}, total: {}',
-            fixed, len(project_cache) - skipped, len(project_cache)
-        )
 
     else:
         projects = gl.projects.list(search=namespace.project)
         if len(projects) == 1:
             project = projects[0]
-            print(project.name)
+            warn('{}: collecting...'.format(project.name))
             cached = add_cache(project, project_cache, force=True, save=True)
             if _collect_requirements(project, cached):
                 save_project_data(project_cache)
             pprint.pprint(cached)
         else:
-            for project in projects:
-                print(project.name)
+            for index, project in enumerate(projects):
+                warn('{}: collecting... ({})'.format(project.name, index + 1))
                 add_cache(project, project_cache, force=False, save=True)
 
-    # for cached in project_cache.values():
-    #     if cached.get('skip'):
-    #         continue
-    #     print("{name}\t\t{python_percent}%\t{last_activity_at}\t{reqs}".format(**cached))
     success('total {}'.format(len(project_cache)))
 
 
@@ -309,24 +317,82 @@ def cmd_repair(namespace):
         for pid, cached in project_cache.items():
             if cached.get('skip'):
                 skipped += 1
-            fixed += fix_cache(gl, project_cache, pid, cached)
+            try:
+                fixed += bool(fix_cache(gl, project_cache, pid, cached))
+            except KeyboardInterrupt:
+                warn('Interrupted')
+                break
 
-        warn(
-            'fixed: {}, python: {}, total: {}',
+        warn('fixed: {}, python: {}, total: {}'.format(
             fixed, len(project_cache) - skipped, len(project_cache)
-        )
+        ))
 
     else:
         cached_search = {
             pid: cached for pid, cached in project_cache.items()
             if cached.get('name') and namespace.project in cached['name']
         }
+        if namespace.exact:
+            cached_search = {
+                pid: cached for pid, cached in cached_search.items()
+                if cached['name'] == namespace.project
+            }
         if len(cached_search) == 1:
-            pid, cached = cached_search.items()
+            (pid, cached), = cached_search.items()
             if fix_cache(gl, project_cache, pid, cached):
                 pprint.pprint(cached)
+        elif namespace.all:
+            for pid, cached in cached_search.items():
+                if fix_cache(gl, project_cache, pid, cached):
+                    print('{}: repaired'.format(cached.get('name') or pid))
+                else:
+                    print('{}: repaire failed'.format(cached.get('name') or pid))
         else:
             warn('Found: {}'.format(', '.join(cached['name'] for cached in cached_search.values())))
+
+
+def cmd_list(namespace):
+    gl = gitlab.Gitlab.from_config('exness', ['./.python-gitlab.cfg'])
+    project_cache = get_project_data() or {}
+
+    if namespace.mode == 'skipped':
+        find = 0
+        try:
+            for index, (pid, cached) in enumerate(project_cache.items()):
+                if cached.get('skip'):
+                    print(cached.get('name') or pid)
+                    find += 1
+        finally:
+            success('find: {}, total: {}'.format(find, len(project_cache)))
+
+    elif namespace.mode == 'unknown':
+        find = 0
+        try:
+            for index, (pid, cached) in enumerate(project_cache.items()):
+                if cached.get('skip'):
+                    continue
+                if _unknown(cached.get('python_percent')):
+                    print(cached.get('name') or pid)
+                    find += 1
+        finally:
+            success('find: {}, total: {}'.format(find, len(project_cache)))
+
+    elif namespace.mode == 'fine':
+        find = 0
+        try:
+            for index, (pid, cached) in enumerate(project_cache.items()):
+                if cached.get('skip'):
+                    continue
+                if _is_broken(cached) or _unknown(cached.get('package_data')):
+                    continue
+                if cached['package_data'].get('install_requires'):
+                    print(cached.get('name') or pid)
+                    find += 1
+        finally:
+            success('find: {}, total: {}'.format(find, len(project_cache)))
+
+    else:
+        return error('Unknown mode')
 
 
 def cmd_show(namespace):
@@ -380,16 +446,21 @@ def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help='sub-command help')
     parser_collect = subparsers.add_parser('collect', help="...")
-    parser_collect.add_argument('-r', '--refresh-cache', action='store_true', help='...')
     parser_collect.set_defaults(func=cmd_collect)
+    parser_collect.add_argument('-r', '--refresh-cache', action='store_true', help='...')
+    parser_collect.add_argument('-f', '--fast', action='store_true', help='...')
     parser_collect.add_argument('project', help='...')
     parser_show = subparsers.add_parser('show', help="...")
-    parser_show.add_argument('project', help='...')
     parser_show.set_defaults(func=cmd_show)
+    parser_show.add_argument('project', help='...')
     parser_repair = subparsers.add_parser('repair', help="...")
+    parser_repair.set_defaults(func=cmd_repair)
     parser_repair.add_argument('project', help='...')
     parser_repair.add_argument('-e', '--exact', action='store_true', help='...')
-    parser_repair.set_defaults(func=cmd_repair)
+    parser_repair.add_argument('-a', '--all', action='store_true', help='...')
+    parser_list = subparsers.add_parser('list', help="...")
+    parser_list.set_defaults(func=cmd_list)
+    parser_list.add_argument('mode', help='...')
 
     namespace = parser.parse_args()
 
@@ -397,7 +468,7 @@ def main():
         try:
             return namespace.func(namespace)
         except KeyboardInterrupt:
-            return success('KeyboardInterrupt')
+            return error('Interrupted')
         except Exception as e:
             logging.exception('!!!')
             return error(e.args[0])
