@@ -8,6 +8,7 @@ import re
 import yaml
 import Levenshtein
 import mock
+import toml
 
 
 CLR_END = '\033[0m'
@@ -145,6 +146,47 @@ def parse_requirements(project, cached, name):
     return cached
 
 
+def parse_pipfile_req(package, data):
+    if data == '*':
+        return package
+
+    elif isinstance(data, str):
+        # TODO:
+        if ',' in data:
+            data = data.split(',', 1)[0]
+
+        m = re.match("(>|<|>=|==|<=|~=)([\w\d.]+)$", data)
+        if m:
+            return package + data
+
+    elif isinstance(data, dict) and data.get('version'):
+        return package + data
+
+    else:
+        # TODO:
+        return package
+
+
+
+def parse_pipfile(project, cached):
+    file_info = project.files.get(file_path='Pipfile', ref='master')
+    raw = base64.b64decode(file_info.content).decode()
+
+    pipfile = toml.loads(raw)
+    if pipfile:
+        cached.setdefault('package_data', {})
+
+    if pipfile.get('packages'):
+        install_requires = [
+            parse_pipfile_req(package, value)
+            for package, value in pipfile['packages'].items()
+        ]
+        if install_requires:
+            cached['package_data']['install_requires'] = install_requires
+
+    return cached
+
+
 def _load_python_percent(project):
     try:
         python_percent = project.languages().get('Python', 0)
@@ -155,6 +197,21 @@ def _load_python_percent(project):
         python_percent = 'n/a'
 
     return python_percent
+
+
+def _load_req_sources(project, cached):
+    req_sources = []
+    for file in ('setup.py', 'requirements.txt', 'reqs.txt', 'Pipfile'):
+        try:
+            project.files.get(file_path=file, ref='master')
+            req_sources.append(file)
+        except gitlab.exceptions.GitlabGetError:
+            pass
+        except gitlab.exceptions.GitlabError:
+            req_sources = 'n/a'
+            break
+
+    cached['req_sources'] = req_sources or 'empty'
 
 
 def add_cache(project, project_cache=None, force=False, save=True, fast=False):
@@ -173,19 +230,8 @@ def add_cache(project, project_cache=None, force=False, save=True, fast=False):
 
         cached['python_percent'] = python_percent
 
-    if not fast and cached.get('req_sources') is None:
-        req_sources = []
-        for file in ('setup.py', 'requirements.txt', 'reqs.txt'):
-            try:
-                project.files.get(file_path=file, ref='master')
-                req_sources.append(file)
-            except gitlab.exceptions.GitlabGetError:
-                pass
-            except gitlab.exceptions.GitlabError:
-                req_sources = 'n/a'
-                break
-
-        cached['req_sources'] = req_sources or 'empty'
+    if not fast and _unknown(cached.get('req_sources')):
+        _load_req_sources(project, cached)
 
     cached.update({
         'name': project.name,
@@ -207,7 +253,7 @@ def fix_skip(cached):
     return cached
 
 
-def fix_cache(gl, project_cache, pid, cached):
+def fix_cache(gl, project_cache, pid, cached, force=False):
     if cached.get('skip'):
         return False
 
@@ -236,7 +282,7 @@ def fix_cache(gl, project_cache, pid, cached):
         return False
 
     if is_broken:
-        add_cache(project, project_cache)
+        add_cache(project, project_cache, force=force)
         is_broken = _is_broken(cached)
         name = cached.get('name') or pid
         if not is_broken:
@@ -247,7 +293,7 @@ def fix_cache(gl, project_cache, pid, cached):
                 return True
 
     if not is_broken and missing_package_data:
-        _collect_requirements(project, cached)
+        _collect_requirements(project, cached, force=force)
         missing_package_data = _unknown(cached.get('package_data'))
         if not missing_package_data:
             success('{}: package data collected'.format(name))
@@ -261,13 +307,18 @@ def fix_cache(gl, project_cache, pid, cached):
     return not is_broken and not missing_package_data
 
 
-def _collect_requirements(project, cached):
+def _collect_requirements(project, cached, force=False):
+    if force or _unknown(cached.get('req_sources')):
+        _load_req_sources(project, cached)
+
     if 'setup.py' in cached['req_sources']:
         cached = parse_setup(project, cached)
     elif 'reqs.txt' in cached['req_sources']:
         cached = parse_requirements(project, cached, 'reqs.txt')
     elif 'requirements.txt' in cached['req_sources']:
         cached = parse_requirements(project, cached, 'requirements.txt')
+    elif 'Pipfile' in cached['req_sources']:
+        cached = parse_pipfile(project, cached)
     else:
         return None
     return cached
@@ -278,18 +329,27 @@ def _unknown(value):
 
 
 def _is_broken(cached):
-    return (
-        _unknown(cached.get('python_percent')) or
-        (not cached.get('skip') and _unknown(cached.get('req_sources')))
-    )
+    return _unknown(cached.get('python_percent')) or (not cached.get('skip') and _unknown(cached.get('req_sources')))
 
 
 def _is_fine(cached):
-    return not cached.get('skip') and not _is_broken(cached) and not _unknown(cached.get('package_data')) and cached['package_data'].get('install_requires')
+    return _is_package(cached) and cached['package_data'].get('install_requires')
+
+
+def _is_skipped(cached):
+    return cached.get('skip')
 
 
 def _is_python(cached):
-    return not cached.get('skip') and not _unknown(cached.get('python_percent')) and cached['python_percent'] > MIN_PYTHON_PERCENT
+    return not _is_skipped(cached) and not _unknown(cached.get('python_percent')) and cached['python_percent'] > MIN_PYTHON_PERCENT
+
+
+def _is_package(cached):
+    return _is_python(cached) and not _unknown(cached.get('package_data'))
+
+
+def _is_req_unknown(cached):
+    return _is_python(cached) and cached.get('req_sources') == 'empty'
 
 
 def cmd_collect(namespace):
@@ -327,7 +387,7 @@ def cmd_collect(namespace):
             project = projects[0]
             warn('{}: collecting...'.format(project.name))
             cached = add_cache(project, project_cache, force=namespace.force, save=True)
-            if _collect_requirements(project, cached):
+            if _collect_requirements(project, cached, force=namespace.force):
                 save_project_data(project_cache)
             pprint.pprint(cached)
         else:
@@ -347,12 +407,12 @@ def cmd_repair(namespace):
         return error('Nothing found')
 
     if not namespace.all and len(cached_search) > 1:
-        warn('Found: {}'.format(', '.join(cached['path'] for cached in cached_search.values())))
+        return warn('Found: {}'.format(', '.join(cached['path'] for cached in cached_search.values())))
 
     fixed = 0
     for pid, cached in cached_search.items():
         try:
-            if fix_cache(gl, project_cache, pid, cached):
+            if fix_cache(gl, project_cache, pid, cached, force=namespace.force):
                 fixed += 1
                 success('{}: repaired'.format(cached.get('name') or pid))
         except KeyboardInterrupt:
@@ -380,9 +440,11 @@ def filter_gen(query, path, exact):
         elif query == ':fine':
             return _is_fine(cached)
         elif query == ':python':
-            return not cached.get('skip') and _is_python(cached)
+            return _is_python(cached)
+        elif query == ':package':
+            return _is_package(cached)
         elif query == ':req_unknown':
-            return not cached.get('skip') and _is_python(cached) and cached.get('req_sources') == 'empty'
+            return _is_req_unknown(cached)
         if not cached.get(key):
             return False
         if exact:
@@ -420,10 +482,18 @@ def cmd_show(namespace):
         pprint.pprint(cached)
         return success('{}: is not a python package')
 
-    if not _is_fine(cached):
-        pprint.pprint(cached)
-        return error('Missing package data for project. Call `collect` on this project or for all projects.')
-
+    if _is_python(cached):
+        success(':python')
+    if _is_package(cached):
+        success(':package')
+    if _is_broken(cached):
+        warn(':broken')
+    if _is_req_unknown(cached):
+        warn(':req_unknown')
+    if _is_fine(cached):
+        success(':fine')
+    else:
+        error('Missing package data for project. Call `collect` on this project or for all projects.')
     pprint.pprint(cached)
 
 
@@ -431,7 +501,11 @@ def cmd_reverse(namespace):
     cached_search, project_cache = filter_cache(namespace.query, False, True)
 
     if not cached_search:
-        return error('Nothing found')
+        if namespace.force:
+            cached_search = {None: {'name': namespace.query, 'python_percent': 100, 'req_sources': 'empty'}}
+        else:
+            return error('Nothing found')
+
     if len(cached_search) > 1:
         warn('Found: {}'.format(', '.join(cached.get('path') or cached.get('name') or pid for pid, cached in cached_search.items())))
 
@@ -439,10 +513,15 @@ def cmd_reverse(namespace):
 
     if cached.get('skip'):
         return success('{}: is not a python package')
-    # if not _is_fine(cached):
-    #     return error('Missing package data for project. Call `collect` on this project or for all projects.')
 
-    package_name = cached['package_data'].get('name') if _is_fine(cached) else cached['name']
+    if _is_fine(cached):
+        self_name = cached['package_data'].get('name') or cached['name']
+    else:
+        error('Missing package data for project. Call `collect` on this project or for all projects.')
+        if namespace.force:
+            self_name = cached.get('package_data', {}).get('name') or cached['name']
+        else:
+            return
 
     dep_for = []
     dep_for_mb = {}
@@ -458,11 +537,12 @@ def cmd_reverse(namespace):
             project_name = project['path']
 
         for req in project['package_data']['install_requires']:
-            self_name, dep_mode, version = _split_requirement_package_version(req)
-            if self_name == cached['package_data']['name']:
+            reverse_name, dep_mode, version = _split_requirement_package_version(req)
+            if reverse_name == self_name:
                 dep_for.append((project_name, dep_mode, version))
-            elif Levenshtein.distance(self_name, cached['package_data']['name']) <= 2:
-                dep_for_mb.setdefault(self_name, []).append((project_name, dep_mode, version))
+            elif Levenshtein.distance(reverse_name, self_name) <= 2:
+                dep_for_mb.setdefault(reverse_name, []).append(
+                    (project_name, dep_mode, version))
 
     if dep_for:
         success('Found reversed dependencies:')
@@ -510,11 +590,13 @@ def main():
     parser_reverse = subparsers.add_parser('reverse', help="...")
     parser_reverse.set_defaults(func=cmd_reverse)
     parser_reverse.add_argument('query', help='...')
+    parser_reverse.add_argument('-F', '--force', action='store_true', help='...')
     parser_repair = subparsers.add_parser('repair', help="...")
     parser_repair.set_defaults(func=cmd_repair)
     parser_repair.add_argument('query', help='...')
     parser_repair.add_argument('-e', '--exact', action='store_true', help='...')
     parser_repair.add_argument('-a', '--all', action='store_true', help='...')
+    parser_repair.add_argument('-F', '--force', action='store_true', help='...')
     parser_list = subparsers.add_parser('list', help="...")
     parser_list.set_defaults(func=cmd_list)
     parser_list.add_argument('query', help='...')

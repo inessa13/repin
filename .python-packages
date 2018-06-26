@@ -3338,15 +3338,6 @@
   python_percent: 100.0
   req_sources: [requirements.txt]
   web_url: https://git.exness.io/pavel.liashkov/scripts
-648: {created_at: '2017-12-08T09:06:26.564Z', last_activity_at: '2018-01-05T10:23:18.818Z',
-  name: withdraw, path: david.djanyan/withdraw, python_percent: 99.49, req_sources: empty,
-  web_url: 'https://git.exness.io/david.djanyan/withdraw'}
-649: {created_at: '2017-12-11T12:42:28.275Z', last_activity_at: '2018-01-05T10:23:16.474Z',
-  name: deposit, path: david.djanyan/deposit, python_percent: 98.35, req_sources: empty,
-  web_url: 'https://git.exness.io/david.djanyan/deposit'}
-650: {created_at: '2017-12-11T12:53:20.293Z', last_activity_at: '2018-01-05T14:04:03.265Z',
-  name: billing, path: david.djanyan/billing, python_percent: 44.79, req_sources: empty,
-  web_url: 'https://git.exness.io/david.djanyan/billing'}
 651:
   created_at: '2017-12-13T08:03:35.285Z'
   last_activity_at: '2018-06-25T10:39:05.954Z'
@@ -3919,9 +3910,16 @@
   python_percent: 88.53
   req_sources: [setup.py]
   web_url: https://git.exness.io/david.djanyan/secure-storage
-781: {created_at: '2018-03-26T07:54:04.632Z', last_activity_at: '2018-04-04T14:08:03.799Z',
-  name: digital-feed, path: partner/digital-feed, python_percent: 100.0, req_sources: empty,
-  web_url: 'https://git.exness.io/partner/digital-feed'}
+781:
+  created_at: '2018-03-26T07:54:04.632Z'
+  last_activity_at: '2018-04-04T14:08:03.799Z'
+  name: digital-feed
+  package_data:
+    install_requires: [requests, click, psycopg2-binary, apscheduler, enum]
+  path: partner/digital-feed
+  python_percent: 100.0
+  req_sources: [Pipfile]
+  web_url: https://git.exness.io/partner/digital-feed
 784:
   created_at: '2018-03-30T03:14:39.968Z'
   last_activity_at: '2018-04-04T08:22:19.941Z'
@@ -4187,12 +4185,27 @@
 841: {created_at: '2018-05-24T13:05:08.706Z', last_activity_at: '2018-05-25T12:33:44.634Z',
   name: exnessinfo, path: fedor.buturlin/exnessinfo, python_percent: 0, req_sources: empty,
   skip: true, web_url: 'https://git.exness.io/fedor.buturlin/exnessinfo'}
-842: {created_at: '2018-05-25T13:34:31.489Z', last_activity_at: '2018-06-01T08:29:46.221Z',
-  name: ac-pay, path: b2b-services/ac-pay, python_percent: 95.14, req_sources: empty,
-  web_url: 'https://git.exness.io/b2b-services/ac-pay'}
-850: {created_at: '2018-06-01T14:10:09.277Z', last_activity_at: '2018-06-25T17:29:34.896Z',
-  name: toolbox, path: evgeny.zuev/toolbox, python_percent: 100.0, req_sources: empty,
-  web_url: 'https://git.exness.io/evgeny.zuev/toolbox'}
+842:
+  created_at: '2018-05-25T13:34:31.489Z'
+  last_activity_at: '2018-06-01T08:29:46.221Z'
+  name: ac-pay
+  package_data:
+    install_requires: [psycopg2-binary, thrift, apistar, sqlalchemy, pycrypto, raven,
+      tox, flake8, graypy, apscheduler]
+  path: b2b-services/ac-pay
+  python_percent: 95.14
+  req_sources: [Pipfile]
+  web_url: https://git.exness.io/b2b-services/ac-pay
+850:
+  created_at: '2018-06-01T14:10:09.277Z'
+  last_activity_at: '2018-06-25T17:29:34.896Z'
+  name: toolbox
+  package_data:
+    install_requires: [apistar, sqlalchemy, psycopg2-binary]
+  path: evgeny.zuev/toolbox
+  python_percent: 100.0
+  req_sources: [Pipfile]
+  web_url: https://git.exness.io/evgeny.zuev/toolbox
 853: {created_at: '2018-06-04T11:36:02.091Z', last_activity_at: '2018-06-04T15:11:50.411Z',
   name: swagger-api, path: qa/swagger-api, python_percent: 0, req_sources: empty,
   skip: true, web_url: 'https://git.exness.io/qa/swagger-api'}
