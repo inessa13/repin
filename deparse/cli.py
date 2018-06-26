@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 import argparse
 import base64
-import gitlab
 import logging
 import pprint
 import re
-import yaml
+
+import gitlab
 import Levenshtein
 import mock
 import toml
-
+import yaml
 
 CLR_END = '\033[0m'
 GL_PER_PAGE = 10
