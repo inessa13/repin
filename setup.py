@@ -41,8 +41,8 @@ setup(
     },
     packages=find_packages('.', exclude=('tests',)),
     scripts=['deparse/cli.py'],
-    include_package_data=True,
-    package_data={'deparse': '.python-package'},
+    include_package_data=False,
     zip_safe=False,
     test_suite='tests',
+    python_requires='>=3.0',
 )

@@ -15,6 +15,23 @@ import yaml
 CLR_END = '\033[0m'
 GL_PER_PAGE = 10
 MIN_PYTHON_PERCENT = 10
+CONFIG_DIR = '.deparse'
+CACHE_FILE_NAME = '.deparse-cache'
+CONFIG_FILE_NAME = '.python-gitlab.cfg'
+CONFIG_TEMPLATE = """[global]
+default = default
+ssl_verify = true
+timeout = 10
+
+[default]
+api_version = 4
+url = {url}
+private_token = {token}
+"""
+
+
+class AppError(Exception):
+    pass
 
 
 def error(message):
@@ -32,17 +49,57 @@ def success(message):
     print(CLR_OKGREEN + message + CLR_END)
 
 
+def cmd_init(namespace):
+    for_user = input('init for a user or local path (y - for user)?  [y]/n ')
+    path = '.' if for_user == 'n' else os.path.expanduser('~')
+
+    base_path = os.path.abspath(os.path.join(path, CONFIG_DIR))
+    if not os.path.isdir(base_path):
+        os.makedirs(base_path)
+
+    config_file = os.path.join(base_path, CONFIG_FILE_NAME)
+    if os.path.isfile(config_file):
+        return warn('Already inited')
+
+    url = input('url: ')
+    token = input('token: ')
+    with open(config_file, 'w') as f:
+        f.write(CONFIG_TEMPLATE.format(url=url, token=token))
+
+    success('Inited')
+
+
+def get_config_dir():
+    paths = (
+        os.path.abspath(os.path.join('.', CONFIG_DIR)),  # local
+        os.path.abspath(os.path.join(os.path.expanduser('~'), CONFIG_DIR)),
+        os.path.abspath(os.path.dirname(__file__)),  # global
+    )
+    for path in paths:
+        if os.path.isfile(os.path.join(path, CONFIG_FILE_NAME)):
+            return path
+    raise AppError('Missing config. Make `init`.')
+
+
 def get_project_data():
+    base_path = get_config_dir()
     try:
-        with open('.python-packages', 'r') as f:
+        with open(os.path.join(base_path, CACHE_FILE_NAME), 'r') as f:
             return yaml.load(f)
     except IOError:
         return None
 
 
 def save_project_data(data):
-    with open('.python-packages', 'w') as f:
+    base_path = get_config_dir()
+    with open(os.path.join(base_path, CACHE_FILE_NAME), 'w') as f:
         yaml.dump(data, f)
+
+
+def get_api():
+    base_path = get_config_dir()
+    return gitlab.Gitlab.from_config('default', [
+        os.path.join(base_path, CONFIG_FILE_NAME)])
 
 
 def load_python_module(project, path):
@@ -410,10 +467,6 @@ def _get_type_tag(cached):
     return 'type:unknown'
 
 
-def get_api():
-    return gitlab.Gitlab.from_config('exness', ['./.python-gitlab.cfg', os.path.join(os.path.dirname(__file__), '.python-gitlab.cfg')])
-
-
 def cmd_collect(namespace):
     gl = get_api()
     project_cache = get_project_data() or {}
@@ -649,6 +702,8 @@ def _split_requirement_package_version(req):
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help='sub-command help')
+    parser_init = subparsers.add_parser('init', help='init new config')
+    parser_init.set_defaults(func=cmd_init)
     parser_collect = subparsers.add_parser('collect', help='collect new projects')
     parser_collect.set_defaults(func=cmd_collect)
     parser_collect.add_argument('project', help='project name/path')
@@ -679,6 +734,8 @@ def main():
             return namespace.func(namespace)
         except KeyboardInterrupt:
             return error('Interrupted')
+        except AppError as e:
+            return error(e.args[0])
         except Exception as e:
             logging.exception('!!!')
             return error(e.args[0])

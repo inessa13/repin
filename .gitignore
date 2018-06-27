@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
-.idea
+.idea/
+.pytest_cache/
 *.egg-info/
 .coverage
-deparse/.python-gitlab.cfg
+.python-gitlab.cfg
