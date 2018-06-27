@@ -30,13 +30,14 @@ nexus:
   image: registry.exness.io/dockerhub/python:3-exness-package
   only:
     - tags
-  script:
+  before_script:
     - echo "checking PEP-440 version tag $CI_BUILD_TAG..."
     - pip install packaging
     - echo -e "from packaging.version import Version\nv = Version('$CI_BUILD_TAG')" | python
 
+    - echo "preparing pypirc..."
+    - echo "username = $NEXUS_USER" >> ~/.pypirc
+    - echo "password = $NEXUS_PASSWORD" >> ~/.pypirc
+  script:
     - echo "pushing to nexus..."
-    - echo "username = $NEXUS_USER" >> .pypirc
-    - echo "password = $NEXUS_PASSWORD" >> .pypirc
-    - cp .pypirc ~/.pypirc
     - python setup.py sdist upload -r nexus
