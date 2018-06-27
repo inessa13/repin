@@ -8,6 +8,8 @@ variables:
 tests:
   stage: tests
   image: registry.exness.io/dockerhub/python:3-exness-package
+  tags:
+    - psp
   cache:
     untracked: true
     key: "$CI_BUILD_REF_NAME"
