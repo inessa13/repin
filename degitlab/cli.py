@@ -15,8 +15,8 @@ import yaml
 CLR_END = '\033[0m'
 GL_PER_PAGE = 10
 MIN_PYTHON_PERCENT = 10
-CONFIG_DIR = '.deparse'
-CACHE_FILE_NAME = '.deparse-cache'
+CONFIG_DIR = '.degitlab'
+CACHE_FILE_NAME = '.degitlab-cache'
 CONFIG_FILE_NAME = '.python-gitlab.cfg'
 CONFIG_TEMPLATE = """[global]
 default = default

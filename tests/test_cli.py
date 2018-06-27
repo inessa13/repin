@@ -1,4 +1,4 @@
-from deparse.cli import main
+from degitlab.cli import main
 
 
 def test_main():
