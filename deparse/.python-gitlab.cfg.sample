@@ -1,0 +1,9 @@
+[global]
+default = default
+ssl_verify = true
+timeout = 5
+
+[default]
+url = https://git.exness.io
+api_version = 4
+private_token = PRIVATE_TOKEN

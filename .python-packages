@@ -67,7 +67,7 @@
 8:
   created_at: '2015-03-22T18:27:07.522Z'
   group: site
-  last_activity_at: '2018-06-25T16:37:05.366Z'
+  last_activity_at: '2018-06-26T16:25:35.465Z'
   name: py
   package_data:
     install_requires: [Cheetah==2.4.4, Django==1.6.10, Fabric==1.10.2, GitPython==1.0.1,
@@ -3701,7 +3701,8 @@
   web_url: https://git.exness.io/BA/datatool
 751:
   created_at: '2018-03-07T12:16:18.814Z'
-  last_activity_at: '2018-06-25T15:07:07.141Z'
+  docker_data: false
+  last_activity_at: '2018-06-26T07:17:29.200Z'
   name: exness-payment
   package_data:
     author: exness
@@ -3816,7 +3817,7 @@
   web_url: https://git.exness.io/aiolibs/exness-aiolibs
 769:
   created_at: '2018-03-16T08:28:39.745Z'
-  last_activity_at: '2018-06-25T13:33:35.948Z'
+  last_activity_at: '2018-06-26T11:22:20.011Z'
   name: payment-api
   package_data:
     author: exness
@@ -4284,8 +4285,16 @@
 884: {created_at: '2018-06-20T14:42:27.029Z', last_activity_at: '2018-06-21T14:42:40.814Z',
   name: Exness.Sqlite, path: tp/nugets/Exness.Sqlite, python_percent: 0, req_sources: empty,
   skip: true, web_url: 'https://git.exness.io/tp/nugets/Exness.Sqlite'}
-885: {created_at: '2018-06-24T21:28:50.195Z', last_activity_at: '2018-06-25T19:38:07.549Z',
-  name: deparse, path: david.djanyan/deparse, python_percent: 100.0, req_sources: empty,
-  web_url: 'https://git.exness.io/david.djanyan/deparse'}
+885:
+  created_at: '2018-06-24T21:28:50.195Z'
+  last_activity_at: '2018-06-25T19:38:07.549Z'
+  name: deparse
+  package_data:
+    install_requires: [mock==2.0.0, python-gitlab==1.5.1, python-Levenshtein==0.12.0,
+      PyYAML==3.12, toml]
+  path: david.djanyan/deparse
+  python_percent: 100.0
+  req_sources: [requirements.txt]
+  web_url: https://git.exness.io/david.djanyan/deparse
 886: {created_at: '2018-06-25T07:39:21.586Z', last_activity_at: '2018-06-25T07:39:21.586Z',
   name: gtest, path: tp/nugets/gtest, python_percent: 11.42, req_sources: empty, web_url: 'https://git.exness.io/tp/nugets/gtest'}

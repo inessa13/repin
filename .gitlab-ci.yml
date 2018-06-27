@@ -1,0 +1,42 @@
+stages:
+  - tests
+  - nexus
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
+
+tests:
+  stage: tests
+  image: registry.exness.io/dockerhub/python:3-exness-package
+  tags:
+    - psp
+  cache:
+    untracked: true
+    key: "$CI_BUILD_REF_NAME"
+    paths:
+      - .cache/
+  except:
+    - tags
+  before_script:
+    - find . -name '__pycache__' | xargs rm -rf
+    - find . -name '*.pyc' | xargs rm -rf
+    - pip install -e .[tests]
+  script:
+    - coverage run --branch -m py.test
+    - coverage report -m
+
+nexus:
+  stage: nexus
+  image: registry.exness.io/dockerhub/python:3-exness-package
+  only:
+    - tags
+  script:
+    - echo "checking PEP-440 version tag $CI_BUILD_TAG..."
+    - pip install packaging
+    - echo -e "from packaging.version import Version\nv = Version('$CI_BUILD_TAG')" | python
+
+    - echo "pushing to nexus..."
+    - echo "username = $NEXUS_USER" >> .pypirc
+    - echo "password = $NEXUS_PASSWORD" >> .pypirc
+    - cp .pypirc ~/.pypirc
+    - python setup.py sdist upload -r nexus
