@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 from setuptools import setup
-import degitlab as project
+import repin as project
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -30,19 +30,19 @@ install_requires_test = [
 setup(
     author='exness',
     author_email='dev@exness.com',
-    name='degitlab',
-    description='DeGitlab. Tool for parsing gitlab repos',
+    name='repin',
+    description='Repository Inspector',
     version=project.__version__,
-    url='https://git.exness.io/utils/deparse',
+    url='https://git.exness.io/utils/repin',
     platforms=CLASSIFIERS,
     install_requires=install_requires,
     extras_require={
         'tests': install_requires_test,
     },
     entry_points={'console_scripts': [
-        'degitlab-cli = degitlab.cli:main',
+        'repin = repin.cli:main',
     ]},
-    packages=['degitlab'],
+    packages=['repin'],
     include_package_data=False,
     zip_safe=False,
     test_suite='tests',

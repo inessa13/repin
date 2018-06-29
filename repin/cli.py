@@ -12,8 +12,8 @@ import mock
 import toml
 import yaml
 
-import degitlab
-from degitlab.cli_utils import (
+import repin
+from repin.cli_utils import (
     FILTERS,
     filter_have_reqs,
     filter_is_broken,
@@ -24,8 +24,8 @@ from degitlab.cli_utils import (
 
 CLR_END = '\033[0m'
 GL_PER_PAGE = 10
-CONFIG_DIR = '.degitlab'
-CACHE_FILE_NAME = '.degitlab-cache'
+CONFIG_DIR = '.repin'
+CACHE_FILE_NAME = '.repin-cache'
 CONFIG_FILE_NAME = '.python-gitlab.cfg'
 CONFIG_TEMPLATE = """[global]
 default = default
@@ -79,7 +79,7 @@ def cmd_init(namespace):
 
 
 def cmd_info(namespace):
-    success('version: {}'.format(degitlab.__version__))
+    success('version: {}'.format(repin.__version__))
     success('config root: {}'.format(get_config_dir()))
     success('available filters:')
     for f in FILTERS.keys():

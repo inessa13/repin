@@ -11016,7 +11016,7 @@
   docker_data: false
   gitlab_ci_data: {file: .gitlab-ci.yml, nexus: mentioned}
   last_activity_at: '2018-06-28T16:16:12.031Z'
-  name: deparse
+  name: repin
   package_data:
     author: exness
     author_email: dev@exness.com
@@ -11026,20 +11026,20 @@
     include_package_data: false
     install_requires: [mock, python-gitlab==1.5.1, python-Levenshtein==0.12.0, PyYAML,
       toml]
-    name: deparse
-    packages: [deparse]
+    name: repin
+    packages: [repin]
     platforms: ['Development Status :: 4 - Beta', 'Environment :: Console', 'Intended
         Audience :: Developers', 'Operating System :: POSIX', 'Programming Language
         :: Python', 'Programming Language :: Python :: 3.6', 'Topic :: Software Development',
       'Topic :: Utilities']
     python_requires: '>=3.0'
     test_suite: tests
-    url: https://git.exness.io/utils/deparse
+    url: https://git.exness.io/utils/repin
     version: 0.1.0
     zip_safe: false
-  path: utils/deparse
+  path: utils/repin
   req_sources: [setup.py]
-  web_url: https://git.exness.io/utils/deparse
+  web_url: https://git.exness.io/utils/repin
 886:
   :languages: {C: 0.43, C++: 85.43, CMake: 0.75, M4: 0.64, Makefile: 0.65, Python: 11.42,
     Shell: 0.67}
