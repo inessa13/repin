@@ -12,13 +12,13 @@ import mock
 import toml
 import yaml
 
+import degitlab
 from degitlab.cli_utils import (
     FILTERS,
     filter_have_reqs,
     filter_is_broken,
     filter_is_package,
-    filter_is_python,
-    filter_is_archived,
+    filter_lang_python,
     unknown_value
 )
 
@@ -79,10 +79,8 @@ def cmd_init(namespace):
 
 
 def cmd_info(namespace):
-    base_path = get_config_dir()
-    success('root')
-    print(base_path)
-
+    success('version: {}'.format(degitlab.__version__))
+    success('config root: {}'.format(get_config_dir()))
     success('available filters:')
     for f in FILTERS.keys():
         print(f)
@@ -284,22 +282,22 @@ def parse_pipfile(project, cached):
     return cached
 
 
-def _load_python_percent(project):
+def _collect_languages(project, cached):
     try:
-        python_percent = project.languages().get('Python', 0)
+        languages_data = project.languages()
     except KeyboardInterrupt:
         raise
     except gitlab.exceptions.GitlabGetError as e:
         if e.response_code == 500:
-            python_percent = 0
+            languages_data = {}
         else:
-            logging.exception('python_percent failed')
-            python_percent = 'n/a'
+            logging.exception('collect_languages failed')
+            languages_data = 'n/a'
     except:
-        logging.exception('python_percent failed')
-        python_percent = 'n/a'
+        logging.exception('collect_languages failed')
+        languages_data = 'n/a'
 
-    return python_percent
+    cached[':languages'] = languages_data
 
 
 def _collect_req_sources(project, cached):
@@ -368,8 +366,8 @@ def add_cache(project, project_cache=None, force=False, save=True, fast=False):
     cached = project_cache.setdefault(project.id, {})
 
     if not fast:
-        if force or unknown_value(cached.get('python_percent')):
-            cached['python_percent'] = _load_python_percent(project)
+        if force or unknown_value(cached.get(':languages')):
+            _collect_languages(project, cached)
 
         if force or unknown_value(cached.get('docker_data')):
             _collect_dockerfile(project, cached)
@@ -377,7 +375,7 @@ def add_cache(project, project_cache=None, force=False, save=True, fast=False):
         if force or unknown_value(cached.get('gitlab_ci_data')):
             _collect_gitlab_ci(project, cached)
 
-        if filter_is_python(cached):
+        if filter_lang_python(cached):
             if force or unknown_value(cached.get('req_sources')):
                 _collect_req_sources(project, cached)
 
@@ -469,18 +467,26 @@ def cmd_collect(namespace):
     success('total {}'.format(len(project_cache)))
 
 
+def _limit_str(value, limit):
+    if len(value) <= limit:
+        return value
+    return value[:limit - 3] + '...'
+
+
 def cmd_repair(namespace):
     gl = get_api()
     cached_search, project_cache = filter_cache(
-        namespace.query, False, namespace.exact)
+        namespace.query, namespace.exact, namespace.exclude)
 
     if not cached_search:
         return error('Nothing found')
 
     if not namespace.all and len(cached_search) > 1:
-        return warn('Found {}: {}'.format(len(cached_search), ', '.join(
+        warn('Found {}: {}'.format(len(cached_search), _limit_str(', '.join(
             cached['path'] for cached in cached_search.values()
-        )))
+        ), 100)))
+        warn('Use --all to repair them all.')
+        return
 
     fixed = 0
     for pid, cached in cached_search.items():
@@ -500,43 +506,57 @@ def cmd_repair(namespace):
         fixed, len(cached_search), len(project_cache)))
 
 
-def filter_gen(query, path, exact, with_archived=False):
-    key = 'path' if path or '/' in query else 'name'
-
-    def f(cached):
-        filter_ = FILTERS.get(query)
-        if callable(filter_):
-            if not with_archived:
-                return filter_(cached) and not filter_is_archived(cached)
-            return filter_(cached)
-        elif cached.get(key):
-            if exact:
-                return query == cached[key]
-            return query in cached[key]
-        else:
-            return False
-    return f
+def _parse_query(query, exact=False, mode=all):
+    key = 'path' if '/' in query else 'name'
+    if ':' in query:
+        query = query.split(',')
+        filters = [FILTERS.get(sub) for sub in query]
+        if not all(filters):
+            warn('Unknown filter: {}'.format(
+                ', '.join(sub for sub in query if sub not in FILTERS)))
+            return None
+        return lambda cached: mode(sub(cached) for sub in filters)
+    elif exact:
+        return lambda c: query == c.get(key)
+    return lambda c: query in c.get(key, '')
 
 
-def filter_cache(query, path, exact, project_cache=None, with_archived=False):
-    project_cache = project_cache or get_project_data() or {}
-    f = filter_gen(query, path, exact, with_archived=with_archived)
+def filter_cache(query, exact, exclude=None):
+    project_cache = get_project_data() or {}
+
+    filter_finally = filter_ = _parse_query(query, exact, all)
+    if not filter_:
+        return {}, project_cache
+
+    if exclude:
+        exclude = _parse_query(exclude, False, any)
+        if not exclude:
+            return {}, project_cache
+        filter_finally = lambda c: filter_(c) and not exclude(c)
+
     return {
-        pid: cached for pid, cached in project_cache.items() if f(cached)
+        pid: cached for pid, cached in project_cache.items()
+        if filter_finally(cached)
     }, project_cache
 
 
 def cmd_list(namespace):
     cached_search, project_cache = filter_cache(
-        namespace.query, False, False, with_archived=namespace.with_archived)
-    for pid, cached in cached_search.items():
-        print('{}'.format(cached.get('path') or cached.get('name') or pid))
+        namespace.query, False, namespace.exclude)
+    if not namespace.total:
+        line = 0
+        for pid, cached in cached_search.items():
+            if namespace.limit is not None and line >= namespace.limit:
+                if line:
+                    warn('Remaining {}'.format(len(cached_search) - line))
+                break
+            line += 1
+            print('{}'.format(cached.get('path') or cached.get('name') or pid))
     success('Found: {}, Total: {}'.format(len(cached_search), len(project_cache)))
 
 
 def cmd_show(namespace):
-    cached_search, project_cache = filter_cache(
-        namespace.query, False, True, with_archived=True)
+    cached_search, project_cache = filter_cache(namespace.query, True)
 
     if not cached_search:
         return error('Nothing found')
@@ -563,12 +583,13 @@ def cmd_show(namespace):
 
 
 def cmd_reverse(namespace):
-    cached_search, project_cache = filter_cache(
-        namespace.query, False, True, with_archived=True)
+    cached_search, project_cache = filter_cache(namespace.query, True)
 
     if not cached_search:
         if namespace.force:
-            cached_search = {None: {'name': namespace.query, 'python_percent': 100, 'req_sources': 'empty'}}
+            cached_search = {
+                None: {'name': namespace.query, ':languages': {'Python': 100}}
+            }
         else:
             return error('Nothing found')
 
@@ -578,25 +599,22 @@ def cmd_reverse(namespace):
             for pid, cached in cached_search.items()
         )))
 
-    pid, cached = cached_search.popitem()
-
-    if not filter_is_python(cached):
-        return success('{}: is not a python package')
+    self_pid, cached = cached_search.popitem()
 
     if filter_is_package(cached):
         self_name = cached['package_data'].get('name', cached['name'])
     else:
-        error('Missing package data for project. Call `collect` on this project or for all projects.')
         if namespace.force:
             self_name = cached['name']
         else:
-            return
+            return error(
+                '{}: is not a python package. Use --force to continue')
 
     dep_for = []
     dep_for_mb = {}
-    for project in project_cache.values():
+    for pid, project in project_cache.items():
         # skip self
-        if project.get('name') == cached['name']:
+        if pid == self_pid:
             continue
         # skip projects without requirements
         if not filter_have_reqs(project):
@@ -702,12 +720,21 @@ def main():
     parser_repair.add_argument(
         '-F', '--force-collect', action='store_true',
         help='force to recollect data')
+    parser_repair.add_argument(
+        '-x', '--exclude',
+        default=':archived',
+        help='exclude from query; by default excluding archived')
     parser_list = subparsers.add_parser('list', help='list cached projects')
     parser_list.set_defaults(func=cmd_list)
     parser_list.add_argument('query', help='project name/path or tag')
     parser_list.add_argument(
-        '-A', '--with-archived', action='store_true',
-        help='list also archived projects')
+        '-t', '--total', action='store_true',
+        help='print only total on filter')
+    parser_list.add_argument('-l', '--limit', type=int, help='output limit')
+    parser_list.add_argument(
+        '-x', '--exclude',
+        default=':archived',
+        help='exclude from query; by default excluding archived')
 
     namespace = parser.parse_args()
 
