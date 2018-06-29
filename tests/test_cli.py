@@ -1,4 +1,4 @@
-from deparse.cli import main
+from repin.cli import main
 
 
 def test_main():

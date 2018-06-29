@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-from setuptools import find_packages, setup
-import deparse as project
+from setuptools import setup
+import repin as project
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -30,16 +30,19 @@ install_requires_test = [
 setup(
     author='exness',
     author_email='dev@exness.com',
-    name='deparse',
-    description='DeParse Tool',
+    name='repin',
+    description='Repository Inspector',
     version=project.__version__,
-    url='https://git.exness.io/utils/deparse',
+    url='https://git.exness.io/utils/repin',
     platforms=CLASSIFIERS,
     install_requires=install_requires,
     extras_require={
         'tests': install_requires_test,
     },
-    packages=['deparse'],
+    entry_points={'console_scripts': [
+        'repin = repin.cli:main',
+    ]},
+    packages=['repin'],
     include_package_data=False,
     zip_safe=False,
     test_suite='tests',
