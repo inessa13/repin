@@ -542,7 +542,7 @@ def filter_cache(query, exact, exclude=None):
 
 def cmd_list(namespace):
     cached_search, project_cache = filter_cache(
-        namespace.query, False, namespace.exclude)
+        namespace.query, namespace.exact, namespace.exclude)
     if not namespace.total:
         line = 0
         for pid, cached in cached_search.items():
@@ -603,6 +603,8 @@ def cmd_reverse(namespace):
 
     if filter_is_package(cached):
         self_name = cached['package_data'].get('name', cached['name'])
+    elif filter_lang_python(cached):
+        self_name = cached['name']
     else:
         if namespace.force:
             self_name = cached['name']
@@ -727,6 +729,9 @@ def main():
     parser_list = subparsers.add_parser('list', help='list cached projects')
     parser_list.set_defaults(func=cmd_list)
     parser_list.add_argument('query', help='project name/path or tag')
+    parser_list.add_argument(
+        '-e', '--exact', action='store_true',
+        help='exact match project name/path')
     parser_list.add_argument(
         '-t', '--total', action='store_true',
         help='print only total on filter')
