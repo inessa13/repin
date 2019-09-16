@@ -1,0 +1,43 @@
+stages:
+  - tests
+  - nexus
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
+
+tests:
+  stage: tests
+  image: python:3
+  tags:
+    - psp
+  cache:
+    untracked: true
+    key: "$CI_BUILD_REF_NAME"
+    paths:
+      - .cache/
+  except:
+    - tags
+  before_script:
+    - find . -name '__pycache__' | xargs rm -rf
+    - find . -name '*.pyc' | xargs rm -rf
+    - pip install -e .[tests]
+  script:
+    - coverage run --branch -m py.test
+    - coverage report -m
+
+nexus:
+  stage: nexus
+  image: python:3
+  only:
+    - tags
+  before_script:
+    - echo "checking PEP-440 version tag $CI_BUILD_TAG..."
+    - pip install packaging
+    - echo -e "from packaging.version import Version\nv = Version('$CI_BUILD_TAG')" | python
+
+    - echo "preparing pypirc..."
+    - echo "username = $NEXUS_USER" >> ~/.pypirc
+    - echo "password = $NEXUS_PASSWORD" >> ~/.pypirc
+  script:
+    - echo "pushing to nexus..."
+    - python setup.py sdist upload -r nexus
