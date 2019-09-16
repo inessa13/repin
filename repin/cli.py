@@ -23,7 +23,7 @@ from repin.cli_utils import (
 )
 
 CLR_END = '\033[0m'
-GL_PER_PAGE = 10
+GL_PER_PAGE = 50
 CONFIG_DIR = '.repin'
 CACHE_FILE_NAME = '.repin-cache'
 CONFIG_FILE_NAME = '.python-gitlab.cfg'
@@ -37,6 +37,14 @@ api_version = 4
 url = {url}
 private_token = {token}
 """
+REQS = (
+    'setup.py',
+    'requirements.txt',
+    'reqs.txt',
+    'Pipfile',
+    'requirements/prod.txt',
+    'requirements/live.txt',
+)
 
 
 class AppError(Exception):
@@ -302,7 +310,7 @@ def _collect_languages(project, cached):
 
 def _collect_req_sources(project, cached):
     req_sources = []
-    for file in ('setup.py', 'requirements.txt', 'reqs.txt', 'Pipfile'):
+    for file in REQS:
         try:
             project.files.get(file_path=file, ref='master')
             req_sources.append(file)
@@ -320,6 +328,10 @@ def _collect_req_sources(project, cached):
             parse_requirements(project, cached, 'reqs.txt')
         elif 'requirements.txt' in cached['req_sources']:
             parse_requirements(project, cached, 'requirements.txt')
+        elif 'requirements/prod.txt' in cached['req_sources']:
+            parse_requirements(project, cached, 'requirements/prod.txt')
+        elif 'requirements/live.txt' in cached['req_sources']:
+            parse_requirements(project, cached, 'requirements/live.txt')
         elif 'Pipfile' in cached['req_sources']:
             parse_pipfile(project, cached)
 
@@ -418,13 +430,19 @@ def fix_cache(gl, project_cache, pid, cached, force, force_collect):
 def cmd_collect(namespace):
     gl = get_api()
     project_cache = get_project_data() or {}
+    # TODO:
+    list_options = {
+        'visibility': 'private',
+        # 'membership': True,
+    }
 
     if namespace.fast and namespace.force:
         return error('Cannot use --fast with --force')
 
     if namespace.project == ':all':
         page = 1
-        projects = gl.projects.list(page=page, per_page=GL_PER_PAGE)
+        list_options['per_page'] = GL_PER_PAGE
+        projects = gl.projects.list(page=page, **list_options)
         interrupted = False
         while projects:
             for index, project in enumerate(projects):
@@ -447,7 +465,7 @@ def cmd_collect(namespace):
                 break
 
             page += 1
-            projects = gl.projects.list(page=page, per_page=GL_PER_PAGE)
+            projects = gl.projects.list(page=page, **list_options)
 
     elif ':' in namespace.project:
         return error('Collect cant use filters beside :all')
@@ -627,20 +645,30 @@ def cmd_reverse(namespace):
         else:
             project_name = project['path']
 
+        comment_addt = ''
+        if project['archived']:
+            comment_addt += ' :archived'
+
         for req in project['package_data']['install_requires']:
-            reverse_name, dep_mode, version = _split_requirement_package_version(req)
+            reverse_name, dep_mode, version, comment = \
+                _split_requirement_package_version(req)
+            comment += comment_addt
             if reverse_name == self_name:
-                dep_for.append((project_name, dep_mode, version))
+                dep_for.append((project_name, dep_mode, version, comment))
             elif not namespace.exact and Levenshtein.distance(
                     reverse_name, self_name) <= 2:
                 dep_for_mb.setdefault(reverse_name, []).append(
-                    (project_name, dep_mode, version))
+                    (project_name, dep_mode, version, comment))
 
     if dep_for:
         success('Found reversed dependencies:')
-        success('version\tdep_type\tproject')
-        for project_name, dep_mode, version in dep_for:
-            warn('{}\t{}\t{}'.format(version, dep_mode, project_name))
+        success('version\tdep\tproject{}comment'.format(' ' * (48 - len('project'))))
+        for project_name, dep_mode, version, comment in dep_for:
+            warn('{}\t{}\t{}{}# {}'.format(
+                version, dep_mode, project_name,
+                ' ' * (48 - len(project_name)),
+                comment,
+            ))
     else:
         warn('No strict reversed dependencies found')
 
@@ -648,12 +676,22 @@ def cmd_reverse(namespace):
         warn('Found similar reversed dependencies:')
         for name, similar in dep_for_mb.items():
             success('{}: '.format(name))
-            success('version\tdep_type\tproject')
-            for project_name, dep_mode, version in similar:
-                success('{}\t{}\t{}'.format(version, dep_mode, project_name))
+            success('version\tdep\tproject')
+            for project_name, dep_mode, version, comment in similar:
+                success('{}\t{}\t{}{}# {}'.format(
+                    version, dep_mode, project_name,
+                    ' ' * (48 - len(project_name)),
+                    comment,
+                ))
 
 
 def _split_requirement_package_version(req):
+    if '#' in req:
+        req, comment = req.split('#', 1)
+        req = req.strip()
+    else:
+        comment = ''
+
     if ',' in req:
         # TODO:
         req = req.split(',', 1)[0]
@@ -661,10 +699,10 @@ def _split_requirement_package_version(req):
     for d in ('==', '~=', '>=', '>', '<'):
         if d in req:
             req = req.split(d, 1)
-            req = req[0], d, req[1]
+            req = req[0], d, req[1], comment
             break
     else:
-        req = (req, None, None)
+        req = (req, None, None, comment)
     return req
 
 
