@@ -5,14 +5,14 @@ import logging
 import os
 import pprint
 import re
+import shutil
 
 import gitlab
 import Levenshtein
 import mock
+import repin
 import toml
 import yaml
-
-import repin
 from repin.cli_utils import (
     FILTERS,
     filter_have_reqs,
@@ -26,6 +26,7 @@ CLR_END = '\033[0m'
 GL_PER_PAGE = 50
 CONFIG_DIR = '.repin'
 CACHE_FILE_NAME = '.repin-cache'
+CACHE_FILE_BACK_NAME = '.repin-cache-back'
 CONFIG_FILE_NAME = '.python-gitlab.cfg'
 CONFIG_TEMPLATE = """[global]
 default = default
@@ -126,16 +127,30 @@ def get_config_dir():
 
 
 def get_project_data():
+    import yaml.parser
     base_path = get_config_dir()
     try:
         with open(os.path.join(base_path, CACHE_FILE_NAME), 'r') as f:
             return yaml.load(f)
+    except yaml.parser.ParserError:
+        backup = os.path.join(base_path, CACHE_FILE_BACK_NAME)
+        if os.path.exists(backup):
+            shutil.move(
+                backup,
+                os.path.join(base_path, CACHE_FILE_NAME),
+            )
+            return get_project_data()
+        raise
     except IOError:
         return None
 
 
 def save_project_data(data):
     base_path = get_config_dir()
+    if os.path.exists(os.path.join(base_path, CACHE_FILE_NAME)):
+        shutil.copy(
+            os.path.join(base_path, CACHE_FILE_NAME),
+            os.path.join(base_path, CACHE_FILE_BACK_NAME))
     with open(os.path.join(base_path, CACHE_FILE_NAME), 'w') as f:
         yaml.dump(data, f)
 
@@ -362,6 +377,9 @@ def _collect_dockerfile(data, raw_content):
         m = re.match('ENTRYPOINT\s+\[(\'|")(.*)\\1\]$', line)
         if m:
             data['entrypoint'] = m.group(2)
+        m = re.match('CMD\s+\[(\'|")(.*)\\1\]$', line)
+        if m:
+            data['cmd'] = '{}{}{}'.format(m.group(1), m.group(2), m.group(1))
     return True
 
 
@@ -430,10 +448,8 @@ def fix_cache(gl, project_cache, pid, cached, force, force_collect):
 def cmd_collect(namespace):
     gl = get_api()
     project_cache = get_project_data() or {}
-    # TODO:
     list_options = {
-        'visibility': 'private',
-        # 'membership': True,
+        'membership': True,
     }
 
     if namespace.fast and namespace.force:
@@ -446,6 +462,9 @@ def cmd_collect(namespace):
         interrupted = False
         while projects:
             for index, project in enumerate(projects):
+                if namespace.exclude and namespace.exclude in '{}/{}'.format(
+                        project.namespace['full_path'], project.path):
+                    continue
                 warn('{}: collecting... ({})'.format(
                     project.name, index + 1 + (page - 1) * GL_PER_PAGE))
                 try:
@@ -499,7 +518,9 @@ def cmd_repair(namespace):
     if not cached_search:
         return error('Nothing found')
 
-    if not namespace.all and len(cached_search) > 1:
+    if (namespace.query != ':broken'
+            and not namespace.all
+            and len(cached_search) > 1):
         warn('Found {}: {}'.format(len(cached_search), _limit_str(', '.join(
             cached['path'] for cached in cached_search.values()
         ), 100)))
@@ -540,9 +561,17 @@ def _parse_query(query, exact=False, mode=all):
 
 
 def filter_cache(query, exact, exclude=None):
+    if query == exclude:
+        exclude = ':none'
+
     project_cache = get_project_data() or {}
 
-    filter_finally = filter_ = _parse_query(query, exact, all)
+    if '.' in query and ',' not in query:
+        mode = any
+        query = query.replace('.', ',')
+    else:
+        mode = all
+    filter_finally = filter_ = _parse_query(query, exact, mode)
     if not filter_:
         return {}, project_cache
 
@@ -556,6 +585,25 @@ def filter_cache(query, exact, exclude=None):
         pid: cached for pid, cached in project_cache.items()
         if filter_finally(cached)
     }, project_cache
+
+
+def cmd_clear(namespace):
+    cached_search, project_cache = filter_cache(
+        namespace.query, namespace.exact, namespace.exclude)
+
+    if not cached_search:
+        return error('Nothing found')
+
+    if not namespace.all and len(cached_search) > 1:
+        warn('Found {}: {}'.format(len(cached_search), _limit_str(', '.join(
+            cached['path'] for cached in cached_search.values()
+        ), 100)))
+        warn('Use --all to clear them all.')
+        return
+
+    for name, cached in cached_search.items():
+        del project_cache[name]
+    save_project_data(project_cache)
 
 
 def cmd_list(namespace):
@@ -598,6 +646,49 @@ def cmd_show(namespace):
 
     if namespace.all:
         pprint.pprint(cached)
+
+
+def cmd_requirements(namespace):
+    cached_search, project_cache = filter_cache(
+        namespace.query, namespace.exact)
+
+    if not cached_search:
+        return error('Nothing found')
+    if not namespace.all and len(cached_search) > 1:
+        warn('Found {}: {}'.format(len(cached_search), _limit_str(', '.join(
+            cached['path'] for cached in cached_search.values()
+        ), 100)))
+        warn('Use --all to repair them all.')
+        return
+
+    for pid, cached in cached_search.items():
+        success(cached['name'])
+        if filter_is_broken(cached):
+            warn('Package is broken, call `repair` to fix it.')
+            continue
+        if not filter_have_reqs(cached):
+            warn('Package have no requirements')
+            continue
+
+        # TODO: build requirements tree
+
+        success(
+            'package{}dep\tversion\tcomment'.format(' ' * (32 - len('package'))))
+        for req in cached['package_data']['install_requires']:
+            req_line = req.strip()
+            if req_line.startswith('# ') or req_line.startswith('--'):
+                continue
+            project_name, dep_mode, version, comment = \
+                _split_requirement_package_version(req)
+            if not project_name:
+                continue
+            print('{}{}{}\t{}\t# {}'.format(
+                project_name,
+                ' ' * (32 - len(project_name)),
+                dep_mode,
+                version,
+                comment,
+            ))
 
 
 def cmd_reverse(namespace):
@@ -727,12 +818,37 @@ def main():
     parser_collect.add_argument(
         '-f', '--fast', action='store_true',
         help='fast mode, dont do additional API calls')
+    parser_collect.add_argument('-x', '--exclude', help='exclude from query')
+    parser_clear = subparsers.add_parser(
+        'clear', help='clear projects from cache')
+    parser_clear.set_defaults(func=cmd_clear)
+    parser_clear.add_argument('query', help='project name/path')
+    parser_clear.add_argument(
+        '-a', '--all', action='store_true', help='clear all entries')
+    parser_clear.add_argument(
+        '-e', '--exact', action='store_true',
+        help='exact match project name/path')
+    parser_clear.add_argument(
+        '-x', '--exclude',
+        default=':archived',
+        help='exclude from query; by default excluding archived')
     parser_show = subparsers.add_parser(
         'show', help='show project info from cache')
     parser_show.set_defaults(func=cmd_show)
     parser_show.add_argument('query', help='project name/path or tag')
     parser_show.add_argument(
         '-a', '--all', action='store_true', help='show all info')
+    parser_requirements = subparsers.add_parser(
+        'reqs', help='show project info from cache')
+    parser_requirements.set_defaults(func=cmd_requirements)
+    parser_requirements.add_argument('query', help='project name/path or tag')
+    parser_requirements.add_argument(
+        '-a', '--all', action='store_true',
+        help='run command to all entries found')
+    parser_requirements.add_argument(
+        '-e', '--exact', action='store_true',
+        help='exact match project name/path')
+    parser_requirements.add_argument('-i', '--index-url', help='show all info')
     parser_reverse = subparsers.add_parser(
         'reverse',
         help='main feature! get list of packages, requiring this one')

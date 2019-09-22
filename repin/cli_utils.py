@@ -64,53 +64,20 @@ def filter_lang_python(cached):
     return cached[':languages'].get('Python', 0) >= MIN_PYTHON_PERCENT
 
 
-def filter_lang_cpp(cached):
-    if filter_language_na(cached):
-        return False
-
-    return cached[':languages'].get('C++', 0) >= MIN_PYTHON_PERCENT
-
-
-def filter_lang_go(cached):
-    if filter_language_na(cached):
-        return False
-
-    return cached[':languages'].get('Go', 0) >= MIN_PYTHON_PERCENT
-
-
-def filter_lang_erlang(cached):
-    if filter_language_na(cached):
-        return False
-
-    return cached[':languages'].get('Erlang', 0) >= MIN_PYTHON_PERCENT
-
-
-def filter_lang_java(cached):
-    if filter_language_na(cached):
-        return False
-
-    return cached[':languages'].get('Java', 0) >= MIN_PYTHON_PERCENT
-
-
-def filter_lang_js(cached):
-    if filter_language_na(cached):
-        return False
-
-    return cached[':languages'].get('JavaScript', 0) >= MIN_PYTHON_PERCENT
-
-
-def filter_lang_php(cached):
-    if filter_language_na(cached):
-        return False
-
-    return cached[':languages'].get('PHP', 0) >= MIN_PYTHON_PERCENT
-
-
 def filter_lang_templates(cached):
     if filter_language_na(cached):
         return False
 
     return cached[':languages'].get('Smarty', 0) >= MIN_PYTHON_PERCENT or cached[':languages'].get('HTML', 0) >= MIN_PYTHON_PERCENT
+
+
+def filter_lang_factory(code):
+    def _filter_lang(cached):
+        if filter_language_na(cached):
+            return False
+
+        return cached[':languages'].get(code, 0) >= MIN_PYTHON_PERCENT
+    return _filter_lang
 
 
 def filter_is_package(cached):
@@ -130,8 +97,10 @@ def filter_is_req_unknown(cached):
 def get_type_tag(cached):
     if not filter_lang_python(cached):
         return 'no:python'
-    if cached.get('docker_data') and cached['docker_data'].get('entrypoint'):
-        return 'type:service'
+    if cached.get('docker_data'):
+        if (cached['docker_data'].get('entrypoint')
+                or cached['docker_data'].get('cmd')):
+            return 'type:service'
     if cached.get('gitlab_ci_data') and cached['gitlab_ci_data'].get('nexus'):
         return 'type:lib'
     return 'na:type'
@@ -160,13 +129,14 @@ FILTERS = {
     ':archived': filter_is_archived,
 
     'lang:python': filter_lang_python,
-    'lang:c++': filter_lang_cpp,
-    'lang:go': filter_lang_go,
-    'lang:erlang': filter_lang_erlang,
-    'lang:java': filter_lang_java,
-    'lang:js': filter_lang_js,
-    'lang:php': filter_lang_php,
+    'lang:c++': filter_lang_factory('C++'),
+    'lang:go': filter_lang_factory('Go'),
+    'lang:erlang': filter_lang_factory('Erlang'),
+    'lang:java': filter_lang_factory('Java'),
+    'lang:js': filter_lang_factory('JavaScript'),
+    'lang:php': filter_lang_factory('PHP'),
     'lang:templates': filter_lang_templates,
+    'lang:shell': filter_lang_factory('Shell'),
     'na:language': filter_language_na,
 
     'no:python': lambda c: not filter_lang_python(c),
