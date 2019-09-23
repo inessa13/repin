@@ -10,17 +10,10 @@ import shutil
 import gitlab
 import Levenshtein
 import mock
-import repin
 import toml
 import yaml
-from repin.cli_utils import (
-    FILTERS,
-    filter_have_reqs,
-    filter_is_broken,
-    filter_is_package,
-    filter_lang_python,
-    unknown_value
-)
+
+from . import __version__, cli_utils
 
 CLR_END = '\033[0m'
 GL_PER_PAGE = 50
@@ -88,10 +81,10 @@ def cmd_init(namespace):
 
 
 def cmd_info(namespace):
-    success('version: {}'.format(repin.__version__))
+    success('version: {}'.format(__version__))
     success('config root: {}'.format(get_config_dir()))
     success('available filters:')
-    for f in FILTERS.keys():
+    for f in cli_utils.FILTERS.keys():
         print(f)
 
 
@@ -99,7 +92,7 @@ def cmd_total(namespace):
     project_cache = get_project_data() or {}
     counts = {}
     for pid, cached in project_cache.items():
-        for filter_tag, filter_ in FILTERS.items():
+        for filter_tag, filter_ in cli_utils.FILTERS.items():
             counts.setdefault(filter_tag, 0)
             if filter_(cached):
                 counts[filter_tag] += 1
@@ -336,7 +329,7 @@ def _collect_req_sources(project, cached):
             break
 
     cached['req_sources'] = req_sources
-    if not unknown_value(req_sources):
+    if not cli_utils.unknown_value(req_sources):
         if 'setup.py' in cached['req_sources']:
             parse_setup(project, cached)
         elif 'reqs.txt' in cached['req_sources']:
@@ -396,17 +389,17 @@ def add_cache(project, project_cache=None, force=False, save=True, fast=False):
     cached = project_cache.setdefault(project.id, {})
 
     if not fast:
-        if force or unknown_value(cached.get(':languages')):
+        if force or cli_utils.unknown_value(cached.get(':languages')):
             _collect_languages(project, cached)
 
-        if force or unknown_value(cached.get('docker_data')):
+        if force or cli_utils.unknown_value(cached.get('docker_data')):
             _collect_dockerfile(project, cached)
 
-        if force or unknown_value(cached.get('gitlab_ci_data')):
+        if force or cli_utils.unknown_value(cached.get('gitlab_ci_data')):
             _collect_gitlab_ci(project, cached)
 
-        if filter_lang_python(cached):
-            if force or unknown_value(cached.get('req_sources')):
+        if cli_utils.filter_lang_python(cached):
+            if force or cli_utils.unknown_value(cached.get('req_sources')):
                 _collect_req_sources(project, cached)
 
     cached.update({
@@ -424,8 +417,8 @@ def add_cache(project, project_cache=None, force=False, save=True, fast=False):
     return cached
 
 
-def fix_cache(gl, project_cache, pid, cached, force, force_collect):
-    if not force and not filter_is_broken(cached):
+def fix_cache(gl, project_cache, pid, cached, force):
+    if not force and not cli_utils.filter_is_broken(cached):
         warn('{}: not broken'.format(cached['name']))
         return False
 
@@ -435,9 +428,9 @@ def fix_cache(gl, project_cache, pid, cached, force, force_collect):
         error('{}: missing'.format(cached.get('name') or pid))
         return False
 
-    add_cache(project, project_cache, force=force_collect, save=True)
+    add_cache(project, project_cache, force=force, save=True)
 
-    if filter_is_broken(cached):
+    if cli_utils.filter_is_broken(cached):
         error('{}: package not fixed'.format(cached.get('name') or pid))
         return False
 
@@ -452,10 +445,13 @@ def cmd_collect(namespace):
         'membership': True,
     }
 
+    if ':' in namespace.exclude:
+        return error('Collect cant use filters in exclude')
+
     if namespace.fast and namespace.force:
         return error('Cannot use --fast with --force')
 
-    if namespace.project == ':all':
+    if namespace.query == ':all':
         page = 1
         list_options['per_page'] = GL_PER_PAGE
         projects = gl.projects.list(page=page, **list_options)
@@ -486,11 +482,11 @@ def cmd_collect(namespace):
             page += 1
             projects = gl.projects.list(page=page, **list_options)
 
-    elif ':' in namespace.project:
+    elif ':' in namespace.query:
         return error('Collect cant use filters beside :all')
 
     else:
-        projects = gl.projects.list(search=namespace.project)
+        projects = gl.projects.list(search=namespace.query)
         if len(projects) == 1:
             project = projects[0]
             warn('{}: collecting...'.format(project.name))
@@ -531,9 +527,7 @@ def cmd_repair(namespace):
     for pid, cached in cached_search.items():
         try:
             fix_result = fix_cache(
-                gl, project_cache, pid, cached, namespace.force,
-                namespace.force_collect
-            )
+                gl, project_cache, pid, cached, namespace.force)
         except KeyboardInterrupt:
             warn('Interrupted')
             break
@@ -545,14 +539,18 @@ def cmd_repair(namespace):
         fixed, len(cached_search), len(project_cache)))
 
 
-def _parse_query(query, exact=False, mode=all):
+def _parse_query(query, exact=False, mode=all, mode_inverse=any):
+    if '.' in query and ',' not in query:
+        mode = mode_inverse
+        query = query.replace('.', ',')
+
     key = 'path' if '/' in query else 'name'
     if ':' in query:
         query = query.split(',')
-        filters = [FILTERS.get(sub) for sub in query]
+        filters = [cli_utils.FILTERS.get(sub) for sub in query]
         if not all(filters):
             warn('Unknown filter: {}'.format(
-                ', '.join(sub for sub in query if sub not in FILTERS)))
+                ', '.join(sub for sub in query if sub not in cli_utils.FILTERS)))
             return None
         return lambda cached: mode(sub(cached) for sub in filters)
     elif exact:
@@ -566,17 +564,12 @@ def filter_cache(query, exact, exclude=None):
 
     project_cache = get_project_data() or {}
 
-    if '.' in query and ',' not in query:
-        mode = any
-        query = query.replace('.', ',')
-    else:
-        mode = all
-    filter_finally = filter_ = _parse_query(query, exact, mode)
+    filter_finally = filter_ = _parse_query(query, exact, all, any)
     if not filter_:
         return {}, project_cache
 
     if exclude:
-        exclude = _parse_query(exclude, False, any)
+        exclude = _parse_query(exclude, False, any, all)
         if not exclude:
             return {}, project_cache
         filter_finally = lambda c: filter_(c) and not exclude(c)
@@ -632,7 +625,7 @@ def cmd_show(namespace):
     pid, cached = cached_search.popitem()
 
     tags = []
-    for filter_tag, filter_ in FILTERS.items():
+    for filter_tag, filter_ in cli_utils.FILTERS.items():
         if filter_(cached):
             tags.append(filter_tag)
 
@@ -641,7 +634,7 @@ def cmd_show(namespace):
     else:
         warn('Package have no tags')
 
-    if filter_is_broken(cached):
+    if cli_utils.filter_is_broken(cached):
         warn('Package is broken, call `repair` to fix it.')
 
     if namespace.all:
@@ -663,10 +656,10 @@ def cmd_requirements(namespace):
 
     for pid, cached in cached_search.items():
         success(cached['name'])
-        if filter_is_broken(cached):
+        if cli_utils.filter_is_broken(cached):
             warn('Package is broken, call `repair` to fix it.')
             continue
-        if not filter_have_reqs(cached):
+        if not cli_utils.filter_have_reqs(cached):
             warn('Package have no requirements')
             continue
 
@@ -710,9 +703,9 @@ def cmd_reverse(namespace):
 
     self_pid, cached = cached_search.popitem()
 
-    if filter_is_package(cached):
+    if cli_utils.filter_is_package(cached):
         self_name = cached['package_data'].get('name', cached['name'])
-    elif filter_lang_python(cached):
+    elif cli_utils.filter_lang_python(cached):
         self_name = cached['name']
     else:
         if namespace.force:
@@ -728,7 +721,7 @@ def cmd_reverse(namespace):
         if pid == self_pid:
             continue
         # skip projects without requirements
-        if not filter_have_reqs(project):
+        if not cli_utils.filter_have_reqs(project):
             continue
 
         if project['package_data'].get('name'):
@@ -797,106 +790,90 @@ def _split_requirement_package_version(req):
     return req
 
 
+def parser_factory(subparsers):
+    def init_parser(name, func, args=(), **kwargs):
+        parser = subparsers.add_parser(name, **kwargs)
+        parser.set_defaults(func=func)
+        if 'query' in args:
+            parser.add_argument('query', help='project name/path/tag')
+        if 'exact' in args:
+            parser.add_argument(
+                '-e', '--exact', action='store_true',
+                help='exact query match project name/path')
+        if 'exclude' in args:
+            parser.add_argument(
+                '-x', '--exclude',
+                default=':archived',
+                help='exclude from query; by default excluding archived')
+        if 'all' in args:
+            parser.add_argument(
+                '-a', '--all',
+                action='store_true', help='proceed with all found entries')
+        if 'force' in args:
+            parser.add_argument(
+                '-F', '--force', action='store_true',
+                help='force proceed')
+        return parser
+    return init_parser
+
+
 def main():
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(help='sub-command help')
-    parser_init = subparsers.add_parser('init', help='init new config')
-    parser_init.set_defaults(func=cmd_init)
-    parser_info = subparsers.add_parser('info', help='get info')
-    parser_info.set_defaults(func=cmd_info)
-    parser_total = subparsers.add_parser(
-        'total', help='get total info about all collected projects')
-    parser_total.set_defaults(func=cmd_total)
-    parser_total.add_argument(
-        '-a', '--all', action='store_true', help='show all info')
-    parser_collect = subparsers.add_parser(
-        'collect', help='collect new projects')
-    parser_collect.set_defaults(func=cmd_collect)
-    parser_collect.add_argument('project', help='project name/path')
-    parser_collect.add_argument(
-        '-F', '--force', action='store_true', help='force to recollect data')
+    init_parser = parser_factory(
+        parser.add_subparsers(help='sub-command help'))
+
+    init_parser('init', cmd_info, help='init new config')
+    init_parser('info', cmd_info, help='get info (config/app)')
+    init_parser(
+        'total', cmd_total,
+        args=('all',),
+        help='get total info about all collected projects')
+
+    parser_collect = init_parser(
+        'collect', cmd_collect,
+        args=('query', 'exclude', 'force'),
+        help='collect new projects')
     parser_collect.add_argument(
         '-f', '--fast', action='store_true',
         help='fast mode, dont do additional API calls')
-    parser_collect.add_argument('-x', '--exclude', help='exclude from query')
-    parser_clear = subparsers.add_parser(
-        'clear', help='clear projects from cache')
-    parser_clear.set_defaults(func=cmd_clear)
-    parser_clear.add_argument('query', help='project name/path')
-    parser_clear.add_argument(
-        '-a', '--all', action='store_true', help='clear all entries')
-    parser_clear.add_argument(
-        '-e', '--exact', action='store_true',
-        help='exact match project name/path')
-    parser_clear.add_argument(
-        '-x', '--exclude',
-        default=':archived',
-        help='exclude from query; by default excluding archived')
-    parser_show = subparsers.add_parser(
-        'show', help='show project info from cache')
-    parser_show.set_defaults(func=cmd_show)
-    parser_show.add_argument('query', help='project name/path or tag')
-    parser_show.add_argument(
-        '-a', '--all', action='store_true', help='show all info')
-    parser_requirements = subparsers.add_parser(
-        'reqs', help='show project info from cache')
-    parser_requirements.set_defaults(func=cmd_requirements)
-    parser_requirements.add_argument('query', help='project name/path or tag')
-    parser_requirements.add_argument(
-        '-a', '--all', action='store_true',
-        help='run command to all entries found')
-    parser_requirements.add_argument(
-        '-e', '--exact', action='store_true',
-        help='exact match project name/path')
+
+    init_parser(
+        'clear', cmd_clear,
+        args=('query', 'exact', 'exclude', 'all'),
+        help='clear projects from cache')
+
+    init_parser(
+        'show', cmd_show,
+        args=('query', 'all'),
+        help='show project info from cache')
+
+    parser_requirements = init_parser(
+        'reqs', cmd_requirements,
+        args=('query', 'exact', 'all'),
+        help='show project info from cache')
     parser_requirements.add_argument('-i', '--index-url', help='show all info')
-    parser_reverse = subparsers.add_parser(
-        'reverse',
+
+    init_parser(
+        'reverse', cmd_reverse,
+        args=('query', 'exact', 'force'),
         help='main feature! get list of packages, requiring this one')
-    parser_reverse.set_defaults(func=cmd_reverse)
-    parser_reverse.add_argument('query', help='project name/path or tag')
-    parser_reverse.add_argument(
-        '-e', '--exact', action='store_true',
-        help='exact match project name/path')
-    parser_reverse.add_argument(
-        '-F', '--force', action='store_true',
-        help='force get reverse requirements, even query is not valid package')
-    parser_repair = subparsers.add_parser(
-        'repair', help='retrieve data from gitlab if missing something')
-    parser_repair.set_defaults(func=cmd_repair)
-    parser_repair.add_argument('query', help='project name/path or tag')
-    parser_repair.add_argument(
-        '-e', '--exact', action='store_true',
-        help='exact match project name/path')
-    parser_repair.add_argument(
-        '-a', '--all', action='store_true',
-        help='do repair for multiple matched')
-    parser_repair.add_argument(
-        '-f', '--force', action='store_true',
-        help='force to repair not broken project')
-    parser_repair.add_argument(
-        '-F', '--force-collect', action='store_true',
-        help='force to recollect data')
-    parser_repair.add_argument(
-        '-x', '--exclude',
-        default=':archived',
-        help='exclude from query; by default excluding archived')
-    parser_list = subparsers.add_parser('list', help='list cached projects')
-    parser_list.set_defaults(func=cmd_list)
-    parser_list.add_argument('query', help='project name/path or tag')
-    parser_list.add_argument(
-        '-e', '--exact', action='store_true',
-        help='exact match project name/path')
+
+    init_parser(
+        'repair', cmd_repair,
+        args=('query', 'exact', 'exclude', 'all', 'force'),
+        help='retrieve data from gitlab if missing something',
+    )
+
+    parser_list = init_parser(
+        'list', cmd_list,
+        args=('query', 'exact', 'exclude'),
+        help='list cached projects')
     parser_list.add_argument(
         '-t', '--total', action='store_true',
         help='print only total on filter')
     parser_list.add_argument('-l', '--limit', type=int, help='output limit')
-    parser_list.add_argument(
-        '-x', '--exclude',
-        default=':archived',
-        help='exclude from query; by default excluding archived')
 
     namespace = parser.parse_args()
-
     if getattr(namespace, 'func', None):
         try:
             return namespace.func(namespace)

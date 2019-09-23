@@ -1,4 +1,4 @@
-MIN_PYTHON_PERCENT = 10
+MIN_LANG_PERCENT = 10
 
 REQUIRED_KEYS_BASE = (
     'name',
@@ -57,26 +57,26 @@ def filter_language_na(cached):
     return unknown_value(cached.get(':languages'))
 
 
+def filter_language_no(cached):
+    return cached.get(':languages') == {}
+
+
 def filter_lang_python(cached):
     if filter_language_na(cached):
         return False
 
-    return cached[':languages'].get('Python', 0) >= MIN_PYTHON_PERCENT
+    return cached[':languages'].get('Python', 0) >= MIN_LANG_PERCENT
 
 
-def filter_lang_templates(cached):
-    if filter_language_na(cached):
-        return False
-
-    return cached[':languages'].get('Smarty', 0) >= MIN_PYTHON_PERCENT or cached[':languages'].get('HTML', 0) >= MIN_PYTHON_PERCENT
-
-
-def filter_lang_factory(code):
+def filter_lang_factory(*codes):
     def _filter_lang(cached):
         if filter_language_na(cached):
             return False
 
-        return cached[':languages'].get(code, 0) >= MIN_PYTHON_PERCENT
+        return sum(
+            cached[':languages'].get(code, 0)
+            for code in codes
+        ) >= MIN_LANG_PERCENT
     return _filter_lang
 
 
@@ -135,11 +135,13 @@ FILTERS = {
     'lang:java': filter_lang_factory('Java'),
     'lang:js': filter_lang_factory('JavaScript'),
     'lang:php': filter_lang_factory('PHP'),
-    'lang:templates': filter_lang_templates,
+    'lang:html': filter_lang_factory('HTML'),
+    'lang:docker': filter_lang_factory('Dockerfile'),
+    'lang:templates': filter_lang_factory('Smarty', 'HTML'),
     'lang:shell': filter_lang_factory('Shell'),
-    'na:language': filter_language_na,
+    'na:lang': filter_language_na,
+    'no:lang': filter_language_no,
 
-    'no:python': lambda c: not filter_lang_python(c),
     'na:req_sources': filter_is_req_unknown,
     'python:package': filter_is_package,
     'na:package': filter_is_package_na,
