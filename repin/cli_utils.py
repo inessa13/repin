@@ -12,7 +12,7 @@ REQUIRED_KEYS_BASE = (
     'docker_data',
 )
 REQUIRED_KEYS_PYTHON = (
-    'req_sources',
+    ':requirements',
 )
 
 
@@ -36,13 +36,11 @@ def filter_is_broken(cached):
 
 
 def filter_have_reqs(cached):
-    return filter_is_package(cached) and cached['package_data'].get(
-        'install_requires')
+    return cached.get(':requirements', {}) and cached.get(':requirements', {}).get('list')
 
 
 def filter_no_reqs(cached):
-    return filter_is_package(cached) and not cached['package_data'].get(
-        'install_requires')
+    return filter_lang_python(cached) and not cached.get(':requirements')
 
 
 def filter_is_active(cached):
@@ -82,16 +80,17 @@ def filter_lang_factory(*codes):
 
 def filter_is_package(cached):
     return filter_lang_python(cached) and not unknown_value(
-        cached.get('package_data'))
+        cached.get(':setup.py')) and cached.get(':setup.py')
 
 
 def filter_is_package_na(cached):
     return filter_lang_python(cached) and unknown_value(
-        cached.get('package_data'))
+        cached.get(':setup.py'))
 
 
 def filter_is_req_unknown(cached):
-    return filter_lang_python(cached) and cached.get('req_sources') == 'empty'
+    return filter_lang_python(cached) and unknown_value(
+        cached.get(':requirements'))
 
 
 def get_type_tag(cached):

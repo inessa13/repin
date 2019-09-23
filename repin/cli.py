@@ -13,7 +13,7 @@ import mock
 import toml
 import yaml
 
-from . import __version__, cli_utils
+from . import __version__, cli_utils, collectors
 
 CLR_END = '\033[0m'
 GL_PER_PAGE = 50
@@ -155,252 +155,13 @@ def get_api():
     ])
 
 
-def load_python_module(project, path):
-    try:
-        version_file = project.files.get(file_path=path, ref='master')
-    except gitlab.exceptions.GitlabGetError:
-        try:
-            version_file = project.files.get(
-                file_path=path + '/__init__.py', ref='master')
-        except gitlab.exceptions.GitlabGetError:
-            return None
-
-    locals_ = {}
-    file_content = base64.b64decode(version_file.content).decode()
-    try:
-        exec(file_content, globals(), locals_)
-    except KeyboardInterrupt:
-        raise
-    except:
-        return 'n/a'
-
-    return type('PythonModule', (), locals_)
-
-
-def parse_setup(project, cached):
-    file_info = project.files.get(file_path='setup.py', ref='master')
-    raw = base64.b64decode(file_info.content).decode()
-    content = raw.split('\n')
-
-    class f:
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def read(self, n=0):
-            return ''
-
-    setup_result = {}
-    setup_locals = {
-        'setup': lambda **kw: setup_result.update(**kw),
-        'find_packages': lambda *a, **kw: None,
-        'open': f,
-    }
-
-    eval_content = []
-    for line in content:
-        if re.match('from setuptools import', line):
-            continue
-
-        m = re.match(r'import\s+([._\w]+)(:?\s+as\s+([.\w]+))?', line)
-        if m:
-            version_path = m.group(1).replace('.', '/')
-            try:
-                version = load_python_module(project, version_path)
-            except KeyboardInterrupt:
-                raise
-            except:
-                logging.exception('setup.py parse failed')
-                cached['package_data'] = 'n/a'
-                return cached
-
-            if version:
-                if m.group(3):
-                    setup_locals[m.group(3)] = version
-                elif '.' not in m.group(1):
-                    setup_locals[m.group(1)] = version
-                else:
-                    path = list(reversed(m.group(1).split('.')))
-                    part1 = path.pop()
-                    dx = setup_locals[part1] = mock.Mock()
-                    while len(path) > 1:
-                        part = path.pop()
-                        setattr(dx, part, mock.Mock())
-                        dx = getattr(dx, part, None)
-                    part_last = path.pop()
-                    setattr(dx, part_last, version)
-                continue
-
-        eval_content.append(line)
-
-    try:
-        exec('\n'.join(eval_content), globals(), setup_locals)
-    except KeyboardInterrupt:
-        raise
-    except:
-        logging.exception('setup.py parse failed')
-        cached['package_data'] = 'n/a'
-        return cached
-
-    if setup_result:
-        cached['package_data'] = setup_result
-    else:
-        cached['package_data'] = 'n/a'
-    return cached
-
-
-def parse_requirements(project, cached, name):
-    file_info = project.files.get(file_path=name, ref='master')
-    raw = base64.b64decode(file_info.content).decode()
-
-    cached['package_data'] = {
-        'install_requires': [l for l in raw.split('\n') if l],
-    }
-    return cached
-
-
-def parse_pipfile_req(package, data):
-    if data == '*':
-        return package
-
-    elif isinstance(data, str):
-        # TODO:
-        if ',' in data:
-            data = data.split(',', 1)[0]
-
-        m = re.match("(>|<|>=|==|<=|~=)([\w\d.]+)$", data)
-        if m:
-            return package + data
-
-    elif isinstance(data, dict) and data.get('version'):
-        return package + data
-
-    else:
-        # TODO:
-        return package
-
-
-def parse_pipfile(project, cached):
-    file_info = project.files.get(file_path='Pipfile', ref='master')
-    raw = base64.b64decode(file_info.content).decode()
-
-    pipfile = toml.loads(raw)
-    if pipfile:
-        cached.setdefault('package_data', {})
-
-    if pipfile.get('packages'):
-        install_requires = [
-            parse_pipfile_req(package, value)
-            for package, value in pipfile['packages'].items()
-        ]
-        if install_requires:
-            cached['package_data']['install_requires'] = install_requires
-
-    return cached
-
-
-def _collect_languages(project, cached):
-    try:
-        languages_data = project.languages()
-    except KeyboardInterrupt:
-        raise
-    except gitlab.exceptions.GitlabGetError as e:
-        if e.response_code == 500:
-            languages_data = {}
-        else:
-            logging.exception('collect_languages failed')
-            languages_data = 'n/a'
-    except:
-        logging.exception('collect_languages failed')
-        languages_data = 'n/a'
-
-    cached[':languages'] = languages_data
-
-
-def _collect_req_sources(project, cached):
-    req_sources = []
-    for file in REQS:
-        try:
-            project.files.get(file_path=file, ref='master')
-            req_sources.append(file)
-        except gitlab.exceptions.GitlabGetError:
-            pass
-        except gitlab.exceptions.GitlabError:
-            req_sources = 'n/a'
-            break
-
-    cached['req_sources'] = req_sources
-    if not cli_utils.unknown_value(req_sources):
-        if 'setup.py' in cached['req_sources']:
-            parse_setup(project, cached)
-        elif 'reqs.txt' in cached['req_sources']:
-            parse_requirements(project, cached, 'reqs.txt')
-        elif 'requirements.txt' in cached['req_sources']:
-            parse_requirements(project, cached, 'requirements.txt')
-        elif 'requirements/prod.txt' in cached['req_sources']:
-            parse_requirements(project, cached, 'requirements/prod.txt')
-        elif 'requirements/live.txt' in cached['req_sources']:
-            parse_requirements(project, cached, 'requirements/live.txt')
-        elif 'Pipfile' in cached['req_sources']:
-            parse_pipfile(project, cached)
-
-
-def collect_file_data(filename, cache_key):
-    def decorator(func):
-        def wrap(project, cached):
-            try:
-                file = project.files.get(file_path=filename, ref='master')
-            except gitlab.exceptions.GitlabGetError:
-                cached[cache_key] = False
-                return
-            except gitlab.exceptions.GitlabError:
-                cached[cache_key] = 'n/a'
-                return
-
-            data = {'file': filename}
-            raw = base64.b64decode(file.content).decode()
-            if func(data, raw):
-                cached[cache_key] = data
-        return wrap
-    return decorator
-
-
-@collect_file_data('Dockerfile', 'docker_data')
-def _collect_dockerfile(data, raw_content):
-    for line in raw_content.split('\n'):
-        m = re.match('ENTRYPOINT\s+\[(\'|")(.*)\\1\]$', line)
-        if m:
-            data['entrypoint'] = m.group(2)
-        m = re.match('CMD\s+\[(\'|")(.*)\\1\]$', line)
-        if m:
-            data['cmd'] = '{}{}{}'.format(m.group(1), m.group(2), m.group(1))
-    return True
-
-
-@collect_file_data('.gitlab-ci.yml', 'gitlab_ci_data')
-def _collect_gitlab_ci(data, raw_content):
-    if 'nexus' in raw_content:
-        data['nexus'] = 'mentioned'
-    return True
-
-
 def add_cache(project, project_cache=None, force=False, save=True, fast=False):
     project_cache = project_cache or get_project_data() or {}
 
     cached = project_cache.setdefault(project.id, {})
 
     if not fast:
-        if force or cli_utils.unknown_value(cached.get(':languages')):
-            _collect_languages(project, cached)
-
-        if force or cli_utils.unknown_value(cached.get('docker_data')):
-            _collect_dockerfile(project, cached)
-
-        if force or cli_utils.unknown_value(cached.get('gitlab_ci_data')):
-            _collect_gitlab_ci(project, cached)
-
-        if cli_utils.filter_lang_python(cached):
-            if force or cli_utils.unknown_value(cached.get('req_sources')):
-                _collect_req_sources(project, cached)
+        collectors.collect(project, cached, force)
 
     cached.update({
         'name': project.name,
@@ -411,6 +172,7 @@ def add_cache(project, project_cache=None, force=False, save=True, fast=False):
         'archived': project.archived,
     })
 
+
     if save:
         save_project_data(project_cache)
 
@@ -418,7 +180,8 @@ def add_cache(project, project_cache=None, force=False, save=True, fast=False):
 
 
 def fix_cache(gl, project_cache, pid, cached, force):
-    if not force and not cli_utils.filter_is_broken(cached):
+    force = force or cli_utils.filter_is_broken(cached)
+    if not force:
         warn('{}: not broken'.format(cached['name']))
         return False
 
@@ -445,7 +208,7 @@ def cmd_collect(namespace):
         'membership': True,
     }
 
-    if ':' in namespace.exclude:
+    if namespace.exclude != ':archived' and ':' in namespace.exclude:
         return error('Collect cant use filters in exclude')
 
     if namespace.fast and namespace.force:
@@ -486,16 +249,18 @@ def cmd_collect(namespace):
         return error('Collect cant use filters beside :all')
 
     else:
-        projects = gl.projects.list(search=namespace.query)
-        if len(projects) == 1:
-            project = projects[0]
-            warn('{}: collecting...'.format(project.name))
-            cached = add_cache(project, project_cache, force=namespace.force, save=True)
-            pprint.pprint(cached)
-        else:
-            for index, project in enumerate(projects):
-                warn('{}: collecting... ({})'.format(project.name, index + 1))
-                add_cache(project, project_cache, force=namespace.force, save=True)
+        projects = gl.projects.list(search=namespace.query, **list_options)
+        for index, project in enumerate(projects):
+            warn('{}: collecting... ({})'.format(project.name, index + 1))
+            cache = add_cache(
+                project,
+                project_cache,
+                force=namespace.force,
+                save=True,
+                fast=namespace.fast,
+            )
+            if len(projects) == 1:
+                pprint.pprint(cache)
 
     success('total {}'.format(len(project_cache)))
 
@@ -615,30 +380,34 @@ def cmd_list(namespace):
 
 
 def cmd_show(namespace):
-    cached_search, project_cache = filter_cache(namespace.query, True)
+    cached_search, project_cache = filter_cache(
+        namespace.query, namespace.exact, namespace.exclude)
 
     if not cached_search:
         return error('Nothing found')
-    if len(cached_search) > 1:
+    if not namespace.all and len(cached_search) > 1:
         warn('Found: {}'.format(', '.join(cached.get('path') or cached.get('name') or pid for pid, cached in cached_search.items())))
+        return
 
-    pid, cached = cached_search.popitem()
+    for pid, cached in cached_search.items():
+        if len(cached_search) > 1:
+            success(cached['name'])
 
-    tags = []
-    for filter_tag, filter_ in cli_utils.FILTERS.items():
-        if filter_(cached):
-            tags.append(filter_tag)
+        tags = []
+        for filter_tag, filter_ in cli_utils.FILTERS.items():
+            if filter_(cached):
+                tags.append(filter_tag)
 
-    if tags:
-        success('Tags: {}'.format(' '.join(tags)))
-    else:
-        warn('Package have no tags')
+        if tags:
+            success('Tags: {}'.format(' '.join(tags)))
+        else:
+            warn('Package have no tags')
 
-    if cli_utils.filter_is_broken(cached):
-        warn('Package is broken, call `repair` to fix it.')
+        if cli_utils.filter_is_broken(cached):
+            warn('Package is broken, call `repair` to fix it.')
 
-    if namespace.all:
-        pprint.pprint(cached)
+        if namespace.force:
+            pprint.pprint(cached)
 
 
 def cmd_requirements(namespace):
@@ -667,7 +436,7 @@ def cmd_requirements(namespace):
 
         success(
             'package{}dep\tversion\tcomment'.format(' ' * (32 - len('package'))))
-        for req in cached['package_data']['install_requires']:
+        for req in cached[':requirements']['list']:
             req_line = req.strip()
             if req_line.startswith('# ') or req_line.startswith('--'):
                 continue
@@ -704,7 +473,7 @@ def cmd_reverse(namespace):
     self_pid, cached = cached_search.popitem()
 
     if cli_utils.filter_is_package(cached):
-        self_name = cached['package_data'].get('name', cached['name'])
+        self_name = cached[':setup.py'].get('name', cached['name'])
     elif cli_utils.filter_lang_python(cached):
         self_name = cached['name']
     else:
@@ -724,8 +493,8 @@ def cmd_reverse(namespace):
         if not cli_utils.filter_have_reqs(project):
             continue
 
-        if project['package_data'].get('name'):
-            project_name = '{} ({})'.format(project['package_data'].get('name'), project['path'])
+        if project[':setup.py'].get('name'):
+            project_name = '{} ({})'.format(project[':setup.py'].get('name'), project['path'])
         else:
             project_name = project['path']
 
@@ -733,7 +502,7 @@ def cmd_reverse(namespace):
         if project['archived']:
             comment_addt += ' :archived'
 
-        for req in project['package_data']['install_requires']:
+        for req in project[':requirements']['list']:
             reverse_name, dep_mode, version, comment = \
                 _split_requirement_package_version(req)
             comment += comment_addt
@@ -844,7 +613,7 @@ def main():
 
     init_parser(
         'show', cmd_show,
-        args=('query', 'all'),
+        args=('query', 'all', 'exact', 'exclude', 'force'),
         help='show project info from cache')
 
     parser_requirements = init_parser(
