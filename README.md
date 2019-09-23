@@ -15,7 +15,7 @@ Init gitlab data
 repin init
 ```
 
-Get tool info
+Get tool info (version, config root, available filters)
 ```
 repin info
 ```
@@ -50,6 +50,26 @@ repin list site/
 List all repos in with name `pages`
 ```
 repin list pages
+```
+
+List all python libs
+```
+repin list type:lib
+```
+
+List all services
+```
+repin list type:service
+```
+
+List archived repos with no requirements (python)
+```
+repin list :archived,no:reqs
+```
+
+List archived or with no requirements (python)
+```
+repin list :archived.no:reqs
 ```
 
 Get common data about `site/py` repo
