@@ -263,7 +263,7 @@ def _load_python_module(project, path):
     except KeyboardInterrupt:
         raise
     except Exception:
-        logging.exception('Load module failed!')
+        logging.exception('Load module %s failed!', path)
         return 'n/a'
 
     return type('PythonModule', (), locals_)
@@ -277,6 +277,8 @@ def _preload_imports(project, path, lines, setup_locals):
             try:
                 importlib.import_module(m.group(1))
             except ImportError:
+                pass
+            except TypeError:
                 pass
             else:
                 eval_content.append(line)
@@ -314,6 +316,8 @@ def _preload_imports(project, path, lines, setup_locals):
             try:
                 importlib.import_module(m.group(1))
             except ImportError:
+                pass
+            except TypeError:
                 pass
             else:
                 eval_content.append(line)
@@ -372,10 +376,17 @@ def _parse_pipfile_req(package, data):
 
 
 def _parse_poetry_req(package, data):
+    package = str(package)
     if data == '*':
         return package
 
-    return package + '==' + data
+    if isinstance(data, str):
+        return package + '==' + data
+
+    if isinstance(data, dict) and data.get('version'):
+        return package + '==' + data['version']
+
+    return package + '==(complex)'
 
 
 class _fake_open:

@@ -9,8 +9,10 @@ import shutil
 
 import gitlab
 import Levenshtein
+import toml.decoder
 import yaml
 import yaml.parser
+import yaml.representer
 
 from . import __version__, cli_utils, collectors
 
@@ -92,7 +94,7 @@ def cmd_init(namespace):
         config.add_section(namespace.config)
         config.set(namespace.config, 'url', url)
         config.set(namespace.config, 'private_token', token)
-        config.set(namespace.config, 'api_version', 4)
+        config.set(namespace.config, 'api_version', '4')
         _save_config(config)
     else:
         with open(config_file, 'w') as f:
@@ -212,8 +214,18 @@ def save_project_data(data):
             os.path.join(base_path, CACHE_FILE_NAME),
             os.path.join(base_path, CACHE_FILE_BACK_NAME))
 
-    with open(os.path.join(base_path, CACHE_FILE_NAME), 'w') as f:
-        yaml.dump(data, f)
+    for sub in toml.decoder.InlineTableDict.__subclasses__():
+        yaml.add_representer(
+            sub, yaml.representer.SafeRepresenter.represent_dict)
+
+    try:
+        with open(os.path.join(base_path, CACHE_FILE_NAME), 'w') as f:
+            yaml.dump(data, f)
+    except yaml.representer.RepresenterError:
+        shutil.copy(
+            os.path.join(base_path, CACHE_FILE_BACK_NAME),
+            os.path.join(base_path, CACHE_FILE_NAME))
+        raise
 
 
 def get_api():
@@ -281,6 +293,7 @@ def cmd_collect(namespace):
     project_cache = get_project_data() or {}
     # TODO:
     list_options = {
+        # 'visibility': 'private',
         'membership': True,
     }
 
@@ -375,6 +388,10 @@ def cmd_repair(namespace):
         except KeyboardInterrupt:
             warn('Interrupted')
             break
+        except Exception:
+            logging.exception(
+                '{}: package fix failed'.format(cached.get('name') or pid))
+            continue
 
         if fix_result:
             fixed += 1
@@ -450,13 +467,16 @@ def cmd_list(namespace):
         line = 0
         for pid, cached in cached_search.items():
             if namespace.limit is not None and line >= namespace.limit:
-                if line:
+                if not namespace.quiet and line:
                     warn('Remaining {}'.format(len(cached_search) - line))
                 break
             line += 1
             print('{}'.format(cached.get('path') or cached.get('name') or pid))
-    success(
-        'Found: {}, Total: {}'.format(len(cached_search), len(project_cache)))
+
+    if not namespace.quiet:
+        success(
+            'Found: {}, Total: {}'.format(
+                len(cached_search), len(project_cache)))
 
 
 def cmd_show(namespace):
@@ -525,27 +545,33 @@ def cmd_requirements(namespace):
         namespace.query, namespace.exact)
 
     if not cached_search:
-        return error('Nothing found')
+        if not namespace.quiet:
+            return error('Nothing found')
     if not namespace.all and len(cached_search) > 1:
-        warn('Found {}: {}'.format(len(cached_search), _limit_str(', '.join(
-            cached['path'] for cached in cached_search.values()
-        ), 100)))
-        warn('Use --all to repair them all.')
+        if not namespace.quiet:
+            warn('Found {}: {}'.format(len(cached_search), _limit_str(', '.join(
+                cached['path'] for cached in cached_search.values()
+            ), 100)))
+            warn('Use --all to repair them all.')
         return
 
     for pid, cached in cached_search.items():
-        success(cached['name'])
+        if not namespace.quiet:
+            success(cached['name'])
         if cli_utils.filter_is_broken(cached):
-            warn('Package is broken, call `repair` to fix it.')
+            if not namespace.quiet:
+                warn('Package is broken, call `repair` to fix it.')
             continue
         if not cli_utils.filter_have_reqs(cached):
-            warn('Package have no requirements')
+            if not namespace.quiet:
+                warn('Package have no requirements')
             continue
 
         # TODO: build requirements tree
 
-        success('package{}dep\tversion\tcomment'.format(
-            ' ' * (32 - len('package'))))
+        if not namespace.quiet:
+            success('package{}dep\tversion\tcomment'.format(
+                ' ' * (32 - len('package'))))
         for req in cached[':requirements']['list']:
             req_line = req.strip()
             if req_line.startswith('# ') or req_line.startswith('--'):
@@ -616,6 +642,8 @@ def cmd_reverse(namespace):
             comment_addt += ' :archived'
 
         for req in project[':requirements']['list']:
+            if not req:
+                continue
             reverse_name, dep_mode, version, comment = \
                 _split_requirement_package_version(req)
             comment += comment_addt
@@ -760,7 +788,7 @@ def main():
 
     parser_requirements = init_parser(
         'reqs', cmd_requirements,
-        args=('query', 'exact', 'all'),
+        args=('query', 'exact', 'all', 'quiet'),
         help='show project info from cache')
     parser_requirements.add_argument('-i', '--index-url', help='show all info')
 
@@ -777,7 +805,7 @@ def main():
 
     parser_list = init_parser(
         'list', cmd_list,
-        args=('query', 'exact', 'exclude'),
+        args=('query', 'exact', 'exclude', 'quiet'),
         help='list cached projects')
     parser_list.add_argument(
         '-t', '--total', action='store_true',

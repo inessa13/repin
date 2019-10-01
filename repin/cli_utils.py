@@ -36,6 +36,9 @@ def filter_is_broken(cached):
         if filter_is_broken_package(cached):
             return True
 
+    if filter_language_no(cached):
+        return True
+
 
 def filter_have_reqs(cached):
     return cached.get(':requirements', {}) and cached.get(':requirements', {}).get('list')
