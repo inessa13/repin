@@ -33,6 +33,8 @@ def filter_is_broken(cached):
         for key in REQUIRED_KEYS_PYTHON:
             if unknown_value(cached.get(key)):
                 return True
+        if filter_is_broken_package(cached):
+            return True
 
 
 def filter_have_reqs(cached):
@@ -83,6 +85,18 @@ def filter_is_package(cached):
         cached.get(':setup.py')) and cached.get(':setup.py')
 
 
+def filter_is_python_pipfile(cached):
+    return filter_lang_python(cached) and cached.get(':Pipfile')
+
+
+def filter_is_python_pyproject(cached):
+    return filter_lang_python(cached) and cached.get('pyproject.toml')
+
+
+def filter_is_broken_package(cached):
+    return filter_lang_python(cached) and cached.get(':setup.py') == 'n/a'
+
+
 def filter_is_package_na(cached):
     return filter_lang_python(cached) and unknown_value(
         cached.get(':setup.py'))
@@ -101,7 +115,7 @@ def get_type_tag(cached):
                 or cached['docker_data'].get('cmd')):
             return 'type:service'
     if cached.get('gitlab_ci_data') and cached['gitlab_ci_data'].get('nexus'):
-        return 'type:lib'
+        return 'python:lib'
     return 'na:type'
 
 
@@ -114,7 +128,7 @@ def filter_is_type_service(cached):
 
 
 def filter_is_type_lib(cached):
-    return get_type_tag(cached) == 'type:lib'
+    return get_type_tag(cached) == 'python:lib'
 
 
 def filter_is_type_unknown(cached):
@@ -143,12 +157,15 @@ FILTERS = {
 
     'na:req_sources': filter_is_req_unknown,
     'python:package': filter_is_package,
-    'na:package': filter_is_package_na,
-    'have:reqs': filter_have_reqs,
-    'no:reqs': filter_no_reqs,
+    'python:package:broken': filter_is_broken_package,
+    'python:lib': filter_is_type_lib,
+    'python:pipfile': filter_is_python_pipfile,
+    'python:pyproject': filter_is_python_pyproject,
+    'python:na:package': filter_is_package_na,
+    'python:have:reqs': filter_have_reqs,
+    'python:no:reqs': filter_no_reqs,
 
     'type:service': filter_is_type_service,
-    'type:lib': filter_is_type_lib,
     'na:type': filter_is_type_unknown,
     ':docker': filter_have_dockerfile,
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import base64
 import configparser
 import logging
 import os
@@ -17,7 +18,7 @@ CLR_FAIL = '\033[91m'
 CLR_WARNING = '\033[93m'
 CLR_OKGREEN = '\033[92m'
 CLR_END = '\033[0m'
-GL_PER_PAGE = 50
+GL_PER_PAGE = 100
 CONFIG_DIR = '.repin'
 CACHE_FILE_NAME = '.repin-cache'
 CACHE_FILE_BACK_NAME = '.repin-cache-back'
@@ -179,7 +180,11 @@ def get_config_dir():
 
 
 def get_project_data():
-    base_path = get_config_dir()
+    base_path = os.path.join(get_config_dir(), _get_current_config())
+
+    if not os.path.exists(base_path):
+        return None
+
     try:
         with open(os.path.join(base_path, CACHE_FILE_NAME), 'r') as f:
             return yaml.load(f)
@@ -197,11 +202,16 @@ def get_project_data():
 
 
 def save_project_data(data):
-    base_path = get_config_dir()
+    base_path = os.path.join(get_config_dir(), _get_current_config())
+
+    if not os.path.exists(base_path):
+        os.mkdir(base_path)
+
     if os.path.exists(os.path.join(base_path, CACHE_FILE_NAME)):
         shutil.copy(
             os.path.join(base_path, CACHE_FILE_NAME),
             os.path.join(base_path, CACHE_FILE_BACK_NAME))
+
     with open(os.path.join(base_path, CACHE_FILE_NAME), 'w') as f:
         yaml.dump(data, f)
 
@@ -221,7 +231,8 @@ def get_config():
 
 
 def add_cache(project, project_cache=None, force=False, save=True, fast=False):
-    project_cache = project_cache or get_project_data() or {}
+    if project_cache is None:
+        project_cache = get_project_data() or {}
 
     cached = project_cache.setdefault(project.id, {})
 
@@ -268,8 +279,9 @@ def fix_cache(gl, project_cache, pid, cached, force):
 def cmd_collect(namespace):
     gl = get_api()
     project_cache = get_project_data() or {}
+    # TODO:
     list_options = {
-        # 'membership': True,
+        'membership': True,
     }
 
     if namespace.exclude != ':archived' and ':' in namespace.exclude:
@@ -480,6 +492,34 @@ def cmd_show(namespace):
             pprint.pprint(cached)
 
 
+def cmd_cat(namespace):
+    cached_search, project_cache = filter_cache(
+        namespace.query, namespace.exact, False)
+
+    if not cached_search:
+        return error('Nothing found')
+    if not namespace.all and len(cached_search) > 1:
+        warn('Found: {}'.format(', '.join(
+            cached.get('path') or cached.get('name') or pid
+            for pid, cached in cached_search.items())))
+        return
+
+    gl = get_api()
+    for pid, cached in cached_search.items():
+        try:
+            project = gl.projects.get(pid)
+        except gitlab.exceptions.GitlabGetError:
+            error('{}: missing'.format(cached.get('name') or pid))
+            continue
+
+        try:
+            file = project.files.get(
+                file_path=namespace.file, ref='master')
+        except gitlab.exceptions.GitlabGetError:
+            continue
+        print(base64.b64decode(file.content).decode())
+
+
 def cmd_requirements(namespace):
     cached_search, project_cache = filter_cache(
         namespace.query, namespace.exact)
@@ -563,7 +603,9 @@ def cmd_reverse(namespace):
         if not cli_utils.filter_have_reqs(project):
             continue
 
-        if project[':setup.py'].get('name'):
+        if (project.get(':setup.py')
+                and project[':setup.py'] != 'n/a'
+                and project[':setup.py'].get('name')):
             project_name = '{} ({})'.format(
                 project[':setup.py'].get('name'), project['path'])
         else:
@@ -584,28 +626,31 @@ def cmd_reverse(namespace):
                 dep_for_mb.setdefault(reverse_name, []).append(
                     (project_name, dep_mode, version, comment))
 
+    PROJECT_NAME_LEN = 60
     if dep_for:
-        success('Found reversed dependencies:')
-        success('version\tdep\tproject{}comment'.format(
-            ' ' * (48 - len('project'))))
+        if not namespace.quiet:
+            success('Found reversed dependencies:')
+            warn('version\tdep\tproject{}comment'.format(
+                ' ' * (PROJECT_NAME_LEN - len('project'))))
         for project_name, dep_mode, version, comment in dep_for:
-            warn('{}\t{}\t{}{}# {}'.format(
-                version, dep_mode, project_name,
-                ' ' * (48 - len(project_name)),
+            print('{}\t{}\t{}{}# {}'.format(
+                version or 'latest', dep_mode or '', project_name,
+                ' ' * (PROJECT_NAME_LEN - len(project_name)),
                 comment,
             ))
-    else:
+    elif not namespace.quiet:
         warn('No strict reversed dependencies found')
 
     if dep_for_mb:
-        warn('Found similar reversed dependencies:')
+        if not namespace.quiet:
+            success('Found similar reversed dependencies:')
         for name, similar in dep_for_mb.items():
-            success('{}: '.format(name))
-            success('version\tdep\tproject')
+            if not namespace.quiet:
+                success('{}: '.format(name))
             for project_name, dep_mode, version, comment in similar:
-                success('{}\t{}\t{}{}# {}'.format(
-                    version, dep_mode, project_name,
-                    ' ' * (48 - len(project_name)),
+                warn('{}\t{}\t{}{}# {}'.format(
+                    version or 'latest', dep_mode or '', project_name,
+                    ' ' * (PROJECT_NAME_LEN - len(project_name)),
                     comment,
                 ))
 
@@ -646,6 +691,10 @@ def parser_factory(subparsers):
                 '-x', '--exclude',
                 default=':archived',
                 help='exclude from query; by default excluding archived')
+        if 'exclude2' in args:
+            parser.add_argument(
+                '-x', '--exclude',
+                help='exclude from query; by default excluding archived')
         if 'all' in args:
             parser.add_argument(
                 '-a', '--all',
@@ -654,6 +703,14 @@ def parser_factory(subparsers):
             parser.add_argument(
                 '-F', '--force', action='store_true',
                 help='force proceed')
+        if 'quiet' in args:
+            parser.add_argument(
+                '-q', '--quiet', action='store_true',
+                help='quiet output')
+        if 'verbose' in args:
+            parser.add_argument(
+                '-v', '--verbose', action='store_true',
+                help='verbose output')
         return parser
     return init_parser
 
@@ -698,7 +755,7 @@ def main():
 
     init_parser(
         'show', cmd_show,
-        args=('query', 'all', 'exact', 'exclude', 'force'),
+        args=('query', 'all', 'exact', 'exclude2', 'force'),
         help='show project info from cache')
 
     parser_requirements = init_parser(
@@ -709,7 +766,7 @@ def main():
 
     init_parser(
         'reverse', cmd_reverse,
-        args=('query', 'exact', 'force'),
+        args=('query', 'exact', 'force', 'quiet'),
         help='main feature! get list of packages, requiring this one')
 
     init_parser(
@@ -726,6 +783,12 @@ def main():
         '-t', '--total', action='store_true',
         help='print only total on filter')
     parser_list.add_argument('-l', '--limit', type=int, help='output limit')
+
+    parser_cat = init_parser(
+        'cat', cmd_cat,
+        args=('query', 'all', 'exact', 'exclude2'),
+        help='cat')
+    parser_cat.add_argument('file', type=str, help='file path to cat')
 
     namespace = parser.parse_args()
     if getattr(namespace, 'func', None):

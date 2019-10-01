@@ -64,12 +64,12 @@ repin list type:service
 
 List archived repos with no requirements (python)
 ```
-repin list :archived,no:reqs
+repin list :archived,python:no:reqs
 ```
 
 List archived or with no requirements (python)
 ```
-repin list :archived.no:reqs
+repin list :archived.python:no:reqs
 ```
 
 Get common data about `site/py` repo
