@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 import argparse
-import base64
+import configparser
 import logging
 import os
 import pprint
-import re
 import shutil
 
 import gitlab
 import Levenshtein
-import mock
-import toml
 import yaml
+import yaml.parser
 
 from . import __version__, cli_utils, collectors
 
+CLR_FAIL = '\033[91m'
+CLR_WARNING = '\033[93m'
+CLR_OKGREEN = '\033[92m'
 CLR_END = '\033[0m'
 GL_PER_PAGE = 50
 CONFIG_DIR = '.repin'
@@ -22,11 +23,11 @@ CACHE_FILE_NAME = '.repin-cache'
 CACHE_FILE_BACK_NAME = '.repin-cache-back'
 CONFIG_FILE_NAME = '.python-gitlab.cfg'
 CONFIG_TEMPLATE = """[global]
-default = default
+default = {default}
 ssl_verify = true
 timeout = 10
 
-[default]
+[{default}]
 api_version = 4
 url = {url}
 private_token = {token}
@@ -46,22 +47,28 @@ class AppError(Exception):
 
 
 def error(message):
-    CLR_FAIL = '\033[91m'
     print(CLR_FAIL + message + CLR_END)
 
 
 def warn(message):
-    CLR_WARNING = '\033[93m'
     print(CLR_WARNING + message + CLR_END)
 
 
 def success(message):
-    CLR_OKGREEN = '\033[92m'
     print(CLR_OKGREEN + message + CLR_END)
 
 
 def cmd_init(namespace):
-    for_user = input('init for a user or local path (y - for user)?  [y]/n ')
+    if namespace.local and namespace.user:
+        return error('can not use local and user flags together')
+    elif namespace.user:
+        for_user = 'y'
+    elif namespace.local:
+        for_user = 'n'
+    else:
+        for_user = input(
+            'init for a user or local path (y - for user)?  [y]/n ')
+
     path = '.' if for_user == 'n' else os.path.expanduser('~')
 
     base_path = os.path.abspath(os.path.join(path, CONFIG_DIR))
@@ -70,28 +77,80 @@ def cmd_init(namespace):
 
     config_file = os.path.join(base_path, CONFIG_FILE_NAME)
     if os.path.isfile(config_file):
-        return warn('Already inited')
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        if config.has_option(namespace.config, 'url'):
+            return warn('Already exists')
 
     url = input('url: ')
     token = input('token: ')
-    with open(config_file, 'w') as f:
-        f.write(CONFIG_TEMPLATE.format(url=url, token=token))
+
+    if os.path.isfile(config_file):
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        config.add_section(namespace.config)
+        config.set(namespace.config, 'url', url)
+        config.set(namespace.config, 'private_token', token)
+        config.set(namespace.config, 'api_version', 4)
+        _save_config(config)
+    else:
+        with open(config_file, 'w') as f:
+            f.write(CONFIG_TEMPLATE.format(
+                default=namespace.config, url=url, token=token))
 
     success('Inited')
 
 
+def _save_config(config):
+    base_path = get_config_dir()
+    config_file = os.path.join(base_path, CONFIG_FILE_NAME)
+    with open(config_file, 'w') as file:
+        config.write(file)
+
+
 def cmd_info(namespace):
     success('version: {}'.format(__version__))
-    success('config root: {}'.format(get_config_dir()))
     success('available filters:')
     for f in cli_utils.FILTERS.keys():
         print(f)
 
 
+def _get_current_config():
+    config = get_config()
+    return config.get('global', 'default')
+
+
+def cmd_config(namespace):
+    config = get_config()
+
+    if namespace.switch:
+        if not config.has_option(namespace.switch, 'url'):
+            return error('Invalid config')
+        if config.get('global', 'default') == namespace.switch:
+            return warn('Config already set to {}'.format(namespace.switch))
+        config.set('global', 'default', namespace.switch)
+        _save_config(config)
+        success('set config to {}'.format(namespace.switch))
+        return
+
+    print('Config root: {}'.format(get_config_dir()))
+    print('Current config: {}'.format(config['global'].get('default')))
+    print('Avaliable configs:')
+    for key, opt in config.items():
+        if key not in ('DEFAULT', 'global'):
+            print(' ', key, opt.get('url'))
+
+
 def cmd_total(namespace):
-    project_cache = get_project_data() or {}
+    if namespace.query:
+        cached_search, project_cache = filter_cache(
+            namespace.query, False)
+    else:
+        cached_search = get_project_data() or {}
+
     counts = {}
-    for pid, cached in project_cache.items():
+
+    for pid, cached in cached_search.items():
         for filter_tag, filter_ in cli_utils.FILTERS.items():
             counts.setdefault(filter_tag, 0)
             if filter_(cached):
@@ -120,7 +179,6 @@ def get_config_dir():
 
 
 def get_project_data():
-    import yaml.parser
     base_path = get_config_dir()
     try:
         with open(os.path.join(base_path, CACHE_FILE_NAME), 'r') as f:
@@ -150,9 +208,16 @@ def save_project_data(data):
 
 def get_api():
     base_path = get_config_dir()
-    return gitlab.Gitlab.from_config('default', [
+    return gitlab.Gitlab.from_config(_get_current_config(), [
         os.path.join(base_path, CONFIG_FILE_NAME)
     ])
+
+
+def get_config():
+    base_path = get_config_dir()
+    parser = configparser.ConfigParser()
+    parser.read(os.path.join(base_path, CONFIG_FILE_NAME))
+    return parser
 
 
 def add_cache(project, project_cache=None, force=False, save=True, fast=False):
@@ -171,7 +236,6 @@ def add_cache(project, project_cache=None, force=False, save=True, fast=False):
         'web_url': project.web_url,
         'archived': project.archived,
     })
-
 
     if save:
         save_project_data(project_cache)
@@ -205,7 +269,7 @@ def cmd_collect(namespace):
     gl = get_api()
     project_cache = get_project_data() or {}
     list_options = {
-        'membership': True,
+        # 'membership': True,
     }
 
     if namespace.exclude != ':archived' and ':' in namespace.exclude:
@@ -224,14 +288,14 @@ def cmd_collect(namespace):
                 if namespace.exclude and namespace.exclude in '{}/{}'.format(
                         project.namespace['full_path'], project.path):
                     continue
-                warn('{}: collecting... ({})'.format(
+                print('{}: collecting... ({})'.format(
                     project.name, index + 1 + (page - 1) * GL_PER_PAGE))
                 try:
                     add_cache(
                         project,
                         project_cache,
                         force=namespace.force,
-                        save=True,
+                        save=False,
                         fast=namespace.fast,
                     )
                 except KeyboardInterrupt:
@@ -239,6 +303,9 @@ def cmd_collect(namespace):
                     interrupted = True
                     break
                 # TODO: save on finally
+
+            save_project_data(project_cache)
+
             if interrupted:
                 break
 
@@ -314,8 +381,8 @@ def _parse_query(query, exact=False, mode=all, mode_inverse=any):
         query = query.split(',')
         filters = [cli_utils.FILTERS.get(sub) for sub in query]
         if not all(filters):
-            warn('Unknown filter: {}'.format(
-                ', '.join(sub for sub in query if sub not in cli_utils.FILTERS)))
+            warn('Unknown filter: {}'.format(', '.join(
+                sub for sub in query if sub not in cli_utils.FILTERS)))
             return None
         return lambda cached: mode(sub(cached) for sub in filters)
     elif exact:
@@ -376,7 +443,8 @@ def cmd_list(namespace):
                 break
             line += 1
             print('{}'.format(cached.get('path') or cached.get('name') or pid))
-    success('Found: {}, Total: {}'.format(len(cached_search), len(project_cache)))
+    success(
+        'Found: {}, Total: {}'.format(len(cached_search), len(project_cache)))
 
 
 def cmd_show(namespace):
@@ -386,7 +454,9 @@ def cmd_show(namespace):
     if not cached_search:
         return error('Nothing found')
     if not namespace.all and len(cached_search) > 1:
-        warn('Found: {}'.format(', '.join(cached.get('path') or cached.get('name') or pid for pid, cached in cached_search.items())))
+        warn('Found: {}'.format(', '.join(
+            cached.get('path') or cached.get('name') or pid
+            for pid, cached in cached_search.items())))
         return
 
     for pid, cached in cached_search.items():
@@ -434,8 +504,8 @@ def cmd_requirements(namespace):
 
         # TODO: build requirements tree
 
-        success(
-            'package{}dep\tversion\tcomment'.format(' ' * (32 - len('package'))))
+        success('package{}dep\tversion\tcomment'.format(
+            ' ' * (32 - len('package'))))
         for req in cached[':requirements']['list']:
             req_line = req.strip()
             if req_line.startswith('# ') or req_line.startswith('--'):
@@ -494,7 +564,8 @@ def cmd_reverse(namespace):
             continue
 
         if project[':setup.py'].get('name'):
-            project_name = '{} ({})'.format(project[':setup.py'].get('name'), project['path'])
+            project_name = '{} ({})'.format(
+                project[':setup.py'].get('name'), project['path'])
         else:
             project_name = project['path']
 
@@ -515,7 +586,8 @@ def cmd_reverse(namespace):
 
     if dep_for:
         success('Found reversed dependencies:')
-        success('version\tdep\tproject{}comment'.format(' ' * (48 - len('project'))))
+        success('version\tdep\tproject{}comment'.format(
+            ' ' * (48 - len('project'))))
         for project_name, dep_mode, version, comment in dep_for:
             warn('{}\t{}\t{}{}# {}'.format(
                 version, dep_mode, project_name,
@@ -591,12 +663,25 @@ def main():
     init_parser = parser_factory(
         parser.add_subparsers(help='sub-command help'))
 
-    init_parser('init', cmd_info, help='init new config')
-    init_parser('info', cmd_info, help='get info (config/app)')
-    init_parser(
+    parser_init = init_parser('init', cmd_init, help='init new config')
+    parser_init.add_argument(
+        '-l', '--local', action='store_true', help='init in cwd')
+    parser_init.add_argument(
+        '-u', '--user', action='store_true', help='init user root')
+    parser_init.add_argument(
+        '-c', '--config', default='default', help='config alias')
+
+    init_parser('info', cmd_info, help='get app info')
+
+    parser_config = init_parser('config', cmd_config, help='get config info')
+    parser_config.add_argument(
+        '-s', '--switch', help='config alias')
+
+    parser_total = init_parser(
         'total', cmd_total,
         args=('all',),
         help='get total info about all collected projects')
+    parser_total.add_argument('-q', '--query', help='project name/path/tag')
 
     parser_collect = init_parser(
         'collect', cmd_collect,
