@@ -573,4 +573,4 @@ def collect(project, cached, force):
                     'multiple data for save setting', collector.cache_key, d, collected[cache_key])
 
     collected[':last_upgrade_activity'] = cached['last_activity_at']
-    cached.update(collected)
+    return collected

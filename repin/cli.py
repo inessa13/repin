@@ -1,53 +1,23 @@
 #!/usr/bin/env python3
 import argparse
 import base64
-import configparser
 import datetime
+import getpass
 import logging
-import os
 import pprint
-import shutil
 
 import gitlab
 import Levenshtein
-import toml.decoder
-import yaml
-import yaml.parser
-import yaml.representer
 
-from . import __version__, cli_utils, collectors
+from . import __version__, cli_utils, collectors, errors
+from .cache import cache
+from .config import config
 
 CLR_FAIL = '\033[91m'
 CLR_WARNING = '\033[93m'
 CLR_OKGREEN = '\033[92m'
 CLR_END = '\033[0m'
 GL_PER_PAGE = 100
-CONFIG_DIR = '.repin'
-CACHE_FILE_NAME = '.repin-cache'
-CACHE_FILE_BACK_NAME = '.repin-cache-back'
-CONFIG_FILE_NAME = '.python-gitlab.cfg'
-CONFIG_TEMPLATE = """[global]
-default = {default}
-ssl_verify = true
-timeout = 10
-
-[{default}]
-api_version = 4
-url = {url}
-private_token = {token}
-"""
-REQS = (
-    'setup.py',
-    'requirements.txt',
-    'reqs.txt',
-    'Pipfile',
-    'requirements/prod.txt',
-    'requirements/live.txt',
-)
-
-
-class AppError(Exception):
-    pass
 
 
 def error(message):
@@ -62,90 +32,52 @@ def success(message):
     print(CLR_OKGREEN + message + CLR_END)
 
 
-def cmd_init(namespace):
-    if namespace.local and namespace.user:
-        return error('can not use local and user flags together')
-    elif namespace.user:
-        for_user = 'y'
-    elif namespace.local:
-        for_user = 'n'
-    else:
-        for_user = input(
-            'init for a user or local path (y - for user)?  [y]/n ')
-
-    path = '.' if for_user == 'n' else os.path.expanduser('~')
-
-    base_path = os.path.abspath(os.path.join(path, CONFIG_DIR))
-    if not os.path.isdir(base_path):
-        os.makedirs(base_path)
-
-    config_file = os.path.join(base_path, CONFIG_FILE_NAME)
-    if os.path.isfile(config_file):
-        config = configparser.ConfigParser()
-        config.read(config_file)
-        if config.has_option(namespace.config, 'url'):
-            return warn('Already exists')
-
-    url = input('url: ')
-    token = input('token: ')
-
-    if os.path.isfile(config_file):
-        config = configparser.ConfigParser()
-        config.read(config_file)
-        config.add_section(namespace.config)
-        config.set(namespace.config, 'url', url)
-        config.set(namespace.config, 'private_token', token)
-        config.set(namespace.config, 'api_version', '4')
-        _save_config(config)
-    else:
-        with open(config_file, 'w') as f:
-            f.write(CONFIG_TEMPLATE.format(
-                default=namespace.config, url=url, token=token))
-
-    success('Inited')
-
-
-def _save_config(config):
-    base_path = get_config_dir()
-    config_file = os.path.join(base_path, CONFIG_FILE_NAME)
-    with open(config_file, 'w') as file:
-        config.write(file)
-
-
-def cmd_info(namespace):
+def cmd_info(__):
     success('version: {}'.format(__version__))
     success('available filters:')
     for f in cli_utils.FILTERS.keys():
         print(f)
 
 
-def _get_current_config():
-    config = get_config()
-    return config.get('global', 'default')
+def cmd_version(__):
+    print('Repin {}'.format(__version__))
+
+
+def cmd_init(namespace):
+    config.prepare('.' if namespace.local else '~')
+
+    if config.has_profile(namespace.profile):
+        return warn('profile `{}` already exists'.format(namespace.profile))
+
+    url = input('url: ')
+    token = getpass.getpass('token: ')
+
+    config.add_profile(namespace.profile, url, token)
+    config.switch_profile(namespace.profile)
+    config.flush()
+    success('inited')
 
 
 def cmd_config(namespace):
-    config = get_config()
+    config.load()
 
     if namespace.switch:
-        if not config.has_option(namespace.switch, 'url'):
-            return error('Invalid config')
-        if config.get('global', 'default') == namespace.switch:
-            return warn('Config already set to {}'.format(namespace.switch))
-        config.set('global', 'default', namespace.switch)
-        _save_config(config)
+        config.switch_profile(namespace.switch)
+        config.flush()
         success('set config to {}'.format(namespace.switch))
         return
 
-    print('Config root: {}'.format(get_config_dir()))
-    print('Current config: {}'.format(config['global'].get('default')))
-    print('Avaliable configs:')
-    for key, opt in config.items():
-        if key not in ('DEFAULT', 'global'):
-            print(' ', key, opt.get('url'))
+    print('Config root: {}'.format(config.root))
+    print('Profile: {}'.format(config.current_profile()))
+    if namespace.verbose:
+        print('Available profiles:')
+        for profile, url in config.iter_profiles():
+            print(' ', profile, url)
 
 
 def cmd_total(namespace):
+    config.load()
+
     if namespace.all:
         namespace.exclude = ':none'
 
@@ -175,89 +107,18 @@ def cmd_total(namespace):
                 success('{} {}'.format(filter_tag_pad, count))
 
 
-def get_config_dir():
-    paths = (
-        os.path.abspath(os.path.join('.', CONFIG_DIR)),  # local
-        os.path.abspath(os.path.join(os.path.expanduser('~'), CONFIG_DIR)),
-        os.path.abspath(os.path.dirname(__file__)),  # global
-    )
-    for path in paths:
-        if os.path.isfile(os.path.join(path, CONFIG_FILE_NAME)):
-            return path
-    raise AppError('Missing config. Make `init`.')
-
-
-def get_project_data():
-    base_path = os.path.join(get_config_dir(), _get_current_config())
-
-    if not os.path.exists(base_path):
-        return None
-
-    try:
-        with open(os.path.join(base_path, CACHE_FILE_NAME), 'r') as f:
-            return yaml.load(f)
-    except yaml.parser.ParserError:
-        backup = os.path.join(base_path, CACHE_FILE_BACK_NAME)
-        if os.path.exists(backup):
-            shutil.move(
-                backup,
-                os.path.join(base_path, CACHE_FILE_NAME),
-            )
-            return get_project_data()
-        raise
-    except IOError:
-        return None
-
-
-def save_project_data(data):
-    base_path = os.path.join(get_config_dir(), _get_current_config())
-
-    if not os.path.exists(base_path):
-        os.mkdir(base_path)
-
-    if os.path.exists(os.path.join(base_path, CACHE_FILE_NAME)):
-        shutil.copy(
-            os.path.join(base_path, CACHE_FILE_NAME),
-            os.path.join(base_path, CACHE_FILE_BACK_NAME))
-
-    for sub in toml.decoder.InlineTableDict.__subclasses__():
-        yaml.add_representer(
-            sub, yaml.representer.SafeRepresenter.represent_dict)
-
-    try:
-        with open(os.path.join(base_path, CACHE_FILE_NAME), 'w') as f:
-            yaml.dump(data, f)
-    except yaml.representer.RepresenterError:
-        shutil.copy(
-            os.path.join(base_path, CACHE_FILE_BACK_NAME),
-            os.path.join(base_path, CACHE_FILE_NAME))
-        raise
-
-
 def get_api():
-    base_path = get_config_dir()
-    return gitlab.Gitlab.from_config(_get_current_config(), [
-        os.path.join(base_path, CONFIG_FILE_NAME)
+    return gitlab.Gitlab.from_config(config.current_profile(), [
+        config.path
     ])
 
 
-def get_config():
-    base_path = get_config_dir()
-    parser = configparser.ConfigParser()
-    parser.read(os.path.join(base_path, CONFIG_FILE_NAME))
-    return parser
-
-
-def add_cache(project, project_cache=None, force=False, save=True, fast=False):
-    if project_cache is None:
-        project_cache = get_project_data() or {}
-
-    cached = project_cache.setdefault(project.id, {})
-
+def add_cache(project, force=False, save=True, fast=False):
     if not fast:
-        collectors.collect(project, cached, force)
+        collected = collectors.collect(project, force)
+        cache.update(project.id, collected)
 
-    cached.update({
+    cached = cache.update(project.id, {
         'name': project.name,
         'path': '{}/{}'.format(project.namespace['full_path'], project.path),
         'created_at': project.created_at,
@@ -268,7 +129,7 @@ def add_cache(project, project_cache=None, force=False, save=True, fast=False):
     })
 
     if save:
-        save_project_data(project_cache)
+        cache.flush()
 
     return cached
 
@@ -296,8 +157,9 @@ def fix_cache(gl, project_cache, pid, cached, force, default):
 
 
 def cmd_collect(namespace):
+    config.load()
     gl = get_api()
-    project_cache = get_project_data() or {}
+
     # TODO:
     list_options = {
         # 'visibility': 'private',
@@ -325,7 +187,6 @@ def cmd_collect(namespace):
                 try:
                     add_cache(
                         project,
-                        project_cache,
                         force=namespace.force,
                         save=False,
                         fast=namespace.fast,
@@ -336,7 +197,7 @@ def cmd_collect(namespace):
                     break
                 # TODO: save on finally
 
-            save_project_data(project_cache)
+            cache.flush()
 
             if interrupted:
                 break
@@ -351,17 +212,16 @@ def cmd_collect(namespace):
         projects = gl.projects.list(search=namespace.query, **list_options)
         for index, project in enumerate(projects):
             warn('{}: collecting... ({})'.format(project.name, index + 1))
-            cache = add_cache(
+            cache_ = add_cache(
                 project,
-                project_cache,
                 force=namespace.force,
                 save=True,
                 fast=namespace.fast,
             )
             if len(projects) == 1:
-                pprint.pprint(cache)
+                pprint.pprint(cache_)
 
-    success('total {}'.format(len(project_cache)))
+    success('total {}'.format(cache.total()))
 
 
 def _limit_str(value, limit):
@@ -408,57 +268,17 @@ def cmd_repair(namespace, default=':broken'):
             fixed += 1
 
         if fixed and not i % 10:
-            save_project_data(project_cache)
+            cache.flush()
 
     if fixed:
-        save_project_data(project_cache)
+        cache.flush()
 
     warn('Fixed: {}, Found: {}, Total: {}'.format(
         fixed, len(cached_search), len(project_cache)))
 
 
-def _parse_query(query, exact=False, mode=all, mode_inverse=any):
-    if '.' in query and ',' not in query:
-        mode = mode_inverse
-        query = query.replace('.', ',')
-
-    key = 'path' if '/' in query else 'name'
-    if ':' in query:
-        query = query.split(',')
-        filters = [cli_utils.FILTERS.get(sub) for sub in query]
-        if not all(filters):
-            warn('Unknown filter: {}'.format(', '.join(
-                sub for sub in query if sub not in cli_utils.FILTERS)))
-            return None
-        return lambda cached: mode(sub(cached) for sub in filters)
-    elif exact:
-        return lambda c: query == c.get(key)
-    return lambda c: query in c.get(key, '')
-
-
-def filter_cache(query, exact, exclude=None):
-    if query == exclude:
-        exclude = ':none'
-
-    filter_finally = filter_ = _parse_query(query, exact, all, any)
-    if not filter_:
-        return {}, {}
-
-    if exclude:
-        exclude = _parse_query(exclude, False, any, all)
-        if not exclude:
-            return {}, {}
-        filter_finally = lambda c: filter_(c) and not exclude(c)
-
-    project_cache = get_project_data() or {}
-    return {
-        pid: cached for pid, cached in project_cache.items()
-        if filter_finally(cached)
-    }, project_cache
-
-
 def cmd_clear(namespace):
-    cached_search, project_cache = filter_cache(
+    cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
 
     if not cached_search:
@@ -472,12 +292,12 @@ def cmd_clear(namespace):
         return
 
     for name, cached in cached_search.items():
-        del project_cache[name]
-    save_project_data(project_cache)
+        cache.delete(name)
+    cache.flush()
 
 
 def cmd_list(namespace):
-    cached_search, project_cache = filter_cache(
+    cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
     if not namespace.total:
         line = 0
@@ -492,11 +312,11 @@ def cmd_list(namespace):
     if not namespace.quiet:
         success(
             'Found: {}, Total: {}'.format(
-                len(cached_search), len(project_cache)))
+                len(cached_search), cache.total()))
 
 
 def cmd_show(namespace):
-    cached_search, project_cache = filter_cache(
+    cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
 
     if not cached_search:
@@ -529,7 +349,7 @@ def cmd_show(namespace):
 
 
 def cmd_cat(namespace):
-    cached_search, project_cache = filter_cache(
+    cached_search = cache.filter_map(
         namespace.query, namespace.exact, False)
 
     if not cached_search:
@@ -557,8 +377,7 @@ def cmd_cat(namespace):
 
 
 def cmd_requirements(namespace):
-    cached_search, project_cache = filter_cache(
-        namespace.query, namespace.exact)
+    cached_search = cache.filter_map(namespace.query, namespace.exact)
 
     if not cached_search:
         if not namespace.quiet:
@@ -606,7 +425,7 @@ def cmd_requirements(namespace):
 
 
 def cmd_reverse(namespace):
-    cached_search, project_cache = filter_cache(namespace.query, True)
+    cached_search = cache.filter_map(namespace.query, True)
 
     if not cached_search:
         if namespace.force:
@@ -796,15 +615,16 @@ def main():
     parser_init.add_argument(
         '-l', '--local', action='store_true', help='init in cwd')
     parser_init.add_argument(
-        '-u', '--user', action='store_true', help='init user root')
-    parser_init.add_argument(
-        '-c', '--config', default='default', help='config alias')
+        '-p', '--profile', default='default', help='profile name')
 
     init_parser('info', cmd_info, help='get app info')
+    init_parser('version', cmd_version, help='get app version')
 
     parser_config = init_parser('config', cmd_config, help='get config info')
     parser_config.add_argument(
         '-s', '--switch', help='config alias')
+    parser_config.add_argument(
+        '-v', '--verbose', action='store_true', help='show detailed info')
 
     init_parser(
         'total', cmd_total,
@@ -878,8 +698,10 @@ def main():
             return namespace.func(namespace)
         except KeyboardInterrupt:
             return error('Interrupted')
-        except AppError as e:
-            return error(e.args[0])
+        except errors.Error as exc:
+            return error(exc.args[0])
+        except errors.Warn as exc:
+            return warn(exc.args[0])
         except Exception as e:
             logging.exception('!!!')
             return error(e.args[0])
