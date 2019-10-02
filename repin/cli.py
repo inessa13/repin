@@ -159,14 +159,20 @@ def cmd_total(namespace):
             if filter_(cached):
                 counts[filter_tag] += 1
 
+    max_name = 1
     for filter_tag, count in counts.items():
+        max_name = max(max_name, len(filter_tag) + 1)
+
+    for filter_tag, count in counts.items():
+        filter_tag_split = filter_tag.split(':')
+        filter_tag_pad = filter_tag.ljust(max_name)
         if namespace.all or count:
-            if count and filter_tag == ':broken':
-                error('{}: {}'.format(filter_tag, count))
-            elif count and filter_tag.startswith('na:'):
-                warn('{}: {}'.format(filter_tag, count))
+            if count and 'broken' in filter_tag_split:
+                error('{} {}'.format(filter_tag_pad, count))
+            elif count and 'na' in filter_tag_split:
+                warn('{} {}'.format(filter_tag_pad, count))
             else:
-                success('{}: {}'.format(filter_tag, count))
+                success('{} {}'.format(filter_tag_pad, count))
 
 
 def get_config_dir():
