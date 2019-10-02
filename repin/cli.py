@@ -2,6 +2,7 @@
 import argparse
 import base64
 import configparser
+import datetime
 import logging
 import os
 import pprint
@@ -145,11 +146,11 @@ def cmd_config(namespace):
 
 
 def cmd_total(namespace):
-    if namespace.query:
-        cached_search, project_cache = filter_cache(
-            namespace.query, False)
-    else:
-        cached_search = get_project_data() or {}
+    if namespace.all:
+        namespace.exclude = ':none'
+
+    cached_search, project_cache = filter_cache(
+        namespace.query, False, namespace.exclude)
 
     counts = {}
 
@@ -160,16 +161,15 @@ def cmd_total(namespace):
                 counts[filter_tag] += 1
 
     max_name = 1
-    for filter_tag, count in counts.items():
+    for filter_tag in cli_utils.FILTERS.keys():
         max_name = max(max_name, len(filter_tag) + 1)
 
     for filter_tag, count in counts.items():
-        filter_tag_split = filter_tag.split(':')
         filter_tag_pad = filter_tag.ljust(max_name)
         if namespace.all or count:
-            if count and 'broken' in filter_tag_split:
+            if count and filter_tag == ':broken':
                 error('{} {}'.format(filter_tag_pad, count))
-            elif count and 'na' in filter_tag_split:
+            elif count and cli_utils.tag_is_warn(filter_tag):
                 warn('{} {}'.format(filter_tag_pad, count))
             else:
                 success('{} {}'.format(filter_tag_pad, count))
@@ -264,6 +264,7 @@ def add_cache(project, project_cache=None, force=False, save=True, fast=False):
         'last_activity_at': project.last_activity_at,
         'web_url': project.web_url,
         'archived': project.archived,
+        ':last_update_at': datetime.datetime.now(),
     })
 
     if save:
@@ -273,7 +274,8 @@ def add_cache(project, project_cache=None, force=False, save=True, fast=False):
 
 
 def fix_cache(gl, project_cache, pid, cached, force):
-    force = force or cli_utils.filter_is_broken(cached)
+    force = force or cli_utils.filter_is_broken(
+        cached) or cli_utils.filter_is_outdated(cached)
     if not force:
         warn('{}: not broken'.format(cached['name']))
         return False
@@ -287,10 +289,10 @@ def fix_cache(gl, project_cache, pid, cached, force):
     add_cache(project, project_cache, force=force, save=False)
 
     if cli_utils.filter_is_broken(cached):
-        error('{}: package not fixed'.format(cached.get('name') or pid))
+        error('{}: package not updated'.format(cached.get('name') or pid))
         return False
 
-    success('{}: package fixed'.format(cached['name']))
+    success('{}: package updated'.format(cached['name']))
     return True
 
 
@@ -378,6 +380,7 @@ def cmd_repair(namespace):
         return error('Nothing found')
 
     if (namespace.query != ':broken'
+            and namespace.query != ':outdated'
             and not namespace.all
             and len(cached_search) > 1):
         warn('Found {}: {}'.format(len(cached_search), _limit_str(', '.join(
@@ -402,10 +405,12 @@ def cmd_repair(namespace):
         if fix_result:
             fixed += 1
 
-        if not i % 10:
+        if fixed and not i % 10:
             save_project_data(project_cache)
 
-    save_project_data(project_cache)
+    if fixed:
+        save_project_data(project_cache)
+
     warn('Fixed: {}, Found: {}, Total: {}'.format(
         fixed, len(cached_search), len(project_cache)))
 
@@ -433,18 +438,17 @@ def filter_cache(query, exact, exclude=None):
     if query == exclude:
         exclude = ':none'
 
-    project_cache = get_project_data() or {}
-
     filter_finally = filter_ = _parse_query(query, exact, all, any)
     if not filter_:
-        return {}, project_cache
+        return {}, {}
 
     if exclude:
         exclude = _parse_query(exclude, False, any, all)
         if not exclude:
-            return {}, project_cache
+            return {}, {}
         filter_finally = lambda c: filter_(c) and not exclude(c)
 
+    project_cache = get_project_data() or {}
     return {
         pid: cached for pid, cached in project_cache.items()
         if filter_finally(cached)
@@ -796,9 +800,10 @@ def main():
 
     parser_total = init_parser(
         'total', cmd_total,
-        args=('all',),
+        args=('all', 'exclude'),
         help='get total info about all collected projects')
-    parser_total.add_argument('-q', '--query', help='project name/path/tag')
+    parser_total.add_argument(
+        '-q', '--query', default=':all', help='project name/path/tag')
 
     parser_collect = init_parser(
         'collect', cmd_collect,
@@ -831,6 +836,7 @@ def main():
 
     init_parser(
         'repair', cmd_repair,
+        aliases=('update', 'up'),
         args=('query', 'exact', 'exclude', 'all', 'force'),
         help='retrieve data from gitlab if missing something',
     )

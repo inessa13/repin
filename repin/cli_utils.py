@@ -1,3 +1,5 @@
+import datetime
+
 MIN_LANG_PERCENT = 10
 
 REQUIRED_KEYS_BASE = (
@@ -36,8 +38,32 @@ def filter_is_broken(cached):
         if filter_is_broken_package(cached):
             return True
 
-    if filter_language_no(cached):
+    if filter_language_na(cached):
         return True
+
+
+def filter_is_outdated(cached):
+    return cached.get(':last_upgrade_activity') != cached['last_activity_at']
+
+
+def inactive_days(cached, value=None):
+    days = (datetime.date.today() - datetime.datetime.strptime(
+        cached['last_activity_at'][:10], '%Y-%m-%d').date()).days
+    if value is None:
+        return days
+    return days > value
+
+
+def filter_old_month(cached):
+    return inactive_days(cached) > 30
+
+
+def filter_old_year(cached):
+    return inactive_days(cached) > 365
+
+
+def filter_old_year2(cached):
+    return inactive_days(cached) > 365 * 2
 
 
 def filter_have_reqs(cached):
@@ -57,15 +83,16 @@ def filter_is_archived(cached):
 
 
 def filter_language_na(cached):
-    return unknown_value(cached.get(':languages'))
+    return unknown_value(
+        cached.get(':languages')) or cached.get(':languages') == {}
 
 
 def filter_language_no(cached):
-    return cached.get(':languages') == {}
+    return cached.get(':languages') is False
 
 
 def filter_lang_python(cached):
-    if filter_language_na(cached):
+    if filter_language_na(cached) or filter_language_no(cached):
         return False
 
     return cached[':languages'].get('Python', 0) >= MIN_LANG_PERCENT
@@ -73,7 +100,7 @@ def filter_lang_python(cached):
 
 def filter_lang_factory(*codes):
     def _filter_lang(cached):
-        if filter_language_na(cached):
+        if filter_language_na(cached) or filter_language_no(cached):
             return False
 
         return sum(
@@ -137,11 +164,26 @@ def filter_is_type_unknown(cached):
     return get_type_tag(cached) == 'py:na'
 
 
+def tag_is_warn(tag):
+    split = set(tag.split(':'))
+    for key in ('na', 'archived', 'outdated'):
+        if key in split:
+            return True
+
+
 FILTERS = {
     ':all': lambda c: True,
     ':none': lambda c: False,
     ':active': filter_is_active,
     ':archived': filter_is_archived,
+    ':outdated': filter_is_outdated,
+
+    'old:month': lambda c: inactive_days(c, 30),
+    'old:3month': lambda c: inactive_days(c, 30 * 3),
+    'old:6month': lambda c: inactive_days(c, 30 * 6),
+    'old:year': lambda c: inactive_days(c, 365),
+    'old:2year': lambda c: inactive_days(c, 365 * 2),
+    'old:4year': lambda c: inactive_days(c, 365 * 4),
 
     'lang:python': filter_lang_python,
     'lang:c++': filter_lang_factory('C++'),
@@ -154,8 +196,8 @@ FILTERS = {
     'lang:docker': filter_lang_factory('Dockerfile'),
     'lang:templates': filter_lang_factory('Smarty', 'HTML'),
     'lang:shell': filter_lang_factory('Shell'),
-    'na:lang': filter_language_na,
-    'no:lang': filter_language_no,
+    'lang:na': filter_language_na,
+    'lang:no': filter_language_no,
 
     'py:package': filter_is_package,
     'py:package:na': filter_is_broken_package,
