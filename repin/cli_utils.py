@@ -1,4 +1,4 @@
-MIN_PYTHON_PERCENT = 10
+MIN_LANG_PERCENT = 10
 
 REQUIRED_KEYS_BASE = (
     'name',
@@ -12,7 +12,7 @@ REQUIRED_KEYS_BASE = (
     'docker_data',
 )
 REQUIRED_KEYS_PYTHON = (
-    'req_sources',
+    ':requirements',
 )
 
 
@@ -33,16 +33,19 @@ def filter_is_broken(cached):
         for key in REQUIRED_KEYS_PYTHON:
             if unknown_value(cached.get(key)):
                 return True
+        if filter_is_broken_package(cached):
+            return True
+
+    if filter_language_no(cached):
+        return True
 
 
 def filter_have_reqs(cached):
-    return filter_is_package(cached) and cached['package_data'].get(
-        'install_requires')
+    return cached.get(':requirements', {}) and cached.get(':requirements', {}).get('list')
 
 
 def filter_no_reqs(cached):
-    return filter_is_package(cached) and not cached['package_data'].get(
-        'install_requires')
+    return filter_lang_python(cached) and not cached.get(':requirements')
 
 
 def filter_is_active(cached):
@@ -57,41 +60,59 @@ def filter_language_na(cached):
     return unknown_value(cached.get(':languages'))
 
 
+def filter_language_no(cached):
+    return cached.get(':languages') == {}
+
+
 def filter_lang_python(cached):
     if filter_language_na(cached):
         return False
 
-    return cached[':languages'].get('Python', 0) >= MIN_PYTHON_PERCENT
+    return cached[':languages'].get('Python', 0) >= MIN_LANG_PERCENT
 
 
-def filter_lang_templates(cached):
-    if filter_language_na(cached):
-        return False
-
-    return cached[':languages'].get('Smarty', 0) >= MIN_PYTHON_PERCENT or cached[':languages'].get('HTML', 0) >= MIN_PYTHON_PERCENT
-
-
-def filter_lang_factory(code):
+def filter_lang_factory(*codes):
     def _filter_lang(cached):
         if filter_language_na(cached):
             return False
 
-        return cached[':languages'].get(code, 0) >= MIN_PYTHON_PERCENT
+        return sum(
+            cached[':languages'].get(code, 0)
+            for code in codes
+        ) >= MIN_LANG_PERCENT
     return _filter_lang
 
 
 def filter_is_package(cached):
     return filter_lang_python(cached) and not unknown_value(
-        cached.get('package_data'))
+        cached.get(':setup.py')) and cached.get(':setup.py')
+
+
+def get_flit_metadata(cached):
+    return cached.get('pyproject.toml', {}).get(
+        'tool', {}).get('flit', {}).get('metadata', {})
+
+
+def filter_is_python_pipfile(cached):
+    return filter_lang_python(cached) and cached.get(':Pipfile')
+
+
+def filter_is_python_pyproject(cached):
+    return filter_lang_python(cached) and cached.get('pyproject.toml')
+
+
+def filter_is_broken_package(cached):
+    return filter_lang_python(cached) and cached.get(':setup.py') == 'n/a'
 
 
 def filter_is_package_na(cached):
     return filter_lang_python(cached) and unknown_value(
-        cached.get('package_data'))
+        cached.get(':setup.py'))
 
 
 def filter_is_req_unknown(cached):
-    return filter_lang_python(cached) and cached.get('req_sources') == 'empty'
+    return filter_lang_python(cached) and unknown_value(
+        cached.get(':requirements'))
 
 
 def get_type_tag(cached):
@@ -102,7 +123,7 @@ def get_type_tag(cached):
                 or cached['docker_data'].get('cmd')):
             return 'type:service'
     if cached.get('gitlab_ci_data') and cached['gitlab_ci_data'].get('nexus'):
-        return 'type:lib'
+        return 'python:lib'
     return 'na:type'
 
 
@@ -115,7 +136,7 @@ def filter_is_type_service(cached):
 
 
 def filter_is_type_lib(cached):
-    return get_type_tag(cached) == 'type:lib'
+    return get_type_tag(cached) == 'python:lib'
 
 
 def filter_is_type_unknown(cached):
@@ -135,19 +156,24 @@ FILTERS = {
     'lang:java': filter_lang_factory('Java'),
     'lang:js': filter_lang_factory('JavaScript'),
     'lang:php': filter_lang_factory('PHP'),
-    'lang:templates': filter_lang_templates,
+    'lang:html': filter_lang_factory('HTML'),
+    'lang:docker': filter_lang_factory('Dockerfile'),
+    'lang:templates': filter_lang_factory('Smarty', 'HTML'),
     'lang:shell': filter_lang_factory('Shell'),
-    'na:language': filter_language_na,
+    'na:lang': filter_language_na,
+    'no:lang': filter_language_no,
 
-    'no:python': lambda c: not filter_lang_python(c),
     'na:req_sources': filter_is_req_unknown,
     'python:package': filter_is_package,
-    'na:package': filter_is_package_na,
-    'have:reqs': filter_have_reqs,
-    'no:reqs': filter_no_reqs,
+    'python:package:broken': filter_is_broken_package,
+    'python:lib': filter_is_type_lib,
+    'python:pipfile': filter_is_python_pipfile,
+    'python:pyproject': filter_is_python_pyproject,
+    'python:na:package': filter_is_package_na,
+    'python:have:reqs': filter_have_reqs,
+    'python:no:reqs': filter_no_reqs,
 
     'type:service': filter_is_type_service,
-    'type:lib': filter_is_type_lib,
     'na:type': filter_is_type_unknown,
     ':docker': filter_have_dockerfile,
 
