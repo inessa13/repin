@@ -278,7 +278,7 @@ def fix_cache(gl, project_cache, pid, cached, force):
         error('{}: missing'.format(cached.get('name') or pid))
         return False
 
-    add_cache(project, project_cache, force=force, save=True)
+    add_cache(project, project_cache, force=force, save=False)
 
     if cli_utils.filter_is_broken(cached):
         error('{}: package not fixed'.format(cached.get('name') or pid))
@@ -294,7 +294,7 @@ def cmd_collect(namespace):
     # TODO:
     list_options = {
         # 'visibility': 'private',
-        'membership': True,
+        # 'membership': True,
     }
 
     if namespace.exclude != ':archived' and ':' in namespace.exclude:
@@ -381,7 +381,7 @@ def cmd_repair(namespace):
         return
 
     fixed = 0
-    for pid, cached in cached_search.items():
+    for i, (pid, cached) in enumerate(cached_search.items()):
         try:
             fix_result = fix_cache(
                 gl, project_cache, pid, cached, namespace.force)
@@ -396,6 +396,10 @@ def cmd_repair(namespace):
         if fix_result:
             fixed += 1
 
+        if not i % 10:
+            save_project_data(project_cache)
+
+    save_project_data(project_cache)
     warn('Fixed: {}, Found: {}, Total: {}'.format(
         fixed, len(cached_search), len(project_cache)))
 
@@ -610,6 +614,8 @@ def cmd_reverse(namespace):
 
     if cli_utils.filter_is_package(cached):
         self_name = cached[':setup.py'].get('name', cached['name'])
+    elif cli_utils.get_flit_metadata(cached).get('dist-name'):
+        self_name = cli_utils.get_flit_metadata(cached)['dist-name']
     elif cli_utils.filter_lang_python(cached):
         self_name = cached['name']
     else:
@@ -656,16 +662,36 @@ def cmd_reverse(namespace):
 
     PROJECT_NAME_LEN = 60
     if dep_for:
+        max_ver = 8
+        max_dep = 4
+        max_name = PROJECT_NAME_LEN
+        for project_name, dep_mode, version, comment in dep_for:
+            if version:
+                max_ver = max(max_ver, len(version) + 2)
+            max_name = max(max_name, len(project_name) + 2)
+
         if not namespace.quiet:
             success('Found reversed dependencies:')
-            warn('version\tdep\tproject{}comment'.format(
-                ' ' * (PROJECT_NAME_LEN - len('project'))))
-        for project_name, dep_mode, version, comment in dep_for:
-            print('{}\t{}\t{}{}# {}'.format(
-                version or 'latest', dep_mode or '', project_name,
-                ' ' * (PROJECT_NAME_LEN - len(project_name)),
-                comment,
+            warn('version{}dep{}project{}comment'.format(
+                ' ' * (max_ver - len('version')),
+                ' ' * (max_dep - len('dep')),
+                ' ' * (max_name - len('project')),
             ))
+        for project_name, dep_mode, version, comment in dep_for:
+            if namespace.quiet:
+                print('{}{}{}'.format(
+                    (version or 'latest').ljust(max_ver),
+                    (dep_mode or '').ljust(max_dep),
+                    project_name,
+                ))
+            else:
+                print('{}{}{}# {}'.format(
+                    (version or '*').ljust(max_ver),
+                    (dep_mode or '').ljust(max_dep),
+                    project_name.ljust(max_name),
+                    # ' ' * (PROJECT_NAME_LEN - len(project_name)),
+                    comment,
+                ))
     elif not namespace.quiet:
         warn('No strict reversed dependencies found')
 

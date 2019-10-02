@@ -88,6 +88,11 @@ def filter_is_package(cached):
         cached.get(':setup.py')) and cached.get(':setup.py')
 
 
+def get_flit_metadata(cached):
+    return cached.get('pyproject.toml', {}).get(
+        'tool', {}).get('flit', {}).get('metadata', {})
+
+
 def filter_is_python_pipfile(cached):
     return filter_lang_python(cached) and cached.get(':Pipfile')
 
