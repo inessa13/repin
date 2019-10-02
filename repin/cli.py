@@ -273,11 +273,10 @@ def add_cache(project, project_cache=None, force=False, save=True, fast=False):
     return cached
 
 
-def fix_cache(gl, project_cache, pid, cached, force):
-    force = force or cli_utils.filter_is_broken(
-        cached) or cli_utils.filter_is_outdated(cached)
+def fix_cache(gl, project_cache, pid, cached, force, default):
+    force = force or cli_utils.filter_is(default, cached)
     if not force:
-        warn('{}: not broken'.format(cached['name']))
+        warn('{}: not {}'.format(cached['name'], default))
         return False
 
     try:
@@ -371,7 +370,11 @@ def _limit_str(value, limit):
     return value[:limit - 3] + '...'
 
 
-def cmd_repair(namespace):
+def cmd_update(namespace):
+    return cmd_repair(namespace, default=':outdated')
+
+
+def cmd_repair(namespace, default=':broken'):
     gl = get_api()
     cached_search, project_cache = filter_cache(
         namespace.query, namespace.exact, namespace.exclude)
@@ -379,8 +382,7 @@ def cmd_repair(namespace):
     if not cached_search:
         return error('Nothing found')
 
-    if (namespace.query != ':broken'
-            and namespace.query != ':outdated'
+    if (namespace.query != default
             and not namespace.all
             and len(cached_search) > 1):
         warn('Found {}: {}'.format(len(cached_search), _limit_str(', '.join(
@@ -393,7 +395,7 @@ def cmd_repair(namespace):
     for i, (pid, cached) in enumerate(cached_search.items()):
         try:
             fix_result = fix_cache(
-                gl, project_cache, pid, cached, namespace.force)
+                gl, project_cache, pid, cached, namespace.force, default)
         except KeyboardInterrupt:
             warn('Interrupted')
             break
@@ -746,6 +748,12 @@ def parser_factory(subparsers):
         parser.set_defaults(func=func)
         if 'query' in args:
             parser.add_argument('query', help='project name/path/tag')
+        if 'query_all' in args:
+            parser.add_argument(
+                'query',
+                nargs='?',
+                default=':all',
+                help='project name/path/tag')
         if 'exact' in args:
             parser.add_argument(
                 '-e', '--exact', action='store_true',
@@ -798,16 +806,14 @@ def main():
     parser_config.add_argument(
         '-s', '--switch', help='config alias')
 
-    parser_total = init_parser(
+    init_parser(
         'total', cmd_total,
-        args=('all', 'exclude'),
+        args=('all', 'query_all', 'exclude'),
         help='get total info about all collected projects')
-    parser_total.add_argument(
-        '-q', '--query', default=':all', help='project name/path/tag')
 
     parser_collect = init_parser(
         'collect', cmd_collect,
-        args=('query', 'exclude', 'force'),
+        args=('query_all', 'exclude', 'force'),
         help='collect new projects')
     parser_collect.add_argument(
         '-f', '--fast', action='store_true',
@@ -834,12 +840,22 @@ def main():
         args=('query', 'exact', 'force', 'quiet'),
         help='main feature! get list of packages, requiring this one')
 
-    init_parser(
+    parser_repair = init_parser(
         'repair', cmd_repair,
-        aliases=('update', 'up'),
-        args=('query', 'exact', 'exclude', 'all', 'force'),
+        args=('exact', 'exclude', 'all', 'force'),
         help='retrieve data from gitlab if missing something',
     )
+    parser_repair.add_argument(
+        'query', nargs='?', default=':broken', help='project name/path/tag')
+
+    parser_update = init_parser(
+        'update', cmd_update,
+        aliases=('up',),
+        args=('exact', 'exclude', 'all', 'force'),
+        help='retrieve data from gitlab if missing something',
+    )
+    parser_update.add_argument(
+        'query', nargs='?', default=':outdated', help='project name/path/tag')
 
     parser_list = init_parser(
         'list', cmd_list,

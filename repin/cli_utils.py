@@ -171,6 +171,10 @@ def tag_is_warn(tag):
             return True
 
 
+def filter_is(tag, cached):
+    return FILTERS[tag](cached)
+
+
 FILTERS = {
     ':all': lambda c: True,
     ':none': lambda c: False,
