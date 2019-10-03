@@ -3,52 +3,35 @@ import argparse
 import base64
 import concurrent.futures
 import getpass
-import logging
-import pprint
 import time
 
 import gitlab
 import Levenshtein
 
-from . import __version__, filters, errors, utils, commands, helpers
+from . import __version__, filters, errors, utils, commands, helpers, log
 from .cache import cache
 from .config import config
 
-CLR_FAIL = '\033[91m'
-CLR_WARNING = '\033[93m'
-CLR_OKGREEN = '\033[92m'
-CLR_END = '\033[0m'
 PROJECT_NAME_LEN = 60
 
 
-def error(message):
-    print(CLR_FAIL + message + CLR_END)
-
-
-def warn(message):
-    print(CLR_WARNING + message + CLR_END)
-
-
-def success(message):
-    print(CLR_OKGREEN + message + CLR_END)
-
-
 def cmd_info(__):
-    success('version: {}'.format(__version__))
-    success('available filters:')
+    log.info('version: {}'.format(__version__))
+    log.info('available filters:')
     for f in filters.FILTERS.keys():
-        print(f)
+        log.info(f)
 
 
 def cmd_version(__):
-    print('Repin {}'.format(__version__))
+    log.info('Repin {}'.format(__version__))
 
 
 def cmd_init(namespace):
     config.prepare('.' if namespace.local else '~')
 
     if config.has_profile(namespace.profile):
-        return warn('profile `{}` already exists'.format(namespace.profile))
+        raise errors.Warn(
+            'profile `{}` already exists'.format(namespace.profile))
 
     url = input('url: ')
     token = getpass.getpass('token: ')
@@ -56,7 +39,7 @@ def cmd_init(namespace):
     config.add_profile(namespace.profile, url, token)
     config.switch_profile(namespace.profile)
     config.flush()
-    success('inited')
+    log.success('inited')
 
 
 def cmd_config(namespace):
@@ -65,15 +48,14 @@ def cmd_config(namespace):
     if namespace.switch:
         config.switch_profile(namespace.switch)
         config.flush()
-        success('set config to {}'.format(namespace.switch))
-        return
+        raise errors.Success('set config to {}'.format(namespace.switch))
 
-    print('Config root: {}'.format(config.root))
-    print('Profile: {}'.format(config.current_profile()))
+    log.info('Config root: {}'.format(config.root))
+    log.info('Profile: {}'.format(config.current_profile()))
     if namespace.verbose:
-        print('Available profiles:')
+        log.info('Available profiles:')
         for profile, url in config.iter_profiles():
-            print(' ', profile, url)
+            log.info(' ', profile, url)
 
 
 def cmd_total(namespace):
@@ -100,11 +82,11 @@ def cmd_total(namespace):
         filter_tag_pad = filter_tag.ljust(max_name)
         if namespace.all or count:
             if count and filter_tag == ':broken':
-                error('{} {}'.format(filter_tag_pad, count))
+                log.error('{} {}'.format(filter_tag_pad, count))
             elif count and filters.tag_is_warn(filter_tag):
-                warn('{} {}'.format(filter_tag_pad, count))
+                log.warn('{} {}'.format(filter_tag_pad, count))
             else:
-                success('{} {}'.format(filter_tag_pad, count))
+                log.success('{} {}'.format(filter_tag_pad, count))
 
 
 def get_api():
@@ -151,27 +133,23 @@ def cmd_repair(namespace, default=':broken'):
 
                 try:
                     cached = feature.result()
-                    print('{}: package updated'.format(cached['name']))
+                    log.info('{}: package updated'.format(cached['name']))
 
-                except errors.Error as exc:
-                    error(exc.args[0])
-                    continue
-
-                except errors.Warn as exc:
-                    warn(exc.args[0])
+                except errors.Client as exc:
+                    log.catch(exc)
                     continue
 
                 except KeyError as exc:
                     if exc.args[0] == 'retry-after':
                         retry.add(pid)
                     else:
-                        logging.exception(
+                        log.exception(
                             '{}: package fix failed'.format(
                                 cache.select(pid, {}).get('name') or pid))
                     continue
 
                 except Exception:
-                    logging.exception(
+                    log.exception(
                         '{}: package fix failed'.format(
                             cache.select(pid, {}).get('name') or pid))
                     continue
@@ -182,11 +160,11 @@ def cmd_repair(namespace, default=':broken'):
                 if fixed and not i % 10:
                     cache.flush()
         except KeyboardInterrupt:
-            warn('Interrupted')
+            log.warn('Interrupted')
             break
 
         if retry:
-            warn('need to retry {} entries'.format(len(retry)))
+            log.warn('need to retry {} entries'.format(len(retry)))
             time.sleep(retry_timeout * retry_step)
             tasks = {
                 pool.submit(
@@ -203,7 +181,7 @@ def cmd_repair(namespace, default=':broken'):
     if fixed:
         cache.flush()
 
-    warn('Fixed: {}, Found: {}, Total: {}'.format(
+    log.success('Fixed: {}, Found: {}, Total: {}'.format(
         fixed, len(cached_search), cache.total()))
 
 
@@ -214,8 +192,7 @@ def cmd_clear(namespace):
         if not namespace.force:
             raise errors.Error('--force required on clear :all')
         cache.clear()
-        success('Cache cleared')
-        return
+        raise errors.Success('Cache cleared')
 
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
@@ -239,12 +216,11 @@ def cmd_list(namespace):
 
     if namespace.total:
         if namespace.quiet:
-            print(len(cached_search))
+            raise errors.Info(len(cached_search))
         else:
-            success(
+            raise errors.Success(
                 'Found: {}, Total: {}'.format(
                     len(cached_search), cache.total()))
-        return
 
     utils.check_found(namespace, cached_search, all_=True)
 
@@ -254,7 +230,7 @@ def cmd_list(namespace):
                 raise errors.Abort
             raise errors.Warn('... remaining {} entries'.format(
                 len(cached_search) - line))
-        print('{}'.format(cached.get('path') or cached.get('name') or pid))
+        log.info('{}'.format(cached.get('path') or cached.get('name') or pid))
 
 
 def cmd_show(namespace):
@@ -267,7 +243,7 @@ def cmd_show(namespace):
 
     for pid, cached in cached_search.items():
         if len(cached_search) > 1:
-            success(cached['name'])
+            log.info(cached['name'])
 
         tags = []
         for filter_tag, filter_ in filters.FILTERS.items():
@@ -275,15 +251,15 @@ def cmd_show(namespace):
                 tags.append(filter_tag)
 
         if tags:
-            success('Tags: {}'.format(' '.join(tags)))
+            log.info('Tags: {}'.format(' '.join(tags)))
         else:
-            warn('Package have no tags')
+            log.warn('Package have no tags')
 
         if filters.filter_is_broken(cached):
-            warn('Package is broken, call `repair` to fix it.')
+            log.warn('Package is broken, call `repair` to fix it.')
 
         if namespace.force:
-            pprint.pprint(cached)
+            log.pprint(cached)
 
 
 def cmd_cat(namespace):
@@ -299,7 +275,7 @@ def cmd_cat(namespace):
         try:
             project = gl.projects.get(pid)
         except gitlab.exceptions.GitlabGetError:
-            error('{}: missing'.format(cached.get('name') or pid))
+            log.error('{}: missing'.format(cached.get('name') or pid))
             continue
 
         if namespace.file[-1] == '/':
@@ -310,16 +286,16 @@ def cmd_cat(namespace):
                 continue
             for file in files:
                 if file['type'] == 'tree':
-                    print(file['path'] + '/')
+                    log.info(file['path'] + '/')
                 else:
-                    print(file['path'])
+                    log.info(file['path'])
         else:
             try:
                 file = project.files.get(
                     file_path=namespace.file, ref='master')
             except gitlab.exceptions.GitlabGetError:
                 continue
-            print(base64.b64decode(file.content).decode())
+            log.info(base64.b64decode(file.content).decode())
 
 
 def cmd_requirements(namespace):
@@ -331,20 +307,20 @@ def cmd_requirements(namespace):
 
     for pid, cached in cached_search.items():
         if not namespace.quiet:
-            success(cached['name'])
+            log.info(cached['name'])
         if filters.filter_is_broken(cached):
             if not namespace.quiet:
-                warn('Package is broken, call `repair` to fix it.')
+                log.warn('Package is broken, call `repair` to fix it.')
             continue
         if not filters.filter_have_reqs(cached):
             if not namespace.quiet:
-                warn('Package have no requirements')
+                log.warn('Package have no requirements')
             continue
 
         # TODO: build requirements tree
 
         if not namespace.quiet:
-            success('package{}dep\tversion\tcomment'.format(
+            log.success('package{}dep\tversion\tcomment'.format(
                 ' ' * (32 - len('package'))))
         for req in cached[':requirements']['list']:
             req_line = req.strip()
@@ -354,7 +330,7 @@ def cmd_requirements(namespace):
                 _split_requirement_package_version(req)
             if not project_name:
                 continue
-            print('{}{}{}\t{}\t# {}'.format(
+            log.info('{}{}{}\t{}\t# {}'.format(
                 project_name,
                 ' ' * (32 - len(project_name)),
                 dep_mode,
@@ -387,7 +363,7 @@ def cmd_reverse(namespace):
         if namespace.force:
             self_name = cached['name']
         else:
-            return error(
+            raise errors.Error(
                 '{}: is not a python package. Use --force to continue')
 
     dep_for = []
@@ -435,21 +411,21 @@ def cmd_reverse(namespace):
             max_name = max(max_name, len(project_name) + 2)
 
         if not namespace.quiet:
-            success('Found reversed dependencies:')
-            warn('version{}dep{}project{}comment'.format(
+            log.info('Found reversed dependencies:')
+            log.info('version{}dep{}project{}comment'.format(
                 ' ' * (max_ver - len('version')),
                 ' ' * (max_dep - len('dep')),
                 ' ' * (max_name - len('project')),
             ))
         for project_name, dep_mode, version, comment in dep_for:
             if namespace.quiet:
-                print('{}{}{}'.format(
+                log.info('{}{}{}'.format(
                     (version or 'latest').ljust(max_ver),
                     (dep_mode or '').ljust(max_dep),
                     project_name,
                 ))
             else:
-                print('{}{}{}# {}'.format(
+                log.info('{}{}{}# {}'.format(
                     (version or '*').ljust(max_ver),
                     (dep_mode or '').ljust(max_dep),
                     project_name.ljust(max_name),
@@ -457,16 +433,16 @@ def cmd_reverse(namespace):
                     comment,
                 ))
     elif not namespace.quiet:
-        warn('No strict reversed dependencies found')
+        log.warn('No strict reversed dependencies found')
 
     if dep_for_mb:
         if not namespace.quiet:
-            success('Found similar reversed dependencies:')
+            log.success('Found similar reversed dependencies:')
         for name, similar in dep_for_mb.items():
             if not namespace.quiet:
-                success('{}: '.format(name))
+                log.info('{}: '.format(name))
             for project_name, dep_mode, version, comment in similar:
-                warn('{}\t{}\t{}{}# {}'.format(
+                log.info('{}\t{}\t{}{}# {}'.format(
                     version or 'latest', dep_mode or '', project_name,
                     ' ' * (PROJECT_NAME_LEN - len(project_name)),
                     comment,
@@ -642,16 +618,13 @@ def main():
         try:
             return namespace.func(namespace)
         except KeyboardInterrupt:
-            return error('Interrupted')
-        except errors.Error as exc:
-            return error(exc.args[0])
-        except errors.Warn as exc:
-            return warn(exc.args[0])
+            return log.error('Interrupted')
         except errors.Abort:
             return
-        except Exception as e:
-            logging.exception('!!!')
-            return error(e.args[0])
+        except errors.Client as exc:
+            return log.catch(exc)
+        except Exception:
+            return log.exception('Unhandled exception')
 
     parser.print_help()
 

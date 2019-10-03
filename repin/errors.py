@@ -2,15 +2,27 @@ class Base(Exception):
     pass
 
 
-class Error(Base):
-    pass
-
-
-class Warn(Base):
-    pass
-
-
 class Abort(Base):
+    pass
+
+
+class Client(Base):
+    pass
+
+
+class Success(Client):
+    pass
+
+
+class Info(Client):
+    pass
+
+
+class Error(Client):
+    pass
+
+
+class Warn(Client):
     pass
 
 

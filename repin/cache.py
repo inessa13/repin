@@ -7,7 +7,7 @@ import yaml
 import yaml.parser
 import yaml.representer
 
-from . import filters, config
+from . import config, errors, filters
 
 CACHE_FILE_NAME = '.repin-cache'
 CACHE_FILE_BACK_NAME = '.repin-cache-back'
@@ -181,9 +181,8 @@ def _parse_query(query, exact=False, mode=all, mode_inverse=any):
         query = query.split(',')
         filters_ = [filters.FILTERS.get(sub) for sub in query]
         if not all(filters_):
-            print('Unknown filter: {}'.format(', '.join(
+            raise errors.Error('Unknown filter: {}'.format(', '.join(
                 sub for sub in query if sub not in filters.FILTERS)))
-            return None
         return lambda cached: mode(sub(cached) for sub in filters_)
 
     elif exact:
