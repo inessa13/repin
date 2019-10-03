@@ -1,12 +1,13 @@
 import os
 import shutil
+import threading
 
 import toml.decoder
 import yaml
 import yaml.parser
 import yaml.representer
 
-from . import config, cli_utils
+from . import cli_utils, config
 
 CACHE_FILE_NAME = '.repin-cache'
 CACHE_FILE_BACK_NAME = '.repin-cache-back'
@@ -17,36 +18,24 @@ class Base:
     path = None
     _data = None
 
-    def load(self):
+    def __init__(self):
+        self._lock = threading.RLock()
+
+    def ensure(self):
+        if self._data is not None:
+            return self._data
+
         self.root = config.config.profile_root()
         self.path = os.path.join(self.root, CACHE_FILE_NAME)
 
         if os.path.exists(self.path):
             self._data = self._read()
+        else:
+            self._data = {}
 
-    def _read(self):
-        raise NotImplementedError
+    def filter_map(self, query, exact, exclude=None):
+        self.ensure()
 
-    def setdefault(self, pid, value):
-        raise NotImplementedError
-
-    def select(self, pid):
-        raise NotImplementedError
-
-    def update(self, pid, data):
-        raise NotImplementedError
-
-    def delete(self, pid):
-        raise NotImplementedError
-
-    def total(self):
-        raise NotImplementedError
-
-    def items(self, filter_=None):
-        raise NotImplementedError
-
-    @classmethod
-    def filter_map(cls, query, exact, exclude=None):
         if query == exclude:
             exclude = ':none'
 
@@ -62,6 +51,27 @@ class Base:
 
         return dict(cache.items(filter_finally))
 
+    def _read(self):
+        raise NotImplementedError
+
+    def setdefault(self, pid, value):
+        raise NotImplementedError
+
+    def select(self, pid):
+        raise NotImplementedError
+
+    def update(self, pid, data):
+        raise NotImplementedError
+
+    def delete(self, pid):
+        raise NotImplementedError
+
+    def total(self):
+        raise NotImplementedError
+
+    def items(self, filter_=None):
+        raise NotImplementedError
+
     def flush(self):
         raise NotImplementedError
 
@@ -70,13 +80,6 @@ class Yaml(Base):
     root = None
     path = None
     _data = None
-
-    def load(self):
-        self.root = config.config.profile_root()
-        self.path = os.path.join(self.root, CACHE_FILE_NAME)
-
-        if os.path.exists(self.path):
-            self._data = self._read()
 
     def _read(self):
         try:
@@ -88,29 +91,44 @@ class Yaml(Base):
                 return self._read()
             raise
 
-    def setdefault(self, pid, value):
-        return self._data.setdefault(pid, value)
-
-    def select(self, pid):
-        return self._data[pid]
+    def select(self, pid, default=None):
+        self.ensure()
+        return self._data.get(pid, default)
 
     def update(self, pid, data):
-        self._data.setdefault(pid, {}).update(pid, data)
-        return self._data[pid]
+        self.ensure()
+
+        self._lock.acquire()
+        try:
+            self._data.setdefault(pid, {}).update(data)
+            return self._data[pid]
+        finally:
+            self._lock.release()
 
     def delete(self, pid):
-        del self._data[pid]
+        self.ensure()
+
+        self._lock.acquire()
+        try:
+            del self._data[pid]
+        finally:
+            self._lock.release()
 
     def total(self):
+        self.ensure()
         return len(self._data)
 
     def items(self, filter_=None):
+        self.ensure()
+
         for pid, data in self._data.items():
             if filter_ is not None and not filter_(data):
                 continue
             yield pid, data
 
     def flush(self):
+        self.ensure()
+
         if not os.path.exists(self.root):
             os.makedirs(self.root)
 
@@ -121,12 +139,15 @@ class Yaml(Base):
             yaml.add_representer(
                 sub, yaml.representer.SafeRepresenter.represent_dict)
 
+        self._lock.acquire()
         try:
             with open(self.path, 'w') as f:
                 yaml.dump(self._data, f)
         except yaml.representer.RepresenterError:
             shutil.copy(self._backup_path, self.path)
             raise
+        finally:
+            self._lock.release()
 
     @property
     def _backup_path(self):

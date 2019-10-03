@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import base64
+import concurrent.futures
 import datetime
 import getpass
 import logging
@@ -18,6 +19,7 @@ CLR_WARNING = '\033[93m'
 CLR_OKGREEN = '\033[92m'
 CLR_END = '\033[0m'
 GL_PER_PAGE = 100
+PROJECT_NAME_LEN = 60
 
 
 def error(message):
@@ -81,8 +83,7 @@ def cmd_total(namespace):
     if namespace.all:
         namespace.exclude = ':none'
 
-    cached_search, project_cache = filter_cache(
-        namespace.query, False, namespace.exclude)
+    cached_search = cache.filter_map(namespace.query, False, namespace.exclude)
 
     counts = {}
 
@@ -113,11 +114,7 @@ def get_api():
     ])
 
 
-def add_cache(project, force=False, save=True, fast=False):
-    if not fast:
-        collected = collectors.collect(project, force)
-        cache.update(project.id, collected)
-
+def add_cache(project, force=False, save=True, update=True):
     cached = cache.update(project.id, {
         'name': project.name,
         'path': '{}/{}'.format(project.namespace['full_path'], project.path),
@@ -128,13 +125,17 @@ def add_cache(project, force=False, save=True, fast=False):
         ':last_update_at': datetime.datetime.now(),
     })
 
+    if update:
+        collected = collectors.collect(project, cached, force)
+        cache.update(project.id, collected)
+
     if save:
         cache.flush()
 
     return cached
 
 
-def fix_cache(gl, project_cache, pid, cached, force, default):
+def fix_cache(gl, pid, cached, force, default):
     force = force or cli_utils.filter_is(default, cached)
     if not force:
         warn('{}: not {}'.format(cached['name'], default))
@@ -146,7 +147,7 @@ def fix_cache(gl, project_cache, pid, cached, force, default):
         error('{}: missing'.format(cached.get('name') or pid))
         return False
 
-    add_cache(project, project_cache, force=force, save=False)
+    add_cache(project, force=force, save=False)
 
     if cli_utils.filter_is_broken(cached):
         error('{}: package not updated'.format(cached.get('name') or pid))
@@ -163,47 +164,35 @@ def cmd_collect(namespace):
     # TODO:
     list_options = {
         # 'visibility': 'private',
-        # 'membership': True,
+        'membership': True,
     }
 
     if namespace.exclude != ':archived' and ':' in namespace.exclude:
         return error('Collect cant use filters in exclude')
 
-    if namespace.fast and namespace.force:
-        return error('Cannot use --fast with --force')
-
     if namespace.query == ':all':
-        page = 1
         list_options['per_page'] = GL_PER_PAGE
-        projects = gl.projects.list(page=page, **list_options)
-        interrupted = False
-        while projects:
-            for index, project in enumerate(projects):
-                if namespace.exclude and namespace.exclude in '{}/{}'.format(
-                        project.namespace['full_path'], project.path):
-                    continue
-                print('{}: collecting... ({})'.format(
-                    project.name, index + 1 + (page - 1) * GL_PER_PAGE))
-                try:
-                    add_cache(
-                        project,
-                        force=namespace.force,
-                        save=False,
-                        fast=namespace.fast,
-                    )
-                except KeyboardInterrupt:
-                    warn('Interrupted')
-                    interrupted = True
-                    break
-                # TODO: save on finally
-
-            cache.flush()
-
-            if interrupted:
+        projects = gl.projects.list(as_list=False, **list_options)
+        print(projects.total_pages)
+        print(projects.total)
+        for index, project in enumerate(projects):
+            if namespace.exclude and namespace.exclude in '{}/{}'.format(
+                    project.namespace['full_path'], project.path):
+                continue
+            print('{} ({}/{})'.format(project.name, index + 1, projects.total))
+            try:
+                add_cache(
+                    project,
+                    force=namespace.force,
+                    save=False,
+                    update=namespace.update,
+                )
+            except KeyboardInterrupt:
+                warn('Interrupted')
                 break
+            # TODO: save on finally
 
-            page += 1
-            projects = gl.projects.list(page=page, **list_options)
+        cache.flush()
 
     elif ':' in namespace.query:
         return error('Collect cant use filters beside :all')
@@ -215,11 +204,15 @@ def cmd_collect(namespace):
             cache_ = add_cache(
                 project,
                 force=namespace.force,
-                save=True,
-                fast=namespace.fast,
+                save=False,
+                update=namespace.update,
             )
             if len(projects) == 1:
                 pprint.pprint(cache_)
+
+            if not index % 10:
+                cache.flush()
+        cache.flush()
 
     success('total {}'.format(cache.total()))
 
@@ -231,12 +224,16 @@ def _limit_str(value, limit):
 
 
 def cmd_update(namespace):
+    config.load()
+
     return cmd_repair(namespace, default=':outdated')
 
 
 def cmd_repair(namespace, default=':broken'):
+    config.load()
+
     gl = get_api()
-    cached_search, project_cache = filter_cache(
+    cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
 
     if not cached_search:
@@ -251,33 +248,41 @@ def cmd_repair(namespace, default=':broken'):
         warn('Use --all to repair them all.')
         return
 
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=20)
+
     fixed = 0
-    for i, (pid, cached) in enumerate(cached_search.items()):
+
+    tasks = {
+        pool.submit(fix_cache, gl, pid, cached, namespace.force, default): pid
+        for pid, cached in cached_search.items()}
+
+    for i, feature in enumerate(concurrent.futures.as_completed(tasks)):
+        pid = tasks[feature]
+
         try:
-            fix_result = fix_cache(
-                gl, project_cache, pid, cached, namespace.force, default)
-        except KeyboardInterrupt:
-            warn('Interrupted')
-            break
+            update_result = feature.result()
         except Exception:
             logging.exception(
-                '{}: package fix failed'.format(cached.get('name') or pid))
+                '{}: package fix failed'.format(
+                    cache.select(pid, {}).get('name') or pid))
             continue
 
-        if fix_result:
+        if update_result:
             fixed += 1
 
-        if fixed and not i % 10:
+        if (fixed or update_result) and not i % 10:
             cache.flush()
 
     if fixed:
         cache.flush()
 
     warn('Fixed: {}, Found: {}, Total: {}'.format(
-        fixed, len(cached_search), len(project_cache)))
+        fixed, len(cached_search), cache.total()))
 
 
 def cmd_clear(namespace):
+    config.load()
+
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
 
@@ -297,6 +302,8 @@ def cmd_clear(namespace):
 
 
 def cmd_list(namespace):
+    config.load()
+
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
     if not namespace.total:
@@ -316,6 +323,8 @@ def cmd_list(namespace):
 
 
 def cmd_show(namespace):
+    config.load()
+
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
 
@@ -349,6 +358,8 @@ def cmd_show(namespace):
 
 
 def cmd_cat(namespace):
+    config.load()
+
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, False)
 
@@ -377,6 +388,8 @@ def cmd_cat(namespace):
 
 
 def cmd_requirements(namespace):
+    config.load()
+
     cached_search = cache.filter_map(namespace.query, namespace.exact)
 
     if not cached_search:
@@ -425,6 +438,8 @@ def cmd_requirements(namespace):
 
 
 def cmd_reverse(namespace):
+    config.load()
+
     cached_search = cache.filter_map(namespace.query, True)
 
     if not cached_search:
@@ -458,7 +473,7 @@ def cmd_reverse(namespace):
 
     dep_for = []
     dep_for_mb = {}
-    for pid, project in project_cache.items():
+    for pid, project in cache.items():
         # skip self
         if pid == self_pid:
             continue
@@ -491,7 +506,6 @@ def cmd_reverse(namespace):
                 dep_for_mb.setdefault(reverse_name, []).append(
                     (project_name, dep_mode, version, comment))
 
-    PROJECT_NAME_LEN = 60
     if dep_for:
         max_ver = 8
         max_dep = 4
@@ -636,8 +650,8 @@ def main():
         args=('query_all', 'exclude', 'force'),
         help='collect new projects')
     parser_collect.add_argument(
-        '-f', '--fast', action='store_true',
-        help='fast mode, dont do additional API calls')
+        '--update', action='store_true',
+        help='update after collect')
 
     init_parser(
         'clear', cmd_clear,
