@@ -7,7 +7,7 @@ import yaml
 import yaml.parser
 import yaml.representer
 
-from . import cli_utils, config
+from . import filters, config
 
 CACHE_FILE_NAME = '.repin-cache'
 CACHE_FILE_BACK_NAME = '.repin-cache-back'
@@ -179,12 +179,12 @@ def _parse_query(query, exact=False, mode=all, mode_inverse=any):
     key = 'path' if '/' in query else 'name'
     if ':' in query:
         query = query.split(',')
-        filters = [cli_utils.FILTERS.get(sub) for sub in query]
-        if not all(filters):
+        filters_ = [filters.FILTERS.get(sub) for sub in query]
+        if not all(filters_):
             print('Unknown filter: {}'.format(', '.join(
-                sub for sub in query if sub not in cli_utils.FILTERS)))
+                sub for sub in query if sub not in filters.FILTERS)))
             return None
-        return lambda cached: mode(sub(cached) for sub in filters)
+        return lambda cached: mode(sub(cached) for sub in filters_)
 
     elif exact:
         return lambda c: query == c.get(key)

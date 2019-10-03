@@ -9,7 +9,7 @@ import gitlab
 import mock
 import toml
 
-from . import cli_utils
+from . import filters
 
 
 def _collect_languages(project, cached):
@@ -519,24 +519,24 @@ CACHE_COLLECTORS = (
     (_collect_languages, None),
     (_collect_dockerfile, None),
     (_collect_gitlab_ci, None),
-    (_collect_setup_py, cli_utils.filter_lang_python),
-    (_collect_requirements_1, cli_utils.filter_lang_python),
-    (_collect_requirements_2, cli_utils.filter_lang_python),
-    (_collect_requirements_3, cli_utils.filter_lang_python),
-    (_collect_requirements_4, cli_utils.filter_lang_python),
-    (_collect_requirements_5, cli_utils.filter_lang_python),
-    (_collect_requirements_6, cli_utils.filter_lang_python),
-    (_collect_requirements_7, cli_utils.filter_lang_python),
-    (_collect_requirements_8, cli_utils.filter_lang_python),
-    (_collect_pip_file, cli_utils.filter_lang_python),
-    (_collect_pyproject, cli_utils.filter_lang_python),
+    (_collect_setup_py, filters.filter_lang_python),
+    (_collect_requirements_1, filters.filter_lang_python),
+    (_collect_requirements_2, filters.filter_lang_python),
+    (_collect_requirements_3, filters.filter_lang_python),
+    (_collect_requirements_4, filters.filter_lang_python),
+    (_collect_requirements_5, filters.filter_lang_python),
+    (_collect_requirements_6, filters.filter_lang_python),
+    (_collect_requirements_7, filters.filter_lang_python),
+    (_collect_requirements_8, filters.filter_lang_python),
+    (_collect_pip_file, filters.filter_lang_python),
+    (_collect_pyproject, filters.filter_lang_python),
 )
 
 
 def collect(project, cached, force):
     collected = {}
     for collector, condition in CACHE_COLLECTORS:
-        if not force and not any(cli_utils.unknown_value(
+        if not force and not any(filters.unknown_value(
                 cached.get(cache_key)) for cache_key in collector.cache_key):
             continue
         if condition and not condition({**cached, **collected}):

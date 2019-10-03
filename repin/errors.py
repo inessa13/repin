@@ -12,3 +12,7 @@ class Warn(Base):
 
 class Abort(Base):
     pass
+
+
+class NothingFound(Error):
+    args = ('Nothing found',)

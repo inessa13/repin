@@ -2,7 +2,6 @@
 import argparse
 import base64
 import concurrent.futures
-import datetime
 import getpass
 import logging
 import pprint
@@ -11,7 +10,7 @@ import time
 import gitlab
 import Levenshtein
 
-from . import __version__, cli_utils, collectors, errors
+from . import __version__, filters, errors, utils, commands, helpers
 from .cache import cache
 from .config import config
 
@@ -19,7 +18,6 @@ CLR_FAIL = '\033[91m'
 CLR_WARNING = '\033[93m'
 CLR_OKGREEN = '\033[92m'
 CLR_END = '\033[0m'
-GL_PER_PAGE = 100
 PROJECT_NAME_LEN = 60
 
 
@@ -38,7 +36,7 @@ def success(message):
 def cmd_info(__):
     success('version: {}'.format(__version__))
     success('available filters:')
-    for f in cli_utils.FILTERS.keys():
+    for f in filters.FILTERS.keys():
         print(f)
 
 
@@ -89,13 +87,13 @@ def cmd_total(namespace):
     counts = {}
 
     for pid, cached in cached_search.items():
-        for filter_tag, filter_ in cli_utils.FILTERS.items():
+        for filter_tag, filter_ in filters.FILTERS.items():
             counts.setdefault(filter_tag, 0)
             if filter_(cached):
                 counts[filter_tag] += 1
 
     max_name = 1
-    for filter_tag in cli_utils.FILTERS.keys():
+    for filter_tag in filters.FILTERS.keys():
         max_name = max(max_name, len(filter_tag) + 1)
 
     for filter_tag, count in counts.items():
@@ -103,7 +101,7 @@ def cmd_total(namespace):
         if namespace.all or count:
             if count and filter_tag == ':broken':
                 error('{} {}'.format(filter_tag_pad, count))
-            elif count and cli_utils.tag_is_warn(filter_tag):
+            elif count and filters.tag_is_warn(filter_tag):
                 warn('{} {}'.format(filter_tag_pad, count))
             else:
                 success('{} {}'.format(filter_tag_pad, count))
@@ -113,106 +111,6 @@ def get_api():
     return gitlab.Gitlab.from_config(config.current_profile(), [
         config.path
     ])
-
-
-def add_cache(project, force=False, save=True, update=True):
-    cached = cache.update(project.id, {
-        'name': project.name,
-        'path': '{}/{}'.format(project.namespace['full_path'], project.path),
-        'created_at': project.created_at,
-        'last_activity_at': project.last_activity_at,
-        'web_url': project.web_url,
-        'archived': project.archived,
-        ':last_update_at': datetime.datetime.now(),
-    })
-
-    if update:
-        collected = collectors.collect(project, cached, force)
-        cache.update(project.id, collected)
-
-    if save:
-        cache.flush()
-
-    return cached
-
-
-def fix_cache(gl, pid, cached, force, default):
-    force = force or cli_utils.filter_is(default, cached)
-    if not force:
-        warn('{}: not {}'.format(cached['name'], default))
-        return False
-
-    try:
-        project = gl.projects.get(pid)
-    except gitlab.exceptions.GitlabGetError:
-        error('{}: missing'.format(cached.get('name') or pid))
-        return False
-
-    add_cache(project, force=force, save=False)
-
-    if cli_utils.filter_is_broken(cached):
-        error('{}: package not updated'.format(cached.get('name') or pid))
-        return False
-
-    success('{}: package updated'.format(cached['name']))
-    return True
-
-
-def cmd_collect(namespace):
-    config.load()
-    gl = get_api()
-
-    # TODO: 'visibility': 'private',
-    list_options = {}
-    if 'gitlab.com' in config.profile_url():
-        list_options['membership'] = True
-
-    if namespace.exclude != ':archived' and ':' in namespace.exclude:
-        return error('Collect cant use filters in exclude')
-
-    if namespace.query == ':all':
-        list_options['per_page'] = GL_PER_PAGE
-        projects = gl.projects.list(as_list=False, **list_options)
-        for index, project in enumerate(projects):
-            if namespace.exclude and namespace.exclude in '{}/{}'.format(
-                    project.namespace['full_path'], project.path):
-                continue
-            print('{} ({}/{})'.format(project.name, index + 1, projects.total))
-            try:
-                add_cache(
-                    project,
-                    force=namespace.force,
-                    save=False,
-                    update=namespace.update,
-                )
-            except KeyboardInterrupt:
-                warn('Interrupted')
-                break
-            # TODO: save on finally
-
-        cache.flush()
-
-    elif ':' in namespace.query:
-        return error('Collect cant use filters beside :all')
-
-    else:
-        projects = gl.projects.list(search=namespace.query, **list_options)
-        for index, project in enumerate(projects):
-            warn('{}: collecting... ({})'.format(project.name, index + 1))
-            cache_ = add_cache(
-                project,
-                force=namespace.force,
-                save=False,
-                update=namespace.update,
-            )
-            if len(projects) == 1:
-                pprint.pprint(cache_)
-
-            if not index % 10:
-                cache.flush()
-        cache.flush()
-
-    success('total {}'.format(cache.total()))
 
 
 def _limit_str(value, limit):
@@ -227,28 +125,6 @@ def cmd_update(namespace):
     return cmd_repair(namespace, default=':outdated')
 
 
-def check_empty(cached_search, quiet=False):
-    if cached_search:
-        return
-    if quiet:
-        raise errors.Abort
-    raise errors.Error('Nothing found')
-
-
-def check_multi(cached_search, all_=False, quiet=False):
-    if not all_ and len(cached_search) > 1:
-        if quiet:
-            raise errors.Abort
-
-        found = ', '.join(
-            cached.get('path') or cached.get('name') or pid
-            for pid, cached in cached_search.items(limit=3)
-        )
-
-        raise errors.Warn('Found {}: {}\nUse --all to process them all'.format(
-            len(cached_search), found))
-
-
 def cmd_repair(namespace, default=':broken'):
     config.load()
 
@@ -256,16 +132,15 @@ def cmd_repair(namespace, default=':broken'):
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
 
-    check_empty(cached_search)
-    if namespace.query != default:
-        check_multi(cached_search, namespace.all)
+    utils.check_found(
+        namespace, cached_search, namespace.query != default or namespace.all)
 
     fixed = 0
     pool = concurrent.futures.ThreadPoolExecutor(max_workers=5)
     retry_timeout = 2
 
     tasks = {
-        pool.submit(fix_cache, gl, pid, cached, namespace.force, default): pid
+        pool.submit(helpers.fix_cache, gl, pid, cached, namespace.force, default): pid
         for pid, cached in cached_search.items()}
     while tasks:
         retry = set()
@@ -275,7 +150,16 @@ def cmd_repair(namespace, default=':broken'):
                 pid = tasks[feature]
 
                 try:
-                    update_result = feature.result()
+                    cached = feature.result()
+                    print('{}: package updated'.format(cached['name']))
+
+                except errors.Error as exc:
+                    error(exc.args[0])
+                    continue
+
+                except errors.Warn as exc:
+                    warn(exc.args[0])
+                    continue
 
                 except KeyError as exc:
                     if exc.args[0] == 'retry-after':
@@ -292,10 +176,10 @@ def cmd_repair(namespace, default=':broken'):
                             cache.select(pid, {}).get('name') or pid))
                     continue
 
-                if update_result:
+                else:
                     fixed += 1
 
-                if (fixed or update_result) and not i % 10:
+                if fixed and not i % 10:
                     cache.flush()
         except KeyboardInterrupt:
             warn('Interrupted')
@@ -306,7 +190,9 @@ def cmd_repair(namespace, default=':broken'):
             time.sleep(retry_timeout * retry_step)
             tasks = {
                 pool.submit(
-                    fix_cache, gl, pid, cached, namespace.force, default): pid
+                    helpers.fix_cache,
+                    gl, pid, cached, namespace.force, default,
+                ): pid
                 for pid, cached in cached_search.items()
                 if pid in retry
             }
@@ -334,8 +220,7 @@ def cmd_clear(namespace):
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
 
-    check_empty(cached_search)
-    check_multi(cached_search, namespace.all)
+    utils.check_found(namespace, cached_search)
 
     for name, cached in cached_search.items():
         cache.delete(name)
@@ -344,6 +229,10 @@ def cmd_clear(namespace):
 
 def cmd_list(namespace):
     config.load()
+
+    if not namespace.query:
+        namespace.query = ':all'
+        namespace.limit = 20
 
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
@@ -357,14 +246,14 @@ def cmd_list(namespace):
                     len(cached_search), cache.total()))
         return
 
-    check_empty(cached_search, namespace.quiet)
-    check_multi(cached_search, True, namespace.quiet)
+    utils.check_found(namespace, cached_search, all_=True)
 
     for line, (pid, cached) in enumerate(cached_search.items()):
         if namespace.limit is not None and line >= namespace.limit:
             if namespace.quiet:
                 raise errors.Abort
-            raise errors.Warn('Remaining {}'.format(len(cached_search) - line))
+            raise errors.Warn('... remaining {} entries'.format(
+                len(cached_search) - line))
         print('{}'.format(cached.get('path') or cached.get('name') or pid))
 
 
@@ -374,15 +263,14 @@ def cmd_show(namespace):
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
 
-    check_empty(cached_search)
-    check_multi(cached_search, namespace.all)
+    utils.check_found(namespace, cached_search)
 
     for pid, cached in cached_search.items():
         if len(cached_search) > 1:
             success(cached['name'])
 
         tags = []
-        for filter_tag, filter_ in cli_utils.FILTERS.items():
+        for filter_tag, filter_ in filters.FILTERS.items():
             if filter_(cached):
                 tags.append(filter_tag)
 
@@ -391,7 +279,7 @@ def cmd_show(namespace):
         else:
             warn('Package have no tags')
 
-        if cli_utils.filter_is_broken(cached):
+        if filters.filter_is_broken(cached):
             warn('Package is broken, call `repair` to fix it.')
 
         if namespace.force:
@@ -404,8 +292,7 @@ def cmd_cat(namespace):
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, False)
 
-    check_empty(cached_search)
-    check_multi(cached_search, namespace.all)
+    utils.check_found(namespace, cached_search)
 
     gl = get_api()
     for pid, cached in cached_search.items():
@@ -415,12 +302,24 @@ def cmd_cat(namespace):
             error('{}: missing'.format(cached.get('name') or pid))
             continue
 
-        try:
-            file = project.files.get(
-                file_path=namespace.file, ref='master')
-        except gitlab.exceptions.GitlabGetError:
-            continue
-        print(base64.b64decode(file.content).decode())
+        if namespace.file[-1] == '/':
+            try:
+                files = project.repository_tree(
+                    path=namespace.file, ref='master')
+            except gitlab.exceptions.GitlabGetError:
+                continue
+            for file in files:
+                if file['type'] == 'tree':
+                    print(file['path'] + '/')
+                else:
+                    print(file['path'])
+        else:
+            try:
+                file = project.files.get(
+                    file_path=namespace.file, ref='master')
+            except gitlab.exceptions.GitlabGetError:
+                continue
+            print(base64.b64decode(file.content).decode())
 
 
 def cmd_requirements(namespace):
@@ -428,17 +327,16 @@ def cmd_requirements(namespace):
 
     cached_search = cache.filter_map(namespace.query, namespace.exact)
 
-    check_empty(cached_search, namespace.quiet)
-    check_multi(cached_search, namespace.all, namespace.quiet)
+    utils.check_found(namespace, cached_search)
 
     for pid, cached in cached_search.items():
         if not namespace.quiet:
             success(cached['name'])
-        if cli_utils.filter_is_broken(cached):
+        if filters.filter_is_broken(cached):
             if not namespace.quiet:
                 warn('Package is broken, call `repair` to fix it.')
             continue
-        if not cli_utils.filter_have_reqs(cached):
+        if not filters.filter_have_reqs(cached):
             if not namespace.quiet:
                 warn('Package have no requirements')
             continue
@@ -470,27 +368,20 @@ def cmd_reverse(namespace):
 
     cached_search = cache.filter_map(namespace.query, True)
 
-    if not cached_search:
-        if namespace.force:
-            cached_search = {
-                None: {'name': namespace.query, ':languages': {'Python': 100}}
-            }
-        else:
-            return error('Nothing found')
+    if not cached_search and namespace.force:
+        cached_search = {
+            None: {'name': namespace.query, ':languages': {'Python': 100}}
+        }
 
-    if len(cached_search) > 1:
-        return warn('Found {}: {}'.format(len(cached_search), ', '.join(
-            cached.get('path') or cached.get('name') or pid
-            for pid, cached in cached_search.items()
-        )))
+    utils.check_found(namespace, cached_search, message='')
 
     self_pid, cached = cached_search.popitem()
 
-    if cli_utils.filter_is_package(cached):
+    if filters.filter_is_package(cached):
         self_name = cached[':setup.py'].get('name', cached['name'])
-    elif cli_utils.get_flit_metadata(cached).get('dist-name'):
-        self_name = cli_utils.get_flit_metadata(cached)['dist-name']
-    elif cli_utils.filter_lang_python(cached):
+    elif filters.get_flit_metadata(cached).get('dist-name'):
+        self_name = filters.get_flit_metadata(cached)['dist-name']
+    elif filters.filter_lang_python(cached):
         self_name = cached['name']
     else:
         if namespace.force:
@@ -506,7 +397,7 @@ def cmd_reverse(namespace):
         if pid == self_pid:
             continue
         # skip projects without requirements
-        if not cli_utils.filter_have_reqs(project):
+        if not filters.filter_have_reqs(project):
             continue
 
         if (project.get(':setup.py')
@@ -642,8 +533,8 @@ def parser_factory(subparsers):
                 help='quiet output')
         if 'verbose' in args:
             parser.add_argument(
-                '-v', '--verbose', action='store_true',
-                help='verbose output')
+                '-v', '--verbose',
+                nargs='?', action=utils.VerboseAction, help='verbose output')
         return parser
     return init_parser
 
@@ -674,12 +565,22 @@ def main():
         help='get total info about all collected projects')
 
     parser_collect = init_parser(
-        'collect', cmd_collect,
-        args=('query_all', 'exclude', 'force'),
+        'collect', commands.cmd_collect,
+        args=('query_all', 'exclude', 'force', 'verbose'),
         help='collect new projects')
     parser_collect.add_argument(
         '--update', action='store_true',
         help='update after collect')
+    parser_collect.add_argument(
+        '-S', '--skip-membership',
+        action='store_true',
+        help='skip membership check on project search')
+    parser_collect.add_argument(
+        '-n', '--no-store',
+        action='store_true',
+        help='only find and output')
+    parser_collect.add_argument(
+        '-l', '--limit', type=int, help='output limit')
 
     init_parser(
         'clear', cmd_clear,
@@ -721,8 +622,10 @@ def main():
 
     parser_list = init_parser(
         'list', cmd_list,
-        args=('query', 'exact', 'exclude', 'quiet'),
+        args=('exact', 'exclude', 'quiet'),
         help='list cached projects')
+    parser_list.add_argument(
+        'query', nargs='?', default=None, help='project name/path/tag')
     parser_list.add_argument(
         '-t', '--total', action='store_true',
         help='print only total on filter')
