@@ -21,12 +21,15 @@ class Base:
     def __init__(self):
         self._lock = threading.RLock()
 
+    def prepare(self):
+        self.root = config.config.profile_root()
+        self.path = os.path.join(self.root, CACHE_FILE_NAME)
+
     def ensure(self):
         if self._data is not None:
             return self._data
 
-        self.root = config.config.profile_root()
-        self.path = os.path.join(self.root, CACHE_FILE_NAME)
+        self.prepare()
 
         if os.path.exists(self.path):
             self._data = self._read()
@@ -69,10 +72,13 @@ class Base:
     def total(self):
         raise NotImplementedError
 
-    def items(self, filter_=None):
+    def items(self, filter_=None, limit=None):
         raise NotImplementedError
 
     def flush(self):
+        raise NotImplementedError
+
+    def clear(self):
         raise NotImplementedError
 
 
@@ -118,13 +124,17 @@ class Yaml(Base):
         self.ensure()
         return len(self._data)
 
-    def items(self, filter_=None):
+    def items(self, filter_=None, limit=None):
         self.ensure()
 
+        index = 0
         for pid, data in self._data.items():
             if filter_ is not None and not filter_(data):
                 continue
+            if limit is not None and index > limit:
+                break
             yield pid, data
+            index += 1
 
     def flush(self):
         self.ensure()
@@ -148,6 +158,12 @@ class Yaml(Base):
             raise
         finally:
             self._lock.release()
+
+    def clear(self):
+        self._data = {}
+        if not self.path:
+            self.prepare()
+        self.flush()
 
     @property
     def _backup_path(self):

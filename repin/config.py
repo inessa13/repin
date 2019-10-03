@@ -42,7 +42,9 @@ class Config:
             os.makedirs(self.root)
 
         self.path = os.path.join(self.root, CONFIG_FILE_NAME)
-        if not os.path.isfile(self.path):
+        if os.path.isfile(self.path):
+            self.parser.read(self.path)
+        else:
             self.parser.add_section('global')
             self.parser.set('global', 'ssl_verify', 'true')
             self.parser.set('global', 'timeout', '60')
@@ -73,6 +75,9 @@ class Config:
 
     def profile_root(self):
         return os.path.join(self.root, self.current_profile())
+
+    def profile_url(self):
+        return self.parser.get(self.current_profile(), 'url', fallback=None)
 
     def iter_profiles(self):
         for key, opt in self.parser.items():

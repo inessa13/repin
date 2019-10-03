@@ -6,6 +6,7 @@ import datetime
 import getpass
 import logging
 import pprint
+import time
 
 import gitlab
 import Levenshtein
@@ -161,11 +162,10 @@ def cmd_collect(namespace):
     config.load()
     gl = get_api()
 
-    # TODO:
-    list_options = {
-        # 'visibility': 'private',
-        'membership': True,
-    }
+    # TODO: 'visibility': 'private',
+    list_options = {}
+    if 'gitlab.com' in config.profile_url():
+        list_options['membership'] = True
 
     if namespace.exclude != ':archived' and ':' in namespace.exclude:
         return error('Collect cant use filters in exclude')
@@ -173,8 +173,6 @@ def cmd_collect(namespace):
     if namespace.query == ':all':
         list_options['per_page'] = GL_PER_PAGE
         projects = gl.projects.list(as_list=False, **list_options)
-        print(projects.total_pages)
-        print(projects.total)
         for index, project in enumerate(projects):
             if namespace.exclude and namespace.exclude in '{}/{}'.format(
                     project.namespace['full_path'], project.path):
@@ -229,6 +227,28 @@ def cmd_update(namespace):
     return cmd_repair(namespace, default=':outdated')
 
 
+def check_empty(cached_search, quiet=False):
+    if cached_search:
+        return
+    if quiet:
+        raise errors.Abort
+    raise errors.Error('Nothing found')
+
+
+def check_multi(cached_search, all_=False, quiet=False):
+    if not all_ and len(cached_search) > 1:
+        if quiet:
+            raise errors.Abort
+
+        found = ', '.join(
+            cached.get('path') or cached.get('name') or pid
+            for pid, cached in cached_search.items(limit=3)
+        )
+
+        raise errors.Warn('Found {}: {}\nUse --all to process them all'.format(
+            len(cached_search), found))
+
+
 def cmd_repair(namespace, default=':broken'):
     config.load()
 
@@ -236,42 +256,63 @@ def cmd_repair(namespace, default=':broken'):
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
 
-    if not cached_search:
-        return error('Nothing found')
-
-    if (namespace.query != default
-            and not namespace.all
-            and len(cached_search) > 1):
-        warn('Found {}: {}'.format(len(cached_search), _limit_str(', '.join(
-            cached['path'] for cached in cached_search.values()
-        ), 100)))
-        warn('Use --all to repair them all.')
-        return
-
-    pool = concurrent.futures.ThreadPoolExecutor(max_workers=20)
+    check_empty(cached_search)
+    if namespace.query != default:
+        check_multi(cached_search, namespace.all)
 
     fixed = 0
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=5)
+    retry_timeout = 2
 
     tasks = {
         pool.submit(fix_cache, gl, pid, cached, namespace.force, default): pid
         for pid, cached in cached_search.items()}
-
-    for i, feature in enumerate(concurrent.futures.as_completed(tasks)):
-        pid = tasks[feature]
-
+    while tasks:
+        retry = set()
+        retry_step = 1
         try:
-            update_result = feature.result()
-        except Exception:
-            logging.exception(
-                '{}: package fix failed'.format(
-                    cache.select(pid, {}).get('name') or pid))
-            continue
+            for i, feature in enumerate(concurrent.futures.as_completed(tasks)):
+                pid = tasks[feature]
 
-        if update_result:
-            fixed += 1
+                try:
+                    update_result = feature.result()
 
-        if (fixed or update_result) and not i % 10:
-            cache.flush()
+                except KeyError as exc:
+                    if exc.args[0] == 'retry-after':
+                        retry.add(pid)
+                    else:
+                        logging.exception(
+                            '{}: package fix failed'.format(
+                                cache.select(pid, {}).get('name') or pid))
+                    continue
+
+                except Exception:
+                    logging.exception(
+                        '{}: package fix failed'.format(
+                            cache.select(pid, {}).get('name') or pid))
+                    continue
+
+                if update_result:
+                    fixed += 1
+
+                if (fixed or update_result) and not i % 10:
+                    cache.flush()
+        except KeyboardInterrupt:
+            warn('Interrupted')
+            break
+
+        if retry:
+            warn('need to retry {} entries'.format(len(retry)))
+            time.sleep(retry_timeout * retry_step)
+            tasks = {
+                pool.submit(
+                    fix_cache, gl, pid, cached, namespace.force, default): pid
+                for pid, cached in cached_search.items()
+                if pid in retry
+            }
+            retry_step += 1
+        else:
+            break
 
     if fixed:
         cache.flush()
@@ -283,18 +324,18 @@ def cmd_repair(namespace, default=':broken'):
 def cmd_clear(namespace):
     config.load()
 
+    if namespace.query == ':all':
+        if not namespace.force:
+            raise errors.Error('--force required on clear :all')
+        cache.clear()
+        success('Cache cleared')
+        return
+
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
 
-    if not cached_search:
-        return error('Nothing found')
-
-    if not namespace.all and len(cached_search) > 1:
-        warn('Found {}: {}'.format(len(cached_search), _limit_str(', '.join(
-            cached['path'] for cached in cached_search.values()
-        ), 100)))
-        warn('Use --all to clear them all.')
-        return
+    check_empty(cached_search)
+    check_multi(cached_search, namespace.all)
 
     for name, cached in cached_search.items():
         cache.delete(name)
@@ -306,20 +347,25 @@ def cmd_list(namespace):
 
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
-    if not namespace.total:
-        line = 0
-        for pid, cached in cached_search.items():
-            if namespace.limit is not None and line >= namespace.limit:
-                if not namespace.quiet and line:
-                    warn('Remaining {}'.format(len(cached_search) - line))
-                break
-            line += 1
-            print('{}'.format(cached.get('path') or cached.get('name') or pid))
 
-    if not namespace.quiet:
-        success(
-            'Found: {}, Total: {}'.format(
-                len(cached_search), cache.total()))
+    if namespace.total:
+        if namespace.quiet:
+            print(len(cached_search))
+        else:
+            success(
+                'Found: {}, Total: {}'.format(
+                    len(cached_search), cache.total()))
+        return
+
+    check_empty(cached_search, namespace.quiet)
+    check_multi(cached_search, True, namespace.quiet)
+
+    for line, (pid, cached) in enumerate(cached_search.items()):
+        if namespace.limit is not None and line >= namespace.limit:
+            if namespace.quiet:
+                raise errors.Abort
+            raise errors.Warn('Remaining {}'.format(len(cached_search) - line))
+        print('{}'.format(cached.get('path') or cached.get('name') or pid))
 
 
 def cmd_show(namespace):
@@ -328,13 +374,8 @@ def cmd_show(namespace):
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
 
-    if not cached_search:
-        return error('Nothing found')
-    if not namespace.all and len(cached_search) > 1:
-        warn('Found: {}'.format(', '.join(
-            cached.get('path') or cached.get('name') or pid
-            for pid, cached in cached_search.items())))
-        return
+    check_empty(cached_search)
+    check_multi(cached_search, namespace.all)
 
     for pid, cached in cached_search.items():
         if len(cached_search) > 1:
@@ -363,13 +404,8 @@ def cmd_cat(namespace):
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, False)
 
-    if not cached_search:
-        return error('Nothing found')
-    if not namespace.all and len(cached_search) > 1:
-        warn('Found: {}'.format(', '.join(
-            cached.get('path') or cached.get('name') or pid
-            for pid, cached in cached_search.items())))
-        return
+    check_empty(cached_search)
+    check_multi(cached_search, namespace.all)
 
     gl = get_api()
     for pid, cached in cached_search.items():
@@ -392,16 +428,8 @@ def cmd_requirements(namespace):
 
     cached_search = cache.filter_map(namespace.query, namespace.exact)
 
-    if not cached_search:
-        if not namespace.quiet:
-            return error('Nothing found')
-    if not namespace.all and len(cached_search) > 1:
-        if not namespace.quiet:
-            warn('Found {}: {}'.format(len(cached_search), _limit_str(', '.join(
-                cached['path'] for cached in cached_search.values()
-            ), 100)))
-            warn('Use --all to repair them all.')
-        return
+    check_empty(cached_search, namespace.quiet)
+    check_multi(cached_search, namespace.all, namespace.quiet)
 
     for pid, cached in cached_search.items():
         if not namespace.quiet:
@@ -655,7 +683,7 @@ def main():
 
     init_parser(
         'clear', cmd_clear,
-        args=('query', 'exact', 'exclude', 'all'),
+        args=('query', 'exact', 'exclude', 'all', 'force'),
         help='clear projects from cache')
 
     init_parser(
@@ -716,6 +744,8 @@ def main():
             return error(exc.args[0])
         except errors.Warn as exc:
             return warn(exc.args[0])
+        except errors.Abort:
+            return
         except Exception as e:
             logging.exception('!!!')
             return error(e.args[0])

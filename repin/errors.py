@@ -8,3 +8,7 @@ class Error(Base):
 
 class Warn(Base):
     pass
+
+
+class Abort(Base):
+    pass

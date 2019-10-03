@@ -23,8 +23,7 @@ def _collect_languages(project, cached):
         logging.error('collect_languages failed')
         languages_data = 'n/a'
     except:
-        logging.exception('collect_languages failed')
-        languages_data = 'n/a'
+        raise
 
     return languages_data
 
