@@ -150,8 +150,21 @@ def _collect_setup_py(project, data, raw_content):
 
 
 def _collect_requirements(data, raw_content):
-    # data.setdefault('req_sources', set()).add('requirements.txt')
-    data['list'] = [line for line in raw_content.split('\n') if line]
+    lines = []
+    for line in raw_content.split('\n'):
+        m = re.match(r'git\+ssh://.*/.*/(.*)\.git', line)
+        if m:
+            lines.append('{} # {}'.format(m.group(1), m.group(0)))
+            continue
+
+        m = re.match(r'git\+https://.*/.*/(.*)', line)
+        if m:
+            lines.append('{} # {}'.format(m.group(1), m.group(0)))
+            continue
+
+        if line:
+            lines.append(line)
+    data['list'] = lines
     return data
 
 
