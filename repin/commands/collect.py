@@ -38,7 +38,7 @@ def iter_search(namespace, **kwargs):
         yield project
 
 
-def cmd_collect(namespace):
+def collect(namespace):
     if ':' in namespace.query and namespace.query != ':all':
         raise errors.Error('Collect cant use filters beside :all')
 
