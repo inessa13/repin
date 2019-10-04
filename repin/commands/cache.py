@@ -1,10 +1,14 @@
 import gitlab
 
-from .. import apis, errors, filters, log, utils
+from .. import apis, cli_args, errors, filters, log, utils
 from ..cache import cache
 from ..config import config
 
 
+@cli_args.command(help='get total info about all collected projects')
+@cli_args.query(default=':all')
+@cli_args.exclude()
+@cli_args.all
 def total(namespace):
     config.load()
 
@@ -36,6 +40,12 @@ def total(namespace):
                 log.success('{} {}'.format(filter_tag_pad, count))
 
 
+@cli_args.command(help='clear projects from cache')
+@cli_args.query()
+@cli_args.exact
+@cli_args.exclude()
+@cli_args.all
+@cli_args.force
 def clear(namespace):
     config.load()
 
@@ -55,6 +65,14 @@ def clear(namespace):
     cache.flush()
 
 
+@cli_args.command(name='list', help='list cached projects')
+@cli_args.query(default='')
+@cli_args.exclude()
+@cli_args.exact
+@cli_args.quiet
+@cli_args.limit
+@cli_args.arg(
+    '-t', '--total', action='store_true', help='print only total on filter')
 def list_(namespace):
     config.load()
 
@@ -84,6 +102,12 @@ def list_(namespace):
         log.info('{}'.format(cached.get('path') or cached.get('name') or pid))
 
 
+@cli_args.command(aliases=('det',), help='show project info from cache')
+@cli_args.query()
+@cli_args.all
+@cli_args.exact
+@cli_args.exclude(default=None)
+@cli_args.force
 def details(namespace):
     config.load()
 

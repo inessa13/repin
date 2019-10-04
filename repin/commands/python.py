@@ -1,12 +1,18 @@
 import Levenshtein
 
-from .. import errors, filters, log, utils
+from .. import cli_args, errors, filters, log, utils
 from ..cache import cache
 from ..config import config
 
 PROJECT_NAME_LEN = 60
 
 
+@cli_args.command(aliases=('reqs',), help='show project info from cache')
+@cli_args.query()
+@cli_args.exact
+@cli_args.all
+@cli_args.quiet
+@cli_args.arg('-i', '--index-url', help='show all info')
 def requirements(namespace):
     config.load()
 
@@ -48,6 +54,11 @@ def requirements(namespace):
             ))
 
 
+@cli_args.command(help='get list of python packages, requiring specified')
+@cli_args.query()
+@cli_args.exact
+@cli_args.force
+@cli_args.quiet
 def reverse(namespace):
     config.load()
 

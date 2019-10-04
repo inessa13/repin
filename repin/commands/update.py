@@ -1,17 +1,30 @@
 import concurrent.futures
 import time
 
-from .. import errors, helpers, log, utils
+from .. import cli_args, errors, helpers, log, utils
 from ..cache import cache
 from ..config import config
 
 
+@cli_args.command(
+    aliases=('up',), help='retrieve data from gitlab if missing something')
+@cli_args.query(default=':outdated')
+@cli_args.exact
+@cli_args.exclude()
+@cli_args.all
+@cli_args.force
 def update(namespace):
     config.load()
 
     return repair(namespace, default=':outdated')
 
 
+@cli_args.command(help='retrieve data from gitlab if missing something')
+@cli_args.query(default=':broken')
+@cli_args.exact
+@cli_args.exclude()
+@cli_args.all
+@cli_args.force
 def repair(namespace, default=':broken'):
     config.load()
 

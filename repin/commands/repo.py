@@ -2,11 +2,18 @@ import base64
 
 import gitlab
 
-from .. import apis, log, utils
+from .. import apis, cli_args, log, utils
 from ..cache import cache
 from ..config import config
 
 
+@cli_args.command(help='cat file (list dir) from repo')
+@cli_args.query()
+@cli_args.all
+@cli_args.exact
+@cli_args.exclude(default=None)
+@cli_args.arg('file', help='file path to cat')
+@cli_args.arg('-b', '--branch', help='cat from specified brach')
 def cat(namespace):
     config.load()
 

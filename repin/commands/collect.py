@@ -1,6 +1,6 @@
 import pprint
 
-from .. import apis, errors, helpers, log
+from .. import apis, cli_args, errors, helpers, log
 from ..cache import cache
 from ..config import config
 
@@ -38,6 +38,18 @@ def iter_search(namespace, **kwargs):
         yield project
 
 
+@cli_args.command(help='collect new projects')
+@cli_args.query(default=':all')
+@cli_args.exclude()
+@cli_args.verbose
+@cli_args.force
+@cli_args.limit
+@cli_args.arg('--update', action='store_true', help='update after collect')
+@cli_args.arg(
+    '-S', '--skip-membership', action='store_true',
+    help='skip membership check on project search')
+@cli_args.arg(
+    '-n', '--no-store', action='store_true', help='only find and output')
 def collect(namespace):
     if ':' in namespace.query and namespace.query != ':all':
         raise errors.Error('Collect cant use filters beside :all')

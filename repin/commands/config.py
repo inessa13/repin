@@ -1,9 +1,12 @@
 import getpass
 
-from .. import errors, log
+from .. import cli_args, errors, log
 from ..config import config
 
 
+@cli_args.command(help='init new profile')
+@cli_args.arg('-l', '--local', action='store_true', help='init in cwd')
+@cli_args.arg('-p', '--profile', default='default', help='profile name')
 def init(namespace):
     config.prepare('.' if namespace.local else '~')
 
@@ -20,6 +23,10 @@ def init(namespace):
     log.success('inited')
 
 
+@cli_args.command(help='get/switch profile')
+@cli_args.quiet
+@cli_args.verbose
+@cli_args.arg('-s', '--switch', help='config alias')
 def profile(namespace):
     config.load()
 
