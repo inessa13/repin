@@ -69,12 +69,16 @@ def clear(namespace):
 @cli_args.query(default='')
 @cli_args.exclude()
 @cli_args.exact
+@cli_args.all
 @cli_args.quiet
 @cli_args.limit
 @cli_args.arg(
     '-t', '--total', action='store_true', help='print only total on filter')
 def list_(namespace):
     config.load()
+
+    if namespace.all:
+        namespace.exclude = None
 
     if not namespace.query:
         namespace.query = ':all'
