@@ -30,7 +30,7 @@ with open(os.path.join(HERE, 'README.md')) as file:
 
 setup(
     name='repin',
-    version='0.2.3',
+    version='0.4.0',
     author='David Jhanyan aka inessa13',
     author_email='davo.fastcall@gmail.com',
     description='Repository Inspector',
