@@ -12,6 +12,7 @@ REQUIRED_KEYS_BASE = (
     ':languages',
     'gitlab_ci_data',
     'docker_data',
+    'default_branch',
 )
 REQUIRED_KEYS_PYTHON = (
     ':requirements',
@@ -22,8 +23,12 @@ def unknown_value(value):
     return value is None or value == 'n/a'
 
 
-def filter_is_skipped(cached):
-    return cached.get('skip')
+def filter_is_lost(cached):
+    return cached.get(':lost')
+
+
+def filter_is_empty(cached):
+    return cached.get('default_branch') == ':none'
 
 
 def filter_is_broken(cached):
@@ -165,8 +170,11 @@ def filter_is_type_unknown(cached):
 
 
 def tag_is_warn(tag):
+    if tag in (':archived', ':lost', ':empty', ':outdated'):
+        return True
+
     split = set(tag.split(':'))
-    for key in ('na', 'archived', 'outdated'):
+    for key in ('na',):
         if key in split:
             return True
 
@@ -181,6 +189,8 @@ FILTERS = {
     ':active': filter_is_active,
     ':archived': filter_is_archived,
     ':outdated': filter_is_outdated,
+    ':lost': filter_is_lost,
+    ':empty': filter_is_empty,
 
     'old:month': lambda c: inactive_days(c, 30),
     'old:3month': lambda c: inactive_days(c, 30 * 3),
@@ -203,6 +213,7 @@ FILTERS = {
     'lang:na': filter_language_na,
     'lang:no': filter_language_no,
 
+    ':py': filter_lang_python,
     'py:package': filter_is_package,
     'py:package:na': filter_is_broken_package,
     'py:lib': filter_is_type_lib,

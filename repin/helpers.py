@@ -2,7 +2,7 @@ import datetime
 
 import gitlab
 
-from . import collectors, errors, filters
+from . import collectors, errors, filters, apis
 from .cache import cache
 
 
@@ -14,6 +14,7 @@ def add_cache(project, force=False, save=True, update=True):
         'last_activity_at': project.last_activity_at,
         'web_url': project.web_url,
         ':last_update_at': datetime.datetime.now(),
+        ':modified': True
     })
 
     try:
@@ -21,9 +22,15 @@ def add_cache(project, force=False, save=True, update=True):
     except AttributeError:
         cached['archived'] = False
 
+    try:
+        cached['default_branch'] = project.default_branch or ':none'
+    except AttributeError:
+        cached['default_branch'] = ':none'
+
     if update:
         collected = collectors.collect(project, cached, force)
-        cache.update(project.id, collected)
+        if collected:
+            cache.update(project.id, collected)
 
     if save:
         cache.flush()
@@ -31,15 +38,18 @@ def add_cache(project, force=False, save=True, update=True):
     return cached
 
 
-def fix_cache(gl, pid, cached, force, default):
+def fix_cache(pid, cached, force, default):
     force = force or filters.filter_is(default, cached)
     if not force:
         raise errors.Warn('{}: not {}'.format(cached['name'], default))
 
     try:
-        project = gl.projects.get(pid)
+        project = apis.get().projects.get(pid)
     except gitlab.exceptions.GitlabGetError:
-        raise errors.Warn('{}: missing'.format(cached.get('name') or pid))
+        if not cached.get(':lost'):
+            cached[':lost'] = True
+            cached[':modified'] = True
+        raise errors.Warn('{}: lost'.format(cached.get('name') or pid))
 
     cached = add_cache(project, force=force, save=False, update=True)
 

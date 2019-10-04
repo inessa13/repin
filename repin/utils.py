@@ -1,4 +1,5 @@
 import argparse
+import itertools
 
 from . import errors
 
@@ -22,14 +23,17 @@ def check_multi(cached_search, all_=False, quiet=False, message=None):
 
     found = ', '.join(
         cached.get('path') or cached.get('name') or pid
-        for pid, cached in cached_search.items(limit=3)
+        for pid, cached in itertools.islice(cached_search.items(), 0, 3)
     )
 
     if message is None:
         message = '\nUse --all to process them all'
 
-    raise errors.Warn('Found {}: {}{}'.format(
-        len(cached_search), found, message))
+    raise errors.Warn('Found {}: {}{}{}'.format(
+        len(cached_search),
+        found,
+        ', ...' if len(cached_search) > 3 else '',
+        message))
 
 
 def check_found(namespace, cached_search, all_=None, message=None):

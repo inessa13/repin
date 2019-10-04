@@ -8,7 +8,7 @@ import time
 import gitlab
 import Levenshtein
 
-from . import __version__, filters, errors, utils, commands, helpers, log
+from . import __version__, apis, commands, errors, filters, helpers, log, utils
 from .cache import cache
 from .config import config
 
@@ -110,19 +110,21 @@ def cmd_update(namespace):
 def cmd_repair(namespace, default=':broken'):
     config.load()
 
-    gl = get_api()
     cached_search = cache.filter_map(
         namespace.query, namespace.exact, namespace.exclude)
 
     utils.check_found(
-        namespace, cached_search, namespace.query != default or namespace.all)
+        namespace, cached_search, namespace.query == default or namespace.all)
 
-    fixed = 0
+    fixed = modified = 0
     pool = concurrent.futures.ThreadPoolExecutor(max_workers=5)
     retry_timeout = 2
 
     tasks = {
-        pool.submit(helpers.fix_cache, gl, pid, cached, namespace.force, default): pid
+        pool.submit(
+            helpers.fix_cache,
+            pid, cached, namespace.force, default,
+        ): pid
         for pid, cached in cached_search.items()}
     while tasks:
         retry = set()
@@ -137,7 +139,6 @@ def cmd_repair(namespace, default=':broken'):
 
                 except errors.Client as exc:
                     log.catch(exc)
-                    continue
 
                 except KeyError as exc:
                     if exc.args[0] == 'retry-after':
@@ -146,18 +147,20 @@ def cmd_repair(namespace, default=':broken'):
                         log.exception(
                             '{}: package fix failed'.format(
                                 cache.select(pid, {}).get('name') or pid))
-                    continue
 
                 except Exception:
                     log.exception(
                         '{}: package fix failed'.format(
                             cache.select(pid, {}).get('name') or pid))
-                    continue
 
                 else:
                     fixed += 1
 
-                if fixed and not i % 10:
+                pid_modified = cache.select(pid).pop(':modified', False)
+                if pid_modified:
+                    modified += 1
+
+                if modified and not i % 10:
                     cache.flush()
         except KeyboardInterrupt:
             log.warn('Interrupted')
@@ -169,7 +172,7 @@ def cmd_repair(namespace, default=':broken'):
             tasks = {
                 pool.submit(
                     helpers.fix_cache,
-                    gl, pid, cached, namespace.force, default,
+                    pid, cached, namespace.force, default,
                 ): pid
                 for pid, cached in cached_search.items()
                 if pid in retry
@@ -178,11 +181,11 @@ def cmd_repair(namespace, default=':broken'):
         else:
             break
 
-    if fixed:
+    if modified:
         cache.flush()
 
-    log.success('Fixed: {}, Found: {}, Total: {}'.format(
-        fixed, len(cached_search), cache.total()))
+    log.success('Fixed: {}, Modified: {}, Found: {}, Total: {}'.format(
+        fixed, modified, len(cached_search), cache.total()))
 
 
 def cmd_clear(namespace):
@@ -233,7 +236,7 @@ def cmd_list(namespace):
         log.info('{}'.format(cached.get('path') or cached.get('name') or pid))
 
 
-def cmd_show(namespace):
+def cmd_details(namespace):
     config.load()
 
     cached_search = cache.filter_map(
@@ -250,15 +253,16 @@ def cmd_show(namespace):
             if filter_(cached):
                 tags.append(filter_tag)
 
-        if tags:
-            log.info('Tags: {}'.format(' '.join(tags)))
-        else:
-            log.warn('Package have no tags')
-
         if filters.filter_is_broken(cached):
             log.warn('Package is broken, call `repair` to fix it.')
 
         if namespace.force:
+            try:
+                project = apis.get().projects.get(pid)
+            except gitlab.exceptions.GitlabGetError:
+                log.error('{}: missing'.format(cached.get('name') or pid))
+            log.pprint(project.attributes)
+        else:
             log.pprint(cached)
 
 
@@ -270,10 +274,9 @@ def cmd_cat(namespace):
 
     utils.check_found(namespace, cached_search)
 
-    gl = get_api()
     for pid, cached in cached_search.items():
         try:
-            project = gl.projects.get(pid)
+            project = apis.get().projects.get(pid)
         except gitlab.exceptions.GitlabGetError:
             log.error('{}: missing'.format(cached.get('name') or pid))
             continue
@@ -281,7 +284,8 @@ def cmd_cat(namespace):
         if namespace.file[-1] == '/':
             try:
                 files = project.repository_tree(
-                    path=namespace.file, ref='master')
+                    path=namespace.file,
+                    ref=namespace.branch or project.default_branch)
             except gitlab.exceptions.GitlabGetError:
                 continue
             for file in files:
@@ -292,7 +296,8 @@ def cmd_cat(namespace):
         else:
             try:
                 file = project.files.get(
-                    file_path=namespace.file, ref='master')
+                    file_path=namespace.file,
+                    ref=namespace.branch or project.default_branch)
             except gitlab.exceptions.GitlabGetError:
                 continue
             log.info(base64.b64decode(file.content).decode())
@@ -564,7 +569,8 @@ def main():
         help='clear projects from cache')
 
     init_parser(
-        'show', cmd_show,
+        'details', cmd_details,
+        aliases=('det',),
         args=('query', 'all', 'exact', 'exclude2', 'force'),
         help='show project info from cache')
 
@@ -611,7 +617,10 @@ def main():
         'cat', cmd_cat,
         args=('query', 'all', 'exact', 'exclude2'),
         help='cat')
-    parser_cat.add_argument('file', type=str, help='file path to cat')
+    parser_cat.add_argument('file', help='file path to cat')
+    parser_cat.add_argument(
+        '-b', '--branch',
+        help='cat from specified brach')
 
     namespace = parser.parse_args()
     if getattr(namespace, 'func', None):

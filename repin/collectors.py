@@ -36,7 +36,9 @@ def collect_file_data(filename, *cache_keys):
         @functools.wraps(func)
         def wrap(project, cached):
             try:
-                file = project.files.get(file_path=filename, ref='master')
+                file = project.files.get(
+                    file_path=filename,
+                    ref=project.attributes.get('default_branch', 'master'))
             except gitlab.exceptions.GitlabGetError:
                 if len(cache_keys) > 1:
                     return [False] * len(cache_keys)
@@ -273,11 +275,14 @@ def _collect_gitlab_ci(project, data, raw_content):
 
 def _load_python_module(project, path):
     try:
-        version_file = project.files.get(file_path=path + '.py', ref='master')
+        version_file = project.files.get(
+            file_path=path + '.py',
+            ref=project.default_branch)
     except gitlab.exceptions.GitlabGetError:
         try:
             version_file = project.files.get(
-                file_path=path + '/__init__.py', ref='master')
+                file_path=path + '/__init__.py',
+                ref=project.default_branch)
         except gitlab.exceptions.GitlabGetError:
             return None
 
@@ -468,7 +473,8 @@ class _fake_open:
     def read(self, n=0):
         try:
             file = self.project.files.get(
-                file_path=self.path, ref='master')
+                file_path=self.path,
+                ref=self.project.default_branch)
         except gitlab.exceptions.GitlabGetError:
             return None
 
@@ -492,7 +498,8 @@ class _fake_os:
 
         def exists(self, path):
             try:
-                self.os._project.files.get(file_path=path, ref='master')
+                self.os._project.files.get(
+                    file_path=path, ref=os._project.default_branch)
             except gitlab.exceptions.GitlabGetError:
                 return False
             return True
@@ -534,6 +541,9 @@ CACHE_COLLECTORS = (
 
 
 def collect(project, cached, force):
+    if filters.filter_is_empty(cached):
+        return None
+
     collected = {}
     for collector, condition in CACHE_COLLECTORS:
         if not force and not any(filters.unknown_value(

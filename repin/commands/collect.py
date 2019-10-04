@@ -62,11 +62,12 @@ def cmd_collect(namespace):
     else:
         it = iter_search
 
-    index = 0
+    index = new = 0
     for index, project in enumerate(it(namespace, **list_options)):
         if namespace.limit and index + 1 > namespace.limit:
             cache.flush()
-            raise errors.Warn('limit reached')
+            log.warn('limit reached')
+            break
 
         if not namespace.verbose:
             log.info(project.name)
@@ -75,6 +76,8 @@ def cmd_collect(namespace):
         else:
             pprint.pprint(project.attributes)
 
+        if not cache.select(project.id):
+            new += 1
         try:
             helpers.add_cache(
                 project,
@@ -91,4 +94,4 @@ def cmd_collect(namespace):
     if not namespace.no_store:
         cache.flush()
 
-    log.success('found {}. total {}'.format(index, cache.total()))
+    log.success('found {}. new {}. total {}'.format(index, new, cache.total()))
