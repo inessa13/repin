@@ -59,20 +59,9 @@ def inactive_days(cached, value=None):
     return days > value
 
 
-def filter_old_month(cached):
-    return inactive_days(cached) > 30
-
-
-def filter_old_year(cached):
-    return inactive_days(cached) > 365
-
-
-def filter_old_year2(cached):
-    return inactive_days(cached) > 365 * 2
-
-
 def filter_have_reqs(cached):
-    return cached.get(':requirements', {}) and cached.get(':requirements', {}).get('list')
+    return cached.get(
+        ':requirements', {}) and cached.get(':requirements', {}).get('list')
 
 
 def filter_no_reqs(cached):
@@ -150,7 +139,8 @@ def get_type_tag(cached):
 
 
 def filter_have_dockerfile(cached):
-    return not unknown_value(cached.get('docker_data')) and bool(cached.get('docker_data'))
+    return not unknown_value(
+        cached.get('docker_data')) and bool(cached.get('docker_data'))
 
 
 def filter_have_gl_ci(cached):
@@ -191,6 +181,7 @@ FILTERS = {
     ':outdated': filter_is_outdated,
     ':lost': filter_is_lost,
     ':empty': filter_is_empty,
+    ':broken': filter_is_broken,
 
     'old:month': lambda c: inactive_days(c, 30),
     'old:3month': lambda c: inactive_days(c, 30 * 3),
@@ -225,7 +216,5 @@ FILTERS = {
     'py:na': filter_is_type_unknown,
 
     ':docker': filter_have_dockerfile,
-    'gl:ci': filter_have_gl_ci,
-
-    ':broken': filter_is_broken,
+    'ci:gitlab': filter_have_gl_ci,
 }
