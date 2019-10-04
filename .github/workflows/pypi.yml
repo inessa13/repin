@@ -1,0 +1,32 @@
+name: publish to pypi
+on: push
+
+jobs:
+  build-n-publish:
+    name: build package and publish to pypi
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    - name: install requirements
+      run: |
+        pip install --no-cache-dir wheel twine
+    - name: build package
+      run: |
+        python setup.py sdist bdist_wheel
+    - name: check dist
+      run: |
+        twine check dist/*
+    - name: publish to pypi
+      if: startsWith(github.event.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.pypi_repin }}
+    - name: publish to test pypi
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.test_pypi }}
+        repository_url: https://test.pypi.org/legacy/
