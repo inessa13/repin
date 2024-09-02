@@ -79,8 +79,10 @@ def _collect_setup_py(project, data, raw_content):
         'setuptools': setuptools,
         'setup': lambda **kw: setup_result.update(**kw),
         'find_packages': lambda *a, **kw: None,
+        'find_namespace_packages': lambda *a, **kw: None,
         'open': _fake_open(project),
         '__file__': 'setup.py',
+        # '__version__': mock.Mock(),
         'os': _fake_os(project),
     }
 
@@ -144,6 +146,7 @@ def _collect_setup_py(project, data, raw_content):
 
     requirements = {
         'file': 'setup.py',
+        'deps': requirements,
         'list': [r for reqs in requirements.values() for r in reqs],
     }
     return data, requirements
@@ -152,6 +155,15 @@ def _collect_setup_py(project, data, raw_content):
 def _collect_requirements(data, raw_content):
     lines = []
     for line in raw_content.split('\n'):
+        # extra comment for previous line (pip-tools)
+        if re.match(r'\s{4}#', line):
+            lines[-1] += ' ' + line.strip()
+            continue
+
+        # full line comments
+        if re.match(r'#', line):
+            continue
+
         m = re.match(r'git\+ssh://.*/.*/(.*)\.git', line)
         if m:
             lines.append('{} # {}'.format(m.group(1), m.group(0)))
@@ -164,7 +176,12 @@ def _collect_requirements(data, raw_content):
 
         if line:
             lines.append(line)
+
     data['list'] = lines
+    data.setdefault('deps', {}).setdefault(
+        os.path.basename(data['file']),
+        lines,
+    )
     return data
 
 
@@ -481,7 +498,7 @@ class _fake_open:
         pass
 
     def readlines(self):
-        return self.read().split('\n')
+        return self.read().decode().split('\n')
 
     def read(self, n=0):
         try:
@@ -489,9 +506,12 @@ class _fake_open:
                 file_path=self.path,
                 ref=self.project.default_branch)
         except gitlab.exceptions.GitlabGetError:
-            return None
+            logging.error(
+                'file read by `open` from setup.py failed: %s', self.path)
+            return ''.encode()
 
-        return base64.b64decode(file.content).decode()
+        # TODO: check, is .decode() required or not
+        return base64.b64decode(file.content)
 
 
 def _callables(obj):
@@ -512,7 +532,7 @@ class _fake_os:
         def exists(self, path):
             try:
                 self.os._project.files.get(
-                    file_path=path, ref=os._project.default_branch)
+                    file_path=path, ref=self.os._project.default_branch)
             except gitlab.exceptions.GitlabGetError:
                 return False
             return True
@@ -523,6 +543,7 @@ class _fake_os:
     def __init__(self, project):
         self._project = project
         self.path = self._path(self)
+        self.sep = os.sep
 
     locals().update(_callables(os))
 
@@ -581,6 +602,9 @@ def collect(project, cached, force):
                 collected[cache_key] = d
             elif not empty(d):
                 if cache_key == ':requirements':
+                    if collected[cache_key].get('deps') and d.get('deps'):
+                        collected[cache_key]['deps'].update(d['deps'])
+
                     reqs = set(collected[cache_key].get('list', []))
                     reqs |= set(d.get('list', []))
                     collected[cache_key]['list'] = list(reqs)

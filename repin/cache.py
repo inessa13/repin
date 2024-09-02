@@ -90,7 +90,7 @@ class Yaml(Base):
     def _read(self):
         try:
             with open(self.path, 'r') as f:
-                return yaml.load(f)
+                return yaml.safe_load(f)
         except yaml.parser.ParserError:
             if os.path.exists(self._backup_path):
                 shutil.move(self._backup_path, self.path)

@@ -14,7 +14,8 @@ def add_cache(project, force=False, save=True, update=True):
         'last_activity_at': project.last_activity_at,
         'web_url': project.web_url,
         ':last_update_at': datetime.datetime.now(),
-        ':modified': True
+        ':modified': True,
+        'visibility': project.visibility,
     })
 
     try:

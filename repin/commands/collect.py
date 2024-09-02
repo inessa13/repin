@@ -60,7 +60,7 @@ def collect(namespace):
     config.load()
 
     # TODO: 'visibility': 'private',
-    list_options = {}
+    list_options = {'visibility': 'private'}
     if 'gitlab.com' in config.profile_url() and not namespace.skip_membership:
         list_options['membership'] = True
 

@@ -1,3 +1,5 @@
+import re
+
 import Levenshtein
 
 from .. import cli_args, errors, filters, log, utils
@@ -41,10 +43,11 @@ def requirements(namespace):
             req_line = req.strip()
             if req_line.startswith('# ') or req_line.startswith('--'):
                 continue
-            project_name, dep_mode, version, comment = \
+            project_name, extra, dep_mode, version, comment = \
                 _split_requirement_package_version(req)
             if not project_name:
                 continue
+            project_name = project_name + (f'[{extra}]' if extra else '')
             log.info('{}{}{}\t{}\t# {}'.format(
                 project_name,
                 ' ' * (32 - len(project_name)),
@@ -56,6 +59,7 @@ def requirements(namespace):
 
 @cli_args.command(help='get list of python packages, requiring specified')
 @cli_args.query()
+@cli_args.exclude()
 @cli_args.exact
 @cli_args.force
 @cli_args.quiet
@@ -104,40 +108,52 @@ def reverse(namespace):
         else:
             project_name = project['path']
 
-        comment_additional = ''
-        if project['archived']:
-            comment_additional += ' :archived'
+        # exclude
+        if any(filters.FILTERS.get(sub)(project) for sub in namespace.exclude.split(',')):
+            continue
 
-        for req in project[':requirements']['list']:
-            if not req:
-                continue
-            reverse_name, dep_mode, version, comment = \
-                _split_requirement_package_version(req)
-            comment += comment_additional
-            if reverse_name == self_name:
-                dep_for.append((project_name, dep_mode, version, comment))
-            elif not namespace.exact and Levenshtein.distance(
-                    reverse_name, self_name) <= 2:
-                dep_for_mb.setdefault(reverse_name, []).append(
-                    (project_name, dep_mode, version, comment))
+        for extras, reqs in project[':requirements'].get('deps', {}).items():
+            for req in reqs:
+                if not req:
+                    continue
+
+                reverse_name, extra, dep_mode, version, comment = \
+                    _split_requirement_package_version(req)
+
+                if extra:
+                    extra = f'[{extra}]'
+
+                if reverse_name == self_name:
+                    dep_for.append(
+                        (project_name, extra or extras, dep_mode, version, comment),
+                    )
+                elif not namespace.exact and Levenshtein.distance(
+                        reverse_name, self_name) <= 2:
+                    dep_for_mb.setdefault(reverse_name, []).append(
+                        (project_name, extra, dep_mode, version, comment))
 
     if dep_for:
         max_ver = 8
         max_dep = 4
         max_name = PROJECT_NAME_LEN
-        for project_name, dep_mode, version, comment in dep_for:
+        max_extra = 2
+        for project_name, extra, dep_mode, version, comment in dep_for:
             if version:
                 max_ver = max(max_ver, len(version) + 2)
             max_name = max(max_name, len(project_name) + 2)
+            if extra:
+                max_extra = max(max_extra, len(extra) + 2)
 
         if not namespace.quiet:
             log.info('Found reversed dependencies:')
-            log.info('version{}dep{}project{}comment'.format(
-                ' ' * (max_ver - len('version')),
-                ' ' * (max_dep - len('dep')),
-                ' ' * (max_name - len('project')),
+            log.info('{}{}{}{}comment'.format(
+                'version'.ljust(max_ver),
+                'dep'.ljust(max_dep),
+                'extra'.ljust(max_extra),
+                'project'.ljust(max_name),
             ))
-        for project_name, dep_mode, version, comment in dep_for:
+
+        for project_name, extra, dep_mode, version, comment in dep_for:
             if namespace.quiet:
                 log.info('{}{}{}'.format(
                     (version or 'latest').ljust(max_ver),
@@ -145,9 +161,10 @@ def reverse(namespace):
                     project_name,
                 ))
             else:
-                log.info('{}{}{}# {}'.format(
+                log.info('{}{}{}{}# {}'.format(
                     (version or '*').ljust(max_ver),
                     (dep_mode or '').ljust(max_dep),
+                    extra.ljust(max_extra),
                     project_name.ljust(max_name),
                     # ' ' * (PROJECT_NAME_LEN - len(project_name)),
                     comment,
@@ -161,7 +178,7 @@ def reverse(namespace):
         for name, similar in dep_for_mb.items():
             if not namespace.quiet:
                 log.info('{}: '.format(name))
-            for project_name, dep_mode, version, comment in similar:
+            for project_name, extra, dep_mode, version, comment in similar:
                 log.info('{}\t{}\t{}{}# {}'.format(
                     version or 'latest', dep_mode or '', project_name,
                     ' ' * (PROJECT_NAME_LEN - len(project_name)),
@@ -170,6 +187,12 @@ def reverse(namespace):
 
 
 def _split_requirement_package_version(req):
+    version = None
+    extra = None
+
+    if isinstance(req, bytes):
+        req = req.decode()
+
     if '#' in req:
         req, comment = req.split('#', 1)
         req = req.strip()
@@ -180,11 +203,15 @@ def _split_requirement_package_version(req):
         # TODO:
         req = req.split(',', 1)[0]
 
-    for d in ('==', '~=', '>=', '>', '<'):
-        if d in req:
-            req = req.split(d, 1)
-            req = req[0], d, req[1], comment
+    for dep_type in ('==', '~=', '>=', '>', '<'):
+        if dep_type in req:
+            req = req.split(dep_type, 1)
+            version = req[1]
+            req = req[0]
             break
-    else:
-        req = (req, None, None, comment)
-    return req
+
+    if m := re.match(r'([\w_-]+)\[([\w_,-]+)\]$', req):
+        req = m.group(1)
+        extra = m.group(2)
+
+    return req, extra, dep_type, version, comment
